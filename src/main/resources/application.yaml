@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: nexa
+  docker:
+    compose:
+      enabled: true
+      lifecycle-management: start_and_stop
+server:
+  port: 8080
