@@ -1,7 +1,7 @@
 package com.decade.nexa.users.adapter.security.strategies;
 
-import com.decade.practice.users.application.ports.in.TokenSessionService;
-import com.decade.practice.users.dto.AccountResponse;
+import com.decade.nexa.users.application.ports.in.TokenSessionService;
+import com.decade.nexa.users.dto.AccountResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,20 +16,20 @@ import java.io.IOException;
 @AllArgsConstructor
 public class LoginSuccessStrategy implements AuthenticationSuccessHandler {
 
-    private final TokenSessionService tokenSessionService;
-    private final ObjectMapper objectMapper;
+      private final TokenSessionService tokenSessionService;
+      private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Override
-    public void onAuthenticationSuccess(
-            HttpServletRequest httpRequest,
-            HttpServletResponse httpResponse,
-            Authentication authentication
-    ) throws IOException {
+      @Override
+      public void onAuthenticationSuccess(
+                HttpServletRequest httpRequest,
+                HttpServletResponse httpResponse,
+                Authentication authentication
+      ) throws IOException {
 
-        AccountResponse accountResponse = tokenSessionService.login(authentication.getName());
-        httpResponse.setContentType("application/json;charset=UTF-8");
-        httpResponse.getWriter().write(objectMapper.writeValueAsString(accountResponse));
-        httpResponse.setStatus(HttpServletResponse.SC_OK);
-        httpResponse.getWriter().flush();
-    }
+            AccountResponse accountResponse = tokenSessionService.login(authentication.getName());
+            httpResponse.setContentType("application/json;charset=UTF-8");
+            httpResponse.getWriter().write(objectMapper.writeValueAsString(accountResponse));
+            httpResponse.setStatus(HttpServletResponse.SC_OK);
+            httpResponse.getWriter().flush();
+      }
 }

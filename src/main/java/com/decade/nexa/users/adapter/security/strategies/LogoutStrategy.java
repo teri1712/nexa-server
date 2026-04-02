@@ -1,8 +1,8 @@
 package com.decade.nexa.users.adapter.security.strategies;
 
-import com.decade.practice.users.application.ports.in.TokenSessionService;
-import com.decade.practice.users.application.ports.out.TokenGenerator;
-import com.decade.practice.web.security.TokenUtils;
+import com.decade.nexa.users.application.ports.in.TokenSessionService;
+import com.decade.nexa.users.application.ports.out.TokenGenerator;
+import com.decade.nexa.web.security.TokenUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;

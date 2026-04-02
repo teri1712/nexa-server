@@ -1,6 +1,6 @@
 package com.decade.nexa.users.application.ports.in;
 
-import com.decade.practice.users.dto.AccountResponse;
+import com.decade.nexa.users.dto.AccountResponse;
 import org.springframework.security.access.AccessDeniedException;
 
 public interface TokenSessionService {

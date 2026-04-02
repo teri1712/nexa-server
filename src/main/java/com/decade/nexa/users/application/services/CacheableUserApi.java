@@ -1,7 +1,7 @@
 package com.decade.nexa.users.application.services;
 
-import com.decade.practice.users.api.UserApi;
-import com.decade.practice.users.api.UserInfo;
+import com.decade.nexa.users.api.UserApi;
+import com.decade.nexa.users.api.UserInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,7 @@ public class CacheableUserApi implements UserApi {
 
       private final UserApiImpl userApi;
       private final StringRedisTemplate redisTemplate;
-      private final ObjectMapper objectMapper;
+      private final ObjectMapper objectMapper = new ObjectMapper();
 
       private static String makeUserKey(UUID userId) {
             return USER_INFO_KEY_PREFIX + userId.toString();

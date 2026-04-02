@@ -1,8 +1,9 @@
 package com.decade.nexa.users.dto.mapper;
 
-import com.decade.practice.users.domain.User;
-import com.decade.practice.users.dto.ProfileResponse;
-import com.decade.practice.users.utils.GenderUtils;
+
+import com.decade.nexa.users.domain.User;
+import com.decade.nexa.users.dto.ProfileResponse;
+import com.decade.nexa.users.utils.GenderUtils;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.ReportingPolicy;

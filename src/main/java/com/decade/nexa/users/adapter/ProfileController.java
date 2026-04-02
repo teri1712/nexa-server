@@ -1,10 +1,10 @@
 package com.decade.nexa.users.adapter;
 
-import com.decade.practice.users.adapter.validation.StrongPassword;
-import com.decade.practice.users.application.ports.in.ProfileService;
-import com.decade.practice.users.dto.AccountResponse;
-import com.decade.practice.users.dto.ProfileRequest;
-import com.decade.practice.users.dto.ProfileResponse;
+import com.decade.nexa.users.adapter.validation.StrongPassword;
+import com.decade.nexa.users.application.ports.in.ProfileService;
+import com.decade.nexa.users.dto.AccountResponse;
+import com.decade.nexa.users.dto.ProfileRequest;
+import com.decade.nexa.users.dto.ProfileResponse;
 import jakarta.persistence.OptimisticLockException;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;

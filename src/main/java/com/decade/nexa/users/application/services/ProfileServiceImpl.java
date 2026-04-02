@@ -1,16 +1,16 @@
 package com.decade.nexa.users.application.services;
 
-import com.decade.practice.users.application.ports.in.ProfileService;
-import com.decade.practice.users.application.ports.out.TokenGenerator;
-import com.decade.practice.users.application.ports.out.TokenStore;
-import com.decade.practice.users.application.ports.out.UserRepository;
-import com.decade.practice.users.domain.DefaultAvatar;
-import com.decade.practice.users.domain.User;
-import com.decade.practice.users.domain.UserFactory;
-import com.decade.practice.users.domain.UserPasswordPolicy;
-import com.decade.practice.users.dto.*;
-import com.decade.practice.users.dto.mapper.UserMapper;
-import com.decade.practice.web.security.UserClaims;
+import com.decade.nexa.users.application.ports.in.ProfileService;
+import com.decade.nexa.users.application.ports.out.TokenGenerator;
+import com.decade.nexa.users.application.ports.out.TokenStore;
+import com.decade.nexa.users.application.ports.out.UserRepository;
+import com.decade.nexa.users.domain.DefaultAvatar;
+import com.decade.nexa.users.domain.User;
+import com.decade.nexa.users.domain.UserFactory;
+import com.decade.nexa.users.domain.UserPasswordPolicy;
+import com.decade.nexa.users.dto.*;
+import com.decade.nexa.users.dto.mapper.UserMapper;
+import com.decade.nexa.web.security.UserClaims;
 import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +19,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -55,7 +55,7 @@ public class ProfileServiceImpl implements ProfileService {
             String password = signUpRequest.getPassword();
             String name = signUpRequest.getName();
             Float gender = signUpRequest.getGender();
-            Date dob = signUpRequest.getDob();
+            Instant dob = signUpRequest.getDob();
             String avatar = Optional.ofNullable(signUpRequest.getAvatar())
                       .orElse(DefaultAvatar.URL);
             User user = userFactory.createUser(id, username, password, name, avatar, dob, gender);
@@ -96,7 +96,7 @@ public class ProfileServiceImpl implements ProfileService {
                       user.getAvatar());
             AccessToken credential = tokenGenerator.generate(claims);
             tokens.add(user.getUsername(), credential.refreshToken());
-            
+
             ProfileResponse profileResponse = userMapper.map(user);
             return new AccountResponse(profileResponse, credential);
       }

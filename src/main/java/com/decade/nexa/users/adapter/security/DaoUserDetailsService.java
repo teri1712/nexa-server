@@ -1,6 +1,6 @@
 package com.decade.nexa.users.adapter.security;
 
-import com.decade.practice.users.application.ports.out.UserRepository;
+import com.decade.nexa.users.application.ports.out.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -13,19 +13,19 @@ import java.util.NoSuchElementException;
 @Service
 public class DaoUserDetailsService implements UserDetailsService {
 
-    private final UserRepository userRepo;
+      private final UserRepository userRepo;
 
-    public DaoUserDetailsService(UserRepository userRepo) {
-        this.userRepo = userRepo;
-    }
+      public DaoUserDetailsService(UserRepository userRepo) {
+            this.userRepo = userRepo;
+      }
 
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        try {
-            return new DaoUser(userRepo.findByUsername(username).orElseThrow());
-        } catch (NoSuchElementException ex) {
-            log.error("User not found {}", username);
-            throw new UsernameNotFoundException("Credential with Username: " + username + " does not exist.");
-        }
-    }
+      @Override
+      public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+            try {
+                  return new DaoUser(userRepo.findByUsername(username).orElseThrow());
+            } catch (NoSuchElementException ex) {
+                  log.error("User not found {}", username);
+                  throw new UsernameNotFoundException("Credential with Username: " + username + " does not exist.");
+            }
+      }
 }

@@ -1,14 +1,14 @@
 package com.decade.nexa.users.infra;
 
-import com.decade.practice.users.adapter.security.strategies.EntryPointStrategy;
-import com.decade.practice.users.adapter.security.strategies.LoginFailedStrategy;
-import com.decade.practice.users.adapter.security.strategies.LoginSuccessStrategy;
-import com.decade.practice.users.adapter.security.strategies.LogoutStrategy;
-import com.decade.practice.web.security.jwt.JwtTokenFilter;
+import com.decade.nexa.users.adapter.security.strategies.EntryPointStrategy;
+import com.decade.nexa.users.adapter.security.strategies.LoginFailedStrategy;
+import com.decade.nexa.users.adapter.security.strategies.LoginSuccessStrategy;
+import com.decade.nexa.users.adapter.security.strategies.LogoutStrategy;
+import com.decade.nexa.web.security.jwt.JwtTokenFilter;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
+import org.springframework.boot.security.autoconfigure.actuate.web.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -75,7 +75,7 @@ public class SecurityConfiguration extends GlobalAuthenticationConfigurerAdapter
       }
 
       @Override
-      public void configure(AuthenticationManagerBuilder auth) throws Exception {
+      public void configure(AuthenticationManagerBuilder auth) {
             auth.eraseCredentials(false);
       }
 
@@ -112,8 +112,7 @@ public class SecurityConfiguration extends GlobalAuthenticationConfigurerAdapter
                       .password(passwordEncoder().encode(actuatorPassword))
                       .roles(actuatorRoles.split(","))
                       .build();
-            DaoAuthenticationProvider adminProvider = new DaoAuthenticationProvider();
-            adminProvider.setUserDetailsService(new InMemoryUserDetailsManager(actuator));
+            DaoAuthenticationProvider adminProvider = new DaoAuthenticationProvider(new InMemoryUserDetailsManager(actuator));
             adminProvider.setPasswordEncoder(passwordEncoder());
 
             http
@@ -121,17 +120,15 @@ public class SecurityConfiguration extends GlobalAuthenticationConfigurerAdapter
                       .securityMatcher(EndpointRequest.toAnyEndpoint())
                       .authorizeHttpRequests(
                                 auth -> auth
-                                          .requestMatchers(EndpointRequest.to("health", "info")).permitAll()
-                                          .requestMatchers(EndpointRequest.to("prometheus")).hasRole("OPS")
-                                          .anyRequest().denyAll()
+                                          .requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole("OPS")
                       )
                       .httpBasic(Customizer.withDefaults())
-                      .csrf(csrf -> csrf.disable());
+                      .csrf(AbstractHttpConfigurer::disable);
             return http.build();
       }
 
 
-      @Bean(name = FILTER_CHAIN_BEAN_NAME)
+      @Bean(FILTER_CHAIN_BEAN_NAME)
       public SecurityFilterChain filterChain(
                 HttpSecurity http,
                 LoginSuccessStrategy successStrategy,

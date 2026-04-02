@@ -1,15 +1,15 @@
 package com.decade.nexa.users.application.services;
 
-import com.decade.practice.users.application.ports.in.TokenSessionService;
-import com.decade.practice.users.application.ports.out.TokenGenerator;
-import com.decade.practice.users.application.ports.out.TokenStore;
-import com.decade.practice.users.application.ports.out.UserRepository;
-import com.decade.practice.users.domain.User;
-import com.decade.practice.users.dto.AccessToken;
-import com.decade.practice.users.dto.AccountResponse;
-import com.decade.practice.users.dto.ProfileResponse;
-import com.decade.practice.users.dto.mapper.UserMapper;
-import com.decade.practice.web.security.UserClaims;
+import com.decade.nexa.users.application.ports.in.TokenSessionService;
+import com.decade.nexa.users.application.ports.out.TokenGenerator;
+import com.decade.nexa.users.application.ports.out.TokenStore;
+import com.decade.nexa.users.application.ports.out.UserRepository;
+import com.decade.nexa.users.domain.User;
+import com.decade.nexa.users.dto.AccessToken;
+import com.decade.nexa.users.dto.AccountResponse;
+import com.decade.nexa.users.dto.ProfileResponse;
+import com.decade.nexa.users.dto.mapper.UserMapper;
+import com.decade.nexa.web.security.UserClaims;
 import io.jsonwebtoken.JwtException;
 import lombok.AllArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;

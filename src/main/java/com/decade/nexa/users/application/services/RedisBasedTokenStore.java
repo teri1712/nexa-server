@@ -1,6 +1,6 @@
 package com.decade.nexa.users.application.services;
 
-import com.decade.practice.users.application.ports.out.TokenStore;
+import com.decade.nexa.users.application.ports.out.TokenStore;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.RedisOperations;
@@ -18,7 +18,7 @@ public class RedisBasedTokenStore implements TokenStore {
       private static final String TOKEN_KEY_SPACE = "JWT_TOKENS";
 
       private final StringRedisTemplate redisTemplate;
-            
+
       private static String generateKey(String username) {
             return TOKEN_KEY_SPACE + ":" + username;
       }

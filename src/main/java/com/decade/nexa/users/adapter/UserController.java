@@ -1,8 +1,8 @@
 package com.decade.nexa.users.adapter;
 
-import com.decade.practice.users.application.ports.in.ProfileService;
-import com.decade.practice.users.dto.ProfileResponse;
-import com.decade.practice.users.dto.SignUpRequest;
+import com.decade.nexa.users.application.ports.in.ProfileService;
+import com.decade.nexa.users.dto.ProfileResponse;
+import com.decade.nexa.users.dto.SignUpRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

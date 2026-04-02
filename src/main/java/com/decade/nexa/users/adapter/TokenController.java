@@ -1,13 +1,13 @@
 package com.decade.nexa.users.adapter;
 
-import com.decade.practice.users.adapter.security.strategies.LoginSuccessStrategy;
-import com.decade.practice.users.application.ports.in.ProfileService;
-import com.decade.practice.users.application.ports.in.TokenSessionService;
-import com.decade.practice.users.dto.AccessToken;
-import com.decade.practice.users.dto.AccountResponse;
-import com.decade.practice.users.dto.SignUpRequest;
-import com.decade.practice.users.utils.GenderUtils;
-import com.decade.practice.web.security.TokenUtils;
+import com.decade.nexa.users.adapter.security.strategies.LoginSuccessStrategy;
+import com.decade.nexa.users.application.ports.in.ProfileService;
+import com.decade.nexa.users.application.ports.in.TokenSessionService;
+import com.decade.nexa.users.dto.AccessToken;
+import com.decade.nexa.users.dto.AccountResponse;
+import com.decade.nexa.users.dto.SignUpRequest;
+import com.decade.nexa.users.utils.GenderUtils;
+import com.decade.nexa.web.security.TokenUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -59,7 +59,7 @@ public class TokenController {
             SignUpRequest signUpRequest = new SignUpRequest();
             signUpRequest.setUsername(username);
             signUpRequest.setName(name);
-            signUpRequest.setDob(new Date());
+            signUpRequest.setDob(Instant.now());
             signUpRequest.setGender(GenderUtils.MALE);
             signUpRequest.setAvatar(picture);
             signUpRequest.setPassword(UUID.randomUUID().toString());

@@ -1,7 +1,7 @@
 package com.decade.nexa.users.application.ports.out;
 
-import com.decade.practice.users.api.UserInfo;
-import com.decade.practice.users.domain.User;
+import com.decade.nexa.users.api.UserInfo;
+import com.decade.nexa.users.domain.User;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;

@@ -1,8 +1,8 @@
 package com.decade.nexa.users.application.services;
 
-import com.decade.practice.users.api.UserApi;
-import com.decade.practice.users.api.UserInfo;
-import com.decade.practice.users.application.ports.out.UserRepository;
+import com.decade.nexa.users.api.UserApi;
+import com.decade.nexa.users.api.UserInfo;
+import com.decade.nexa.users.application.ports.out.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

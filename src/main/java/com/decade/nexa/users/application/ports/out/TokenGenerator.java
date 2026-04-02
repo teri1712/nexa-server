@@ -1,7 +1,7 @@
 package com.decade.nexa.users.application.ports.out;
 
-import com.decade.practice.users.dto.AccessToken;
-import com.decade.practice.web.security.UserClaims;
+import com.decade.nexa.users.dto.AccessToken;
+import com.decade.nexa.web.security.UserClaims;
 import io.jsonwebtoken.JwtException;
 
 public interface TokenGenerator {
