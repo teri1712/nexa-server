@@ -1,4 +1,6 @@
 spring:
+  autoconfigure:
+    exclude: org.springframework.ai.vectorstore.elasticsearch.autoconfigure.ElasticsearchVectorStoreAutoConfiguration
   application:
     name: nexa
   profiles:

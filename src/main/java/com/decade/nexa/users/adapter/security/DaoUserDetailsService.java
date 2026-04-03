@@ -24,7 +24,7 @@ public class DaoUserDetailsService implements UserDetailsService {
             try {
                   return new DaoUser(userRepo.findByUsername(username).orElseThrow());
             } catch (NoSuchElementException ex) {
-                  log.error("User not found {}", username);
+                  log.warn("User not found {}", username);
                   throw new UsernameNotFoundException("Credential with Username: " + username + " does not exist.");
             }
       }

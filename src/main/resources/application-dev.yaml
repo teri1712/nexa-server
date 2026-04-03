@@ -3,6 +3,3 @@ spring:
     compose:
       enabled: true
       lifecycle-management: start_only
-
-  autoconfigure:
-    exclude: org.springframework.ai.vectorstore.elasticsearch.autoconfigure.ElasticsearchVectorStoreAutoConfiguration

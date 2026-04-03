@@ -11,4 +11,5 @@ public class AuthContext {
       public ProfileResponse profile;
       public AccessToken accessToken;
       public int statusCode;
+      public String errorMessage;
 }

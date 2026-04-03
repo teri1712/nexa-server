@@ -1,6 +1,7 @@
 package com.decade.nexa.users.adapter;
 
 import com.decade.nexa.users.application.ports.in.ProfileService;
+import com.decade.nexa.users.application.ports.out.UserRepository;
 import com.decade.nexa.users.dto.ProfileResponse;
 import com.decade.nexa.users.dto.SignUpRequest;
 import jakarta.validation.Valid;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
       private final ProfileService profileService;
+      private final UserRepository users;
 
       @ExceptionHandler(DataIntegrityViolationException.class)
       @ResponseStatus(HttpStatus.CONFLICT)
@@ -31,7 +33,8 @@ public class UserController {
       @PostMapping
       @ResponseStatus(HttpStatus.CREATED)
       public ProfileResponse registerUser(@RequestBody @Valid SignUpRequest signUpRequest) {
-            return profileService.create(signUpRequest, true);
+            var res = profileService.create(signUpRequest, true);
+            return res;
       }
 
 
