@@ -135,7 +135,7 @@ public class SecurityConfiguration extends GlobalAuthenticationConfigurerAdapter
                 LoginFailedStrategy failedStrategy,
                 LogoutStrategy logoutHandler,
                 JwtTokenFilter jwtAuthenticationFilter
-      ) throws Exception {
+      ) {
             http
                       .requestCache(Customizer.withDefaults())
                       .securityContext(context ->
