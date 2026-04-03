@@ -33,8 +33,7 @@ public class UserController {
       @PostMapping
       @ResponseStatus(HttpStatus.CREATED)
       public ProfileResponse registerUser(@RequestBody @Valid SignUpRequest signUpRequest) {
-            var res = profileService.create(signUpRequest, true);
-            return res;
+            return profileService.create(signUpRequest, true);
       }
 
 
