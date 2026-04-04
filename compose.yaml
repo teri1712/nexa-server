@@ -50,6 +50,20 @@ services:
       retries: 20
       start_period: 5s
 
+  s3:
+    image: localstack/localstack:2.3
+    ports:
+      - "4566:4566"
+    environment:
+      SERVICES: s3
+      AWS_DEFAULT_REGION: ap-southeast-1
+    volumes:
+      - s3-data:/var/lib/localstack
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./s3/init:/etc/localstack/init/ready.d
+    cpus: 0.5
+    cpu_count: 3
+    mem_limit: 500m
 
 volumes:
   redis-data:

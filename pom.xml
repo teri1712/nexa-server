@@ -62,10 +62,6 @@
             <artifactId>spring-boot-starter-webmvc</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-starter-vector-store-elasticsearch</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.modulith</groupId>
             <artifactId>spring-modulith-starter-core</artifactId>
         </dependency>
@@ -236,12 +232,6 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>com.google.genai</groupId>
-            <artifactId>google-genai</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-
 
         <dependency>
             <groupId>org.mapstruct</groupId>
@@ -285,6 +275,17 @@
             <version>2.8.5</version>
         </dependency>
 
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <version>2.20.12</version>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>localstack</artifactId>
+            <version>1.19.7</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>

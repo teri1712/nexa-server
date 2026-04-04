@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.http.*;
-import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.validation.method.MethodValidationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -25,10 +24,6 @@ public class ExceptionControllerAdvice extends ResponseEntityExceptionHandler {
 
       @ResponseStatus(value = HttpStatus.NOT_FOUND)
       @ExceptionHandler({
-                EntityNotFoundException.class,
-                NoSuchElementException.class,
-      })
-      @MessageExceptionHandler({
                 EntityNotFoundException.class,
                 NoSuchElementException.class,
       })
