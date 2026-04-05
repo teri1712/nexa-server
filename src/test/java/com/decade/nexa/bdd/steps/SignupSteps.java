@@ -38,10 +38,11 @@ public class SignupSteps {
                                           "gender", 0.5,
                                           "password", password))
                       .post("/users");
-            signUpContext.profile = response.jsonPath().getObject(".", ProfileResponse.class);
             signUpContext.status = response.statusCode();
             if (response.statusCode() != 201) {
                   signUpContext.errorMessage = response.jsonPath().getString("detail");
+            } else {
+                  signUpContext.profile = response.jsonPath().getObject(".", ProfileResponse.class);
             }
 
       }
