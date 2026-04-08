@@ -5,7 +5,9 @@ import com.decade.nexa.users.domain.events.UserPasswordChanged;
 import com.decade.nexa.users.utils.GenderUtils;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.domain.AbstractAggregateRoot;
 
 import java.time.Instant;
@@ -14,6 +16,7 @@ import java.util.UUID;
 @Getter
 @Entity
 @Table(name = "user_member")
+@Inheritance(strategy = InheritanceType.JOINED)
 public class User extends AbstractAggregateRoot<User> {
 
       @Column(unique = true, nullable = false, updatable = false)
@@ -26,13 +29,13 @@ public class User extends AbstractAggregateRoot<User> {
 
       private Instant dob;
 
+      @Enumerated(EnumType.STRING)
       @Column(updatable = false)
-      private String role = "ROLE_USER";
+      @Setter(AccessLevel.PACKAGE)
+      private Role role;
 
       @Id
       private UUID id;
-
-      private String avatar;
 
       @Version
       private Integer version;
@@ -42,10 +45,6 @@ public class User extends AbstractAggregateRoot<User> {
 
       public void changeGender(@NotNull Float gender) {
             this.gender = gender;
-      }
-
-      public void changeAvatar(@NotNull String avatar) {
-            this.avatar = avatar;
       }
 
       void changePassword(@NotNull String password) {
@@ -65,20 +64,19 @@ public class User extends AbstractAggregateRoot<User> {
       protected User() {
       }
 
-      public User(UUID id, String username, String password, String name, String avatar, Instant dob, Float gender) {
+      User(UUID id, String username, String password, String name, Instant dob, Float gender) {
             this.id = id;
             this.username = username;
             this.password = password;
             this.name = name;
-            this.avatar = avatar;
             this.dob = dob;
             this.gender = gender;
-
+            this.setRole(Role.USER);
       }
 
       @PrePersist
       void onCreated() {
-            registerEvent(new UserCreated(id, username, name, GenderUtils.inspect(gender), dob, avatar));
+            registerEvent(new UserCreated(id, username, name, GenderUtils.inspect(gender), dob));
       }
 
 }

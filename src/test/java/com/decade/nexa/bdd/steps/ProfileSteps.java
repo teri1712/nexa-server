@@ -11,10 +11,12 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Slf4j
 @RequiredArgsConstructor
 public class ProfileSteps {
       private final AuthContext authContext;
@@ -36,6 +38,7 @@ public class ProfileSteps {
                       .formParam("new_password", newPassword)
                       .post("/profiles/me/password");
             profileContext.accessToken = response.getBody().jsonPath().getObject("accessToken", AccessToken.class);
+            log.debug("Change password Response: {}", response.getBody().prettyPrint());
             assertThat(response.statusCode()).isEqualTo(200);
       }
 
@@ -71,7 +74,7 @@ public class ProfileSteps {
                       .statusCode(200);
       }
 
-      @When("the user update his name to {string} and his gender to {double}")
+      @When("the admin update his name to {string} and his gender to {double}")
       public void theUserUpdateHisNameToAndHisGenderTo(String name, double gender) {
             ProfileRequest request = new ProfileRequest();
             request.setName(name);

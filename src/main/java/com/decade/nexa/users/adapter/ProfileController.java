@@ -2,7 +2,6 @@ package com.decade.nexa.users.adapter;
 
 import com.decade.nexa.users.adapter.validation.StrongPassword;
 import com.decade.nexa.users.application.ports.in.ProfileService;
-import com.decade.nexa.users.dto.AccountResponse;
 import com.decade.nexa.users.dto.ProfileRequest;
 import com.decade.nexa.users.dto.ProfileResponse;
 import jakarta.persistence.OptimisticLockException;
@@ -37,7 +36,7 @@ public class ProfileController {
       }
 
       @PostMapping("/password")
-      public AccountResponse changePassword(
+      public ProfileResponse changePassword(
                 @AuthenticationPrincipal(expression = "id") UUID id,
                 @RequestParam(value = "password", required = false) String password,
                 @StrongPassword @RequestParam("new_password") String newPassword

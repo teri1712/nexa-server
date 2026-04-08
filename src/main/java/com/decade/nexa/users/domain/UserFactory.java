@@ -1,20 +1,44 @@
 package com.decade.nexa.users.domain;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserFactory {
 
       private final PasswordEncoder passwordEncoder;
 
-      public User createUser(UUID id, String username, String password, String name, String avatar, Instant dob, Float gender) {
+      @Value("${super.admin.username}")
+      private String superAdmin;
+
+      @Value("${super.admin.password}")
+      private String superPassword;
+
+      public User createUser(String username, String password, String name, Instant dob, Float gender) {
             password = passwordEncoder.encode(password);
-            return new User(id, username, password, name, avatar, dob, gender);
+            return new User(UUID.randomUUID(), username, password, name, dob, gender);
       }
+
+      public Admin createAdmin(String username, String password, String name, Instant dob, Float gender, Optional<Admin> createdBy) throws NeedAParentAdminException {
+            if (username.equals(superAdmin)) {
+                  if (!password.equals(superPassword)) {
+                        throw new AccessDeniedException("Super admin cannot be created due to mismatched credentials");
+                  }
+            } else {
+                  if (createdBy.isEmpty()) {
+                        throw new NeedAParentAdminException(username);
+                  }
+            }
+            password = passwordEncoder.encode(password);
+            return new Admin(UUID.randomUUID(), username, password, name, dob, gender, createdBy.orElse(null));
+      }
+
 }

@@ -1,0 +1,22 @@
+package com.decade.nexa.users.domain;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
+import lombok.NoArgsConstructor;
+
+import java.time.Instant;
+import java.util.UUID;
+
+@NoArgsConstructor
+@Entity
+public class Admin extends User {
+
+      @ManyToOne
+      private Admin createdBy;
+
+      Admin(UUID id, String username, String password, String name, Instant dob, Float gender, Admin createdBy) {
+            super(id, username, password, name, dob, gender);
+            this.createdBy = createdBy;
+            setRole(Role.ADMIN);
+      }
+}
