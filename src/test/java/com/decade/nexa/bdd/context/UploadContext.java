@@ -8,5 +8,4 @@ import org.springframework.stereotype.Component;
 public class UploadContext {
       public int finishStatus;
       public String key;
-      public String downloadUrl;
 }

@@ -34,8 +34,9 @@ public class PresignController {
             return service.generateUploadUrl(filename, user);
       }
 
-      @PostMapping(value = "/finish", produces = "text/html")
-      public String finishUpload(@RequestBody CompleteUploadRequest request) {
-            return service.finishUpload(request);
+      @PostMapping(value = "/finish")
+      @ResponseStatus(value = HttpStatus.NO_CONTENT)
+      public void finishUpload(@RequestBody CompleteUploadRequest request) {
+            service.finishUpload(request);
       }
 }

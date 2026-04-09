@@ -1,11 +1,13 @@
 package com.decade.nexa.files.application.ports.out;
 
+import com.decade.nexa.files.domain.FileIntegrityException;
+
 public interface StoragePathGenerator {
 
-      Presigned generatePresignUpload(String username, String filename);
+      Path generateUpload(String username, String filename);
 
-      String generateDownload(String key, String eTag);
+      void validate(String key, String eTag) throws FileIntegrityException;
 
-      record Presigned(String key, String url) {
+      record Path(String key, String url) {
       }
 }

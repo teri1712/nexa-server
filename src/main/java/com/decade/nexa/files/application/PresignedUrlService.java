@@ -15,14 +15,13 @@ public class PresignedUrlService {
 
       private final RecordRepository records;
       private final StoragePathGenerator pathGenerator;
-      private final StoragePathGenerator storagePathGenerator;
 
 
       public S3PresignedResponse generateUploadUrl(String filename, String username) {
 
-            StoragePathGenerator.Presigned generation = pathGenerator.generatePresignUpload(username, filename);
+            StoragePathGenerator.Path generation = pathGenerator.generateUpload(username, filename);
             String key = generation.key();
-            records.save(new UploadRecord(filename, key));
+            records.save(new UploadRecord(key));
 
             return S3PresignedResponse.builder()
                       .key(key)
@@ -32,12 +31,11 @@ public class PresignedUrlService {
       }
 
       @Transactional
-      public String finishUpload(CompleteUploadRequest request) {
+      public void finishUpload(CompleteUploadRequest request) {
             String key = request.key();
-            String downloadUrl = storagePathGenerator.generateDownload(key, request.eTag());
             UploadRecord record = records.findById(key).orElseThrow();
-            record.complete(downloadUrl);
+            record.complete();
             records.save(record);
-            return downloadUrl;
       }
+
 }

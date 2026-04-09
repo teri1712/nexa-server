@@ -16,18 +16,13 @@ public class UploadRecord extends AbstractAggregateRoot<UploadRecord> {
       @Id
       @Column(name = "id")
       private String key;
-      private String fileName;
-
-      @Column(nullable = true)
-      private String downloadUrl;
 
 
       @Column(columnDefinition = "upload_progress")
       @JdbcTypeCode(SqlTypes.NAMED_ENUM)
       private UploadProgress progress;
 
-      public UploadRecord(String fileName, String key) {
-            this.fileName = fileName;
+      public UploadRecord(String key) {
             this.key = key;
             this.progress = UploadProgress.UPLOADING;
       }
@@ -36,9 +31,8 @@ public class UploadRecord extends AbstractAggregateRoot<UploadRecord> {
       private Integer version;
 
 
-      public void complete(String downloadUrl) {
-            this.downloadUrl = downloadUrl;
+      public void complete() {
             this.progress = UploadProgress.COMPLETED;
-            registerEvent(new UploadCompleted(key, fileName, downloadUrl));
+            registerEvent(new UploadCompleted(key));
       }
 }

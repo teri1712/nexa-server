@@ -61,12 +61,10 @@ public class UploadSteps {
                       .body(Map.of("key", key, "eTag", eTag))
                       .post("/files/finish");
             uploadContext.finishStatus = response.statusCode();
-            uploadContext.downloadUrl = response.body().asString();
       }
 
       @Then("the document is saved")
       public void theDocumentIsSaved() {
-            assertThat(uploadContext.downloadUrl).isNotBlank();
-            assertThat(uploadContext.finishStatus).isEqualTo(200);
+            assertThat(uploadContext.finishStatus).isEqualTo(204);
       }
 }
