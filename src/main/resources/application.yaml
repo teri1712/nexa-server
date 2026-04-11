@@ -97,6 +97,13 @@ actuator:
 jwt.secret: vcl-vcl-vcl-vcl-vcl-vcl-vcl-vcl-vcl
 
 
+super:
+  admin:
+    username: super_ultimate_supreme_admin
+    password: vclvclvclvcl
+
+
+
 aws:
   s3:
     region: ap-southeast-1

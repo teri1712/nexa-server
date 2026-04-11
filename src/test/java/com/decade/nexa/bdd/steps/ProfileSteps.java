@@ -11,10 +11,12 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Slf4j
 @RequiredArgsConstructor
 public class ProfileSteps {
       private final AuthContext authContext;
@@ -29,13 +31,14 @@ public class ProfileSteps {
 
 
       @When("changing password to {string} with submitted password {string}")
-      public void changePasswordSuccess(String newPassword, String submittedPassword) {
+      public void changePassword(String newPassword, String submittedPassword) {
             Response response = RestAssured.given().contentType(ContentType.URLENC)
                       .headers("Authorization", "Bearer " + authContext.accessToken.accessToken())
                       .formParam("password", submittedPassword)
                       .formParam("new_password", newPassword)
                       .post("/profiles/me/password");
             profileContext.accessToken = response.getBody().jsonPath().getObject("accessToken", AccessToken.class);
+            log.debug("Change password Response: {}", response.getBody().prettyPrint());
             assertThat(response.statusCode()).isEqualTo(200);
       }
 
@@ -55,22 +58,23 @@ public class ProfileSteps {
             RestAssured.given()
                       .contentType(ContentType.URLENC)
                       .formParam("refresh_token", authContext.accessToken.refreshToken())
-                      .post("/refresh")
+                      .post("/tokens/refresh")
                       .then()
                       .statusCode(401);
       }
 
-      @Then("grant new valid session")
+      @Then("grant a new valid session")
       public void newSession() {
+            assertThat(profileContext.accessToken).isNotNull();
             RestAssured.given()
                       .contentType(ContentType.URLENC)
-                      .formParam("refresh_token", authContext.accessToken.refreshToken())
-                      .post("/refresh")
+                      .formParam("refresh_token", profileContext.accessToken.refreshToken())
+                      .post("/tokens/refresh")
                       .then()
-                      .statusCode(401);
+                      .statusCode(200);
       }
 
-      @When("the user update his name to {string} and his gender to {double}")
+      @When("the admin update his name to {string} and his gender to {double}")
       public void theUserUpdateHisNameToAndHisGenderTo(String name, double gender) {
             ProfileRequest request = new ProfileRequest();
             request.setName(name);

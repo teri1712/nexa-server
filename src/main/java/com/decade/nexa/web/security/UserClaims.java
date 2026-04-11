@@ -9,7 +9,7 @@ public record UserClaims(
           UUID id,
           String username,
           String name,
-          String avatar
+          String role
 ) {
 
 }

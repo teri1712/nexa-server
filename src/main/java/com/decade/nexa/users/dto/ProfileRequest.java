@@ -22,7 +22,4 @@ public class ProfileRequest {
       @Past
       @Nullable
       private Instant dob;
-
-      @Nullable
-      private String avatar;
 }

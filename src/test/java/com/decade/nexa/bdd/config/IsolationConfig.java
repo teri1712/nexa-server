@@ -23,9 +23,12 @@ public class IsolationConfig {
                       .build());
       }
 
+      @Value("${super.admin.username}")
+      private String superAdmin;
+
       @Before
       public void cleanUp() {
-            jdbcTemplate.execute("truncate table user_member, upload_record cascade");
+            jdbcTemplate.execute("delete from user_member where username != '" + superAdmin + "'");
             redisTemplate.getConnectionFactory().getConnection().serverCommands().flushAll();
       }
 }

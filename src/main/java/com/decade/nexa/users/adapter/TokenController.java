@@ -1,37 +1,16 @@
 package com.decade.nexa.users.adapter;
 
-import com.decade.nexa.users.adapter.security.strategies.LoginSuccessStrategy;
-import com.decade.nexa.users.application.ports.in.ProfileService;
 import com.decade.nexa.users.application.ports.in.TokenSessionService;
 import com.decade.nexa.users.dto.AccessToken;
 import com.decade.nexa.users.dto.AccountResponse;
-import com.decade.nexa.users.dto.SignUpRequest;
-import com.decade.nexa.users.utils.GenderUtils;
 import com.decade.nexa.web.security.TokenUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.util.List;
-import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -39,57 +18,16 @@ import java.util.UUID;
 @RequestMapping("/tokens")
 public class TokenController {
 
-      private final ProfileService profileService;
-      private final LoginSuccessStrategy loginSuccessStrategy;
       private final TokenSessionService tokenSessionService;
 
-      // TODO: Adjust client
-      @PostMapping("/oauth2")
-      public void exchange(
-                @AuthenticationPrincipal Jwt jwt,
-                HttpServletRequest request,
-                HttpServletResponse response
-      ) throws Exception {
-            String username = jwt.getSubject();
-
-            var claims = jwt.getClaims();
-            String name = claims.get("name").toString();
-            String picture = claims.get("picture").toString();
-
-            SignUpRequest signUpRequest = new SignUpRequest();
-            signUpRequest.setUsername(username);
-            signUpRequest.setName(name);
-            signUpRequest.setDob(Instant.now());
-            signUpRequest.setGender(GenderUtils.MALE);
-            signUpRequest.setAvatar(picture);
-            signUpRequest.setPassword(UUID.randomUUID().toString());
-            try {
-                  profileService.createIfNotExists(signUpRequest, false);
-            } catch (DataIntegrityViolationException ignored) {
-                  log.debug("Oauth2 user already exists");
-            }
-            UsernamePasswordAuthenticationToken authenticationToken = UsernamePasswordAuthenticationToken.authenticated(username, null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
-            SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
-            securityContext.setAuthentication(authenticationToken);
-            SecurityContextHolder.getContextHolderStrategy().setContext(securityContext);
-            loginSuccessStrategy.onAuthenticationSuccess(request, response, authenticationToken);
-      }
-
       @PostMapping("/refresh")
-      public void refresh(HttpServletRequest request, HttpServletResponse response) throws IOException {
+      public AccountResponse refresh(HttpServletRequest request) {
             String refreshToken = TokenUtils.extractRefreshToken(request);
             if (refreshToken == null) {
                   throw new AccessDeniedException("No refresh token provided in the request");
             }
 
             String accessToken = tokenSessionService.refresh(refreshToken);
-            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-            response.getWriter().write(
-                      new ObjectMapper()
-                                .enable(SerializationFeature.INDENT_OUTPUT)
-                                .writeValueAsString(new AccountResponse(null, new AccessToken(accessToken, refreshToken)))
-            );
-            response.getWriter().flush();
+            return new AccountResponse(null, new AccessToken(accessToken, refreshToken));
       }
 }
