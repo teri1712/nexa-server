@@ -1,0 +1,17 @@
+spring:
+  ai:
+    model:
+      chat: ollama
+      embedding:
+        text: ollama
+    ollama:
+      base-url: http://localhost:11434
+      init:
+        pull-model-strategy: when_missing
+      chat:
+        model: phi3
+        options:
+          temperature: 0.5
+      embedding:
+        model: nomic-embed-text
+

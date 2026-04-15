@@ -1,5 +1,9 @@
 package com.decade.nexa.files.apis;
 
+import org.springframework.core.io.Resource;
+
 public interface FileApi {
-      FileResource getFile(String fileKey);
+      FileMetadata getFile(String fileKey, String eTag);
+
+      Resource getResource(String fileKey);
 }

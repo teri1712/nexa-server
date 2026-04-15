@@ -24,7 +24,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
 
-import static com.decade.nexa.bdd.config.OIDCConfig.TEST_RSA_KEY;
+import static com.decade.nexa.common.OIDCConfig.TEST_RSA_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
@@ -123,19 +123,37 @@ public class LoginSteps {
             }
       }
 
-      private String oidcContext;
+      private String oidcToken;
 
       @Given("user with email {string} and name {string} grant consent to the application")
-      public void userLogin(String email, String name) {
-            this.oidcContext = oidcToken(email, name);
+      public void userEmailConsent(String email, String name) {
+            this.oidcToken = oidcToken(email, name);
       }
 
       @When("user login to the application with that email")
       public void userLoginToTheApplicationWithThatEmail() {
             Response response = RestAssured.given().contentType("application/json")
-                      .headers("OIDC-Token", oidcContext)
+                      .headers("OIDC-Token", oidcToken)
                       .post("/user-login")
                       .andReturn();
             consumeAuth(response);
       }
+
+      @Given("user {string} login")
+      public void userEmailLogin(String email) {
+            this.userEmailConsent(email, email);
+            this.userLoginToTheApplicationWithThatEmail();
+      }
+
+      @When("logout")
+      public void logout() {
+            RestAssured.given()
+                      .contentType("application/x-www-form-urlencoded")
+                      .headers("Authorization", "Bearer " + authContext.accessToken.accessToken())
+                      .param("refresh_token", authContext.accessToken.refreshToken())
+                      .post("/logout")
+                      .then()
+                      .statusCode(200);
+      }
+
 }

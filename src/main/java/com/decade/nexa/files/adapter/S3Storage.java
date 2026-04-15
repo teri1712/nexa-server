@@ -1,7 +1,6 @@
 package com.decade.nexa.files.adapter;
 
-import com.decade.nexa.files.apis.FileApi;
-import com.decade.nexa.files.apis.FileResource;
+import com.decade.nexa.files.application.ports.out.FileStorage;
 import com.decade.nexa.files.application.ports.out.StoragePathGenerator;
 import com.decade.nexa.files.domain.FileIntegrityException;
 import lombok.RequiredArgsConstructor;
@@ -9,19 +8,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
-import org.springframework.web.util.UriUtils;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
-public class S3Storage implements StoragePathGenerator, FileApi {
+public class S3Storage implements StoragePathGenerator, FileStorage {
 
       private final S3Presigner presigner;
       private final S3Client s3Client;
@@ -58,32 +56,22 @@ public class S3Storage implements StoragePathGenerator, FileApi {
       }
 
       @Override
-      public void validate(String key, String eTag) throws FileIntegrityException {
-            String expectedEtag = getEtag(key);
-            if (eTag == null || !eTag.equals(expectedEtag)) {
-                  throw new FileIntegrityException(key, bucket, expectedEtag, eTag);
+      public Map<String, String> getFile(String fileKey, String eTag) {
+
+            HeadObjectRequest request = HeadObjectRequest.builder()
+                      .bucket(bucket)
+                      .key(fileKey)
+                      .build();
+
+            HeadObjectResponse response = s3Client.headObject(request);
+            if (response.eTag() == null || !response.eTag().equals(eTag)) {
+                  throw new FileIntegrityException(fileKey, bucket, eTag, response.eTag());
             }
-      }
-
-      public String generateDownload(String key) {
-            String[] parts = key.split("/");
-            String username = parts[0];
-            String filename = parts[1];
-            return s3Endpoint + "/" + bucket + "/" + UriUtils.encodePath(username, StandardCharsets.UTF_8) + "/" + UriUtils.encodePath(filename, StandardCharsets.UTF_8);
-      }
-
-      private String getEtag(String key) {
-            HeadObjectResponse res = s3Client.headObject(
-                      HeadObjectRequest.builder()
-                                .bucket(bucket)
-                                .key(key)
-                                .build()
-            );
-            return res.eTag();
+            return response.metadata();
       }
 
       @Override
-      public FileResource getFile(String fileKey) {
+      public Resource getResource(String fileKey) {
 
             GetObjectRequest request = GetObjectRequest.builder()
                       .bucket(bucket)
@@ -92,10 +80,6 @@ public class S3Storage implements StoragePathGenerator, FileApi {
 
             ResponseInputStream<GetObjectResponse> response =
                       s3Client.getObject(request);
-            Resource resource = new InputStreamResource(response);
-            String fileType = response.response().contentType();
-            String fileName = response.response().metadata().get("filename");
-
-            return new FileResource(fileName, fileType, resource, generateDownload(fileKey));
+            return new InputStreamResource(response);
       }
 }

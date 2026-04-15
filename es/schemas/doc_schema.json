@@ -1,0 +1,24 @@
+{
+  "mappings": {
+    "properties": {
+      "id": {
+        "type": "keyword"
+      },
+      "filename": {
+        "type": "text"
+      },
+      "title": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "created_at": {
+        "type": "date"
+      },
+      "content_type": {
+        "type": "keyword"
+      }
+    }
+  }
+}

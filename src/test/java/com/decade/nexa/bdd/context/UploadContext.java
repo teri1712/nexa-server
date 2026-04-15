@@ -6,6 +6,6 @@ import org.springframework.stereotype.Component;
 @Component
 @ScenarioScope
 public class UploadContext {
-      public int finishStatus;
       public String key;
+      public String eTag;
 }

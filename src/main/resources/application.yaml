@@ -41,6 +41,9 @@ spring:
       port: 6379
       timeout: 60000
       client-type: lettuce
+    elasticsearch:
+      repositories:
+        enabled: true
   flyway:
     clean-disabled: false
     enabled: true
@@ -54,6 +57,7 @@ spring:
           text:
             options:
               model: gemini-embedding-001
+              dimensions: 768
           project-id: ${GEMINI_PROJECT_ID}
           api-key: ${GEMINI_API_KEY}
 
@@ -61,13 +65,14 @@ spring:
         api-key: ${GEMINI_API_KEY}
     vectorstore:
       elasticsearch:
-        dimensions: 1536
-        index-name: nexa-vectorstore
+        dimensions: 768
+        index-name: nexa-documents
         initialize-schema: true
         similarity: cosine
+        embedding-field-name: embedding
+
 server:
   port: 8080
-
 
 frontend:
   host:

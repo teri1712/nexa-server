@@ -11,18 +11,18 @@ import io.restassured.response.Response;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.env.Environment;
 
-import java.io.IOException;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
 
 @RequiredArgsConstructor
 public class UploadSteps {
 
+      private final Environment environment;
+
       private final AuthContext authContext;
       private final UploadContext uploadContext;
-      private final Environment environment;
+      private Response uploadResponse;
 
       @Before
       public void setup() {
@@ -30,20 +30,25 @@ public class UploadSteps {
             RestAssured.baseURI = "http://localhost";
       }
 
-      @When("user uploading a pdf file at {string}")
-      public void whenUpload(String fileName) throws IOException {
-            Response response = RestAssured.given()
+      @When("upload a {string} file at {string} with title {string} and description {string}")
+      public void whenUpload(String type, String fileName, String title, String description) {
+            uploadResponse = RestAssured.given()
                       .headers("Authorization", "Bearer " + authContext.accessToken.accessToken())
                       .queryParam("filename", fileName)
-                      .post("/files/upload")
-                      .andReturn();
-            response.then().statusCode(200)
-                      .body("presignedUploadUrl", notNullValue())
-                      .body("key", notNullValue());
 
-            String uploadUrl = response.jsonPath().getString("presignedUploadUrl");
-            String key = response.jsonPath().getString("key");
-            uploadContext.key = key;
+                      .when()
+                      .post("/files/upload")
+
+                      .then()
+                      .statusCode(200)
+                      .body("presignedUploadUrl", notNullValue())
+                      .body("fileKey", notNullValue())
+
+                      .extract()
+                      .response();
+
+            String uploadUrl = uploadResponse.jsonPath().getString("presignedUploadUrl");
+            String key = uploadResponse.jsonPath().getString("fileKey");
             String eTag = RestAssured.given()
                       .urlEncodingEnabled(false)
                       .contentType(ContentType.BINARY)
@@ -55,16 +60,29 @@ public class UploadSteps {
                       .extract()
                       .header("ETag");
 
-            response = RestAssured.given()
+            uploadResponse = RestAssured.given()
                       .contentType("application/json")
                       .headers("Authorization", "Bearer " + authContext.accessToken.accessToken())
-                      .body(Map.of("key", key, "eTag", eTag))
-                      .post("/files/finish");
-            uploadContext.finishStatus = response.statusCode();
+                      .body(Map.of(
+                                "key", key,
+                                "filename", fileName,
+                                "eTag", eTag,
+                                "type", type,
+                                "title", title,
+                                "description", description
+
+                      ))
+
+                      .when()
+                      .post("/docs");
+            uploadContext.key = key;
+            uploadContext.eTag = eTag;
+
       }
 
       @Then("the document is saved")
       public void theDocumentIsSaved() {
-            assertThat(uploadContext.finishStatus).isEqualTo(204);
+            uploadResponse.then()
+                      .statusCode(202);
       }
 }
