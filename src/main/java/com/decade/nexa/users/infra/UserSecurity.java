@@ -35,6 +35,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
+import static com.decade.nexa.users.infra.ODIC.OIDC_HEADER;
+
 @EnableMethodSecurity
 @Configuration
 public class UserSecurity extends GlobalAuthenticationConfigurerAdapter {
@@ -124,19 +126,16 @@ public class UserSecurity extends GlobalAuthenticationConfigurerAdapter {
                       .addFilterAfter(new JwtTokenFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
                       .authorizeHttpRequests(authorize ->
                                 authorize
-                                          .requestMatchers(HttpMethod.POST, "/users").permitAll()
-                                          .requestMatchers(HttpMethod.POST, "/tokens/**").permitAll()
                                           .requestMatchers(HttpMethod.POST, "/login").permitAll()
-                                          .requestMatchers(
-                                                    "/swagger-ui/**",
-                                                    "/v3/api-docs/**",
-                                                    "/swagger-ui.html"
-                                          ).permitAll()
-                                          .requestMatchers(HttpMethod.POST, "/admins").hasRole("ADMIN")
+                                          .requestMatchers("/tokens").permitAll()
+                                          .requestMatchers("/user-login").permitAll()
+                                          .requestMatchers("/profiles/me/**").authenticated()
+                                          .requestMatchers("/profiles/me/password").hasRole("ADMIN")
+                                          .requestMatchers("/admins/**").hasRole("ADMIN")
                                           .anyRequest().authenticated()
                       )
                       .oauth2ResourceServer(oauth2 -> {
-                            oauth2.bearerTokenResolver(new HeaderBearerTokenResolver("OIDC-Token"));
+                            oauth2.bearerTokenResolver(new HeaderBearerTokenResolver(OIDC_HEADER));
                             oauth2.jwt(Customizer.withDefaults());
                       })
                       .sessionManagement(session ->

@@ -70,7 +70,6 @@ spring:
         initialize-schema: true
         similarity: cosine
         embedding-field-name: embedding
-
 server:
   port: 8080
 
@@ -117,3 +116,6 @@ aws:
       id: decade
       secret: decade
     endpoint: http://localhost:4566
+springdoc:
+  override-with-generic-response: false
+

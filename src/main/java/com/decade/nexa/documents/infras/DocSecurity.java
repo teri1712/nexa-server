@@ -4,6 +4,7 @@ import com.decade.nexa.web.security.jwt.JwtService;
 import com.decade.nexa.web.security.jwt.JwtTokenFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -37,7 +38,9 @@ public class DocSecurity {
                       )
                       .addFilterAfter(new JwtTokenFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
                       .authorizeHttpRequests(authorize ->
-                                authorize.anyRequest().authenticated()
+                                authorize
+                                          .requestMatchers(HttpMethod.POST, "/docs").hasRole("ADMIN")
+                                          .anyRequest().authenticated()
                       )
                       .sessionManagement(session ->
                                 session

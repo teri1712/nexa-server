@@ -1,9 +1,9 @@
-package com.decade.nexa.files.domain;
+package com.decade.nexa.files.apis;
 
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
-public class FileIntegrityException extends RuntimeException {
+public class FileIntegrityException extends Exception {
       private String key;
       private String bucket;
       private String expectedEtag;
@@ -11,6 +11,6 @@ public class FileIntegrityException extends RuntimeException {
 
       @Override
       public String getMessage() {
-            return "File Integrity Exception: " + key + " in bucket expected Etag: " + expectedEtag + " but got: " + actualETag;
+            return "File " + key + " in bucket " + bucket + " has been corrupted with Etag" + actualETag;
       }
 }

@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.Map;
 
 import static com.decade.nexa.common.OIDCConfig.TEST_RSA_KEY;
+import static com.decade.nexa.users.infra.ODIC.OIDC_HEADER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
@@ -133,7 +134,7 @@ public class LoginSteps {
       @When("user login to the application with that email")
       public void userLoginToTheApplicationWithThatEmail() {
             Response response = RestAssured.given().contentType("application/json")
-                      .headers("OIDC-Token", oidcToken)
+                      .headers(OIDC_HEADER, oidcToken)
                       .post("/user-login")
                       .andReturn();
             consumeAuth(response);

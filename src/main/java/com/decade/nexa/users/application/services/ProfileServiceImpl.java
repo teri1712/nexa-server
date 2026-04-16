@@ -4,18 +4,14 @@ import com.decade.nexa.users.application.ports.in.ProfileService;
 import com.decade.nexa.users.application.ports.out.AdminRepository;
 import com.decade.nexa.users.application.ports.out.TokenStore;
 import com.decade.nexa.users.application.ports.out.UserRepository;
-import com.decade.nexa.users.domain.Admin;
-import com.decade.nexa.users.domain.UserFactory;
-import com.decade.nexa.users.domain.UserPasswordPolicy;
+import com.decade.nexa.users.domain.*;
 import com.decade.nexa.users.dto.ProfileRequest;
 import com.decade.nexa.users.dto.ProfileResponse;
 import com.decade.nexa.users.dto.SignUpRequest;
 import com.decade.nexa.users.dto.mapper.UserMapper;
-import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,7 +35,7 @@ public class ProfileServiceImpl implements ProfileService {
 
 
       @Override
-      public ProfileResponse create(SignUpRequest signUpRequest, UUID caller) throws DataIntegrityViolationException {
+      public ProfileResponse create(SignUpRequest signUpRequest, UUID caller) throws NeedAParentAdminException, UserAlreadyExistException {
 
             String username = signUpRequest.getUsername();
             String password = signUpRequest.getPassword();
@@ -47,14 +43,22 @@ public class ProfileServiceImpl implements ProfileService {
             Float gender = signUpRequest.getGender();
             Instant dob = signUpRequest.getDob();
             Optional<Admin> callerAdmin = admins.findById(caller);
-            Admin admin = userFactory.createAdmin(username, password, name, dob, gender, callerAdmin);
-            admins.save(admin);
 
-            return userMapper.map(admin);
+            if (users.findByUsername(username).isPresent()) {
+                  throw new UserAlreadyExistException(username, null);
+            }
+            Admin admin = userFactory.createAdmin(username, password, name, dob, gender, callerAdmin);
+            try {
+                  admins.saveAndFlush(admin);
+                  return userMapper.map(admin);
+            } catch (DataIntegrityViolationException ex) {
+                  throw new UserAlreadyExistException(username, ex);
+            }
+
       }
 
       @Override
-      public ProfileResponse changeProfile(UUID id, ProfileRequest profileRequest) throws OptimisticLockException {
+      public ProfileResponse changeProfile(UUID id, ProfileRequest profileRequest) {
             Admin admin = admins.findById(id).orElseThrow();
             if (profileRequest.getName() != null)
                   admin.changeName(profileRequest.getName());
@@ -67,7 +71,7 @@ public class ProfileServiceImpl implements ProfileService {
 
 
       @Override
-      public ProfileResponse changePassword(UUID id, String newPassword, String password) throws AccessDeniedException, OptimisticLockException {
+      public ProfileResponse changePassword(UUID id, String newPassword, String password) throws WrongPasswordException {
             Admin admin = admins.findById(id).orElseThrow();
 
             passwordPolicy.change(admin, password, newPassword);

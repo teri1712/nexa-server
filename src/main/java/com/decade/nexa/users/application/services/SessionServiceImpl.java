@@ -1,9 +1,11 @@
 package com.decade.nexa.users.application.services;
 
-import com.decade.nexa.users.application.ports.in.TokenSessionService;
+import com.decade.nexa.users.application.ports.in.SessionService;
 import com.decade.nexa.users.application.ports.out.TokenGenerator;
 import com.decade.nexa.users.application.ports.out.TokenStore;
 import com.decade.nexa.users.application.ports.out.UserRepository;
+import com.decade.nexa.users.domain.ExpiredTokenException;
+import com.decade.nexa.users.domain.InvalidTokenException;
 import com.decade.nexa.users.domain.User;
 import com.decade.nexa.users.domain.UserFactory;
 import com.decade.nexa.users.dto.AccessToken;
@@ -18,13 +20,13 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 @Service
 @AllArgsConstructor
-public class TokenSessionServiceImpl implements TokenSessionService {
+public class SessionServiceImpl implements SessionService {
 
 
       private final TokenStore tokenStore;
@@ -34,21 +36,21 @@ public class TokenSessionServiceImpl implements TokenSessionService {
       private final UserMapper userMapper;
 
 
-      private UserClaims validate(String refreshToken) throws AccessDeniedException {
+      private UserClaims validate(String refreshToken) throws ExpiredTokenException {
             UserClaims claims;
             try {
                   claims = tokenGenerator.decode(refreshToken);
             } catch (JwtException e) {
-                  throw new AccessDeniedException("Token expired", e);
+                  throw new ExpiredTokenException(e);
             }
             if (!tokenStore.has(claims.username(), refreshToken)) {
-                  throw new AccessDeniedException("Token expired");
+                  throw new ExpiredTokenException(new AccessDeniedException("Refresh token is invalid"));
             }
             return claims;
       }
 
       @Override
-      public String refresh(String refreshToken) throws AccessDeniedException {
+      public String refresh(String refreshToken) throws ExpiredTokenException {
             UserClaims claims = validate(refreshToken);
             return tokenGenerator.generate(claims).accessToken();
       }
@@ -73,26 +75,32 @@ public class TokenSessionServiceImpl implements TokenSessionService {
       }
 
       @Override
-      public AccountResponse loginOauth(Jwt jwt) {
+      public AccountResponse loginOauth(Jwt jwt) throws InvalidTokenException {
 
             String username = jwt.getSubject();
 
             var claims = jwt.getClaims();
             String name = claims.get("name").toString();
 
-            User user = users.findByUsername(username).orElseGet(new Supplier<User>() {
-                  @Override
-                  public User get() {
-                        String password = UUID.randomUUID().toString();
-                        Float gender = new Random().nextFloat();
-                        Instant dob = Instant.now();
-                        User user = userFactory.createUser(username, password, name, dob, gender);
-                        return users.saveAndFlush(user);
+            if (name == null || username == null) {
+                  throw new InvalidTokenException(new AccessDeniedException("Missing name or username in JWT"));
+            }
 
+            Optional<User> user = users.findByUsername(username);
+            if (user.isEmpty()) {
+                  String password = UUID.randomUUID().toString();
+                  Float gender = new Random().nextFloat();
+                  Instant dob = Instant.now();
+                  User uwu = userFactory.createUser(username, password, name, dob, gender);
+                  try {
+                        users.saveAndFlush(uwu);
+                        user = Optional.of(uwu);
+                  } catch (Exception e) {
+                        user = users.findByUsername(username);
                   }
-            });
 
-            return createNewSession(user);
+            }
+            return createNewSession(user.orElseThrow());
 
 
       }

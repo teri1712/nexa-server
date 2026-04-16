@@ -5,10 +5,12 @@ import com.decade.nexa.documents.domain.Documentation;
 import com.decade.nexa.documents.dto.CreateDocumentRequest;
 import com.decade.nexa.documents.dto.DocumentResponse;
 import com.decade.nexa.files.apis.FileApi;
-import com.decade.nexa.files.apis.FileMetadata;
+import com.decade.nexa.files.apis.FileIntegrityException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DocService {
@@ -16,8 +18,8 @@ public class DocService {
       private final FileApi fileApi;
       private final DocumentRepository docs;
 
-      public void add(CreateDocumentRequest request) {
-            FileMetadata file = fileApi.getFile(request.fileKey(), request.eTag());
+      public void add(CreateDocumentRequest request) throws FileIntegrityException {
+            fileApi.getFile(request.fileKey(), request.eTag());
             Documentation documentation = new Documentation(request.fileKey(), request.filename(), request.title(), request.description(), request.type());
             docs.save(documentation);
       }

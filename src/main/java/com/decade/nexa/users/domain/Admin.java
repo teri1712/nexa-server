@@ -2,6 +2,7 @@ package com.decade.nexa.users.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
@@ -9,6 +10,7 @@ import java.util.UUID;
 
 @NoArgsConstructor
 @Entity
+@Getter
 public class Admin extends User {
 
       @ManyToOne

@@ -1,6 +1,6 @@
 package com.decade.nexa.users.adapter.security.strategies;
 
-import com.decade.nexa.users.application.ports.in.TokenSessionService;
+import com.decade.nexa.users.application.ports.in.SessionService;
 import com.decade.nexa.users.dto.AccountResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,7 +16,7 @@ import java.io.IOException;
 @AllArgsConstructor
 public class LoginSuccessStrategy implements AuthenticationSuccessHandler {
 
-      private final TokenSessionService tokenSessionService;
+      private final SessionService sessionService;
       private final ObjectMapper objectMapper = new ObjectMapper();
 
       @Override
@@ -26,7 +26,7 @@ public class LoginSuccessStrategy implements AuthenticationSuccessHandler {
                 Authentication authentication
       ) throws IOException {
 
-            AccountResponse accountResponse = tokenSessionService.login(authentication.getName());
+            AccountResponse accountResponse = sessionService.login(authentication.getName());
             httpResponse.setContentType("application/json;charset=UTF-8");
             httpResponse.getWriter().write(objectMapper.writeValueAsString(accountResponse));
             httpResponse.setStatus(HttpServletResponse.SC_OK);

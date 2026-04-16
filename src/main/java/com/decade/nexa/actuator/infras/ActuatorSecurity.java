@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -28,7 +29,7 @@ public class ActuatorSecurity {
       private String actuatorRoles;
 
       @Bean
-      @Order(0)
+      @Order(Ordered.HIGHEST_PRECEDENCE)
       public SecurityFilterChain myActuatorSecurity(HttpSecurity http, PasswordEncoder passwordEncoder) throws Exception {
             UserDetails actuator = User.builder()
                       .username(actuatorUsername)

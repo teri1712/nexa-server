@@ -14,7 +14,7 @@ public class FileApiImpl implements FileApi {
       private final FileStorage fileStorage;
 
       @Override
-      public FileMetadata getFile(String fileKey, String eTag) {
+      public FileMetadata getFile(String fileKey, String eTag) throws FileIntegrityException {
             Map<String, String> metadata = fileStorage.getFile(fileKey, eTag);
             return new FileMetadata(metadata.get("filename"), metadata.get("filetype"));
       }

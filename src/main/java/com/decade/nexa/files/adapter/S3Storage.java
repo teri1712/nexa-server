@@ -1,8 +1,8 @@
 package com.decade.nexa.files.adapter;
 
+import com.decade.nexa.files.apis.FileIntegrityException;
 import com.decade.nexa.files.application.ports.out.FileStorage;
 import com.decade.nexa.files.application.ports.out.StoragePathGenerator;
-import com.decade.nexa.files.domain.FileIntegrityException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
@@ -56,7 +56,7 @@ public class S3Storage implements StoragePathGenerator, FileStorage {
       }
 
       @Override
-      public Map<String, String> getFile(String fileKey, String eTag) {
+      public Map<String, String> getFile(String fileKey, String eTag) throws FileIntegrityException {
 
             HeadObjectRequest request = HeadObjectRequest.builder()
                       .bucket(bucket)
