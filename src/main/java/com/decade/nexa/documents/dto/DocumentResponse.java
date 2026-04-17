@@ -10,13 +10,14 @@ import java.time.Instant;
 @Getter
 public class DocumentResponse {
 
-      private String id;
-      private String filename;
-      private String title;
-      private String description;
-      private DocType fileType;
-      private Instant createdAt;
+    private String id;
+    private String fileKey;
+    private String filename;
+    private String title;
+    private String description;
+    private DocType fileType;
+    private Instant createdAt;
 
-      private float score;
+    private float score;
 
 }

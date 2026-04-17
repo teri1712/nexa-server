@@ -33,101 +33,101 @@ import java.time.Instant;
 @SecurityRequirement(name = "bearerAuth")
 public class DocumentController {
 
-      private final DocService docService;
-      private final SearchService searchService;
-      private final SuggestService suggestService;
+    private final DocService docService;
+    private final SearchService searchService;
+    private final SuggestService suggestService;
 
-      @ExceptionHandler(FileIntegrityException.class)
-      ProblemDetail handle(FileIntegrityException exception) {
-            log.warn("File integrity error", exception);
-            ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-            pd.setTitle("File integrity error");
-            pd.setDetail("Mismatch Etag");
-            return pd;
-      }
+    @ExceptionHandler(FileIntegrityException.class)
+    ProblemDetail handle(FileIntegrityException exception) {
+        log.warn("File integrity error", exception);
+        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        pd.setTitle("File integrity error");
+        pd.setDetail("Mismatch Etag");
+        return pd;
+    }
 
 
-      @Operation(description = "Add a new document", responses = {
-                @ApiResponse(responseCode = "202", description = "Document added successfully"),
-                @ApiResponse(responseCode = "400", description = "Validation failure", content = @Content(
-                          mediaType = "application/problem+json",
-                          schema = @Schema(implementation = ProblemDetail.class),
-                          examples = {
-                                    @ExampleObject(name = "Request validation", ref = "#/components/examples/Validation"),
-                                    @ExampleObject(name = "File integrity violated", value = """
-                                              
-                                                        {
-                                                              "title": "File integrity error",
-                                                              "status": 400,
-                                                              "detail": "Mismatch Etag",
-                                                              "instance": "/docs/add"
-                                                        }
-                                              """)
-                          }
-                ))
-      })
-      @PostMapping
-      @ResponseStatus(HttpStatus.ACCEPTED)
-      void add(@Valid @RequestBody CreateDocumentRequest request) throws FileIntegrityException {
-            docService.add(request);
-      }
-
-      @Operation(description = "Find a document by id", responses = {
-                @ApiResponse(responseCode = "200", description = "The document"),
-                @ApiResponse(responseCode = "404", description = "Document not found", content = @Content(
-                          mediaType = "application/problem+json",
-                          schema = @Schema(implementation = ProblemDetail.class),
-                          examples = {@ExampleObject(ref = "#/components/examples/NotFound")}
-                ))
-      })
-      @GetMapping("/{id}")
-      DocumentResponse find(@PathVariable String id) {
-            return docService.find(id);
-      }
-
-      @Operation(description = "Search documents", responses = {
-                @ApiResponse(responseCode = "200", description = "The documents"),
-                @ApiResponse(responseCode = "400", description = "Validation failure", content = @Content(
-                          mediaType = "application/problem+json",
-                          schema = @Schema(implementation = ProblemDetail.class),
-                          examples = {@ExampleObject(ref = "#/components/examples/Validation")}
-                ))
-      })
-      @GetMapping
-      DocPage search(
-                @NotBlank @RequestParam String query,
-                @RequestParam(required = false) Instant start,
-                @RequestParam(required = false) Instant end,
-                @RequestParam DocType type,
-                @RequestParam(required = false) String lastDocId,
-                @RequestParam(required = false) Float lastDocScore) {
-            if (start == null) {
-                  start = Instant.parse("2026-01-01T00:00:00Z");
+    @Operation(description = "Add a new document", responses = {
+        @ApiResponse(responseCode = "202", description = "Document added successfully"),
+        @ApiResponse(responseCode = "400", description = "Validation failure", content = @Content(
+            mediaType = "application/problem+json",
+            schema = @Schema(implementation = ProblemDetail.class),
+            examples = {
+                @ExampleObject(name = "Request validation", ref = "#/components/examples/Validation"),
+                @ExampleObject(name = "File integrity violated", value = """
+                    
+                      {
+                            "title": "File integrity error",
+                            "status": 400,
+                            "detail": "Mismatch Etag",
+                            "instance": "/docs/add"
+                      }
+                    """)
             }
-            if (end == null) {
-                  end = Instant.now();
+        ))
+    })
+    @PostMapping
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    void add(@Valid @RequestBody CreateDocumentRequest request) throws FileIntegrityException {
+        docService.add(request);
+    }
+
+    @Operation(description = "Find a document by id", responses = {
+        @ApiResponse(responseCode = "200", description = "The document"),
+        @ApiResponse(responseCode = "404", description = "Document not found", content = @Content(
+            mediaType = "application/problem+json",
+            schema = @Schema(implementation = ProblemDetail.class),
+            examples = {@ExampleObject(ref = "#/components/examples/NotFound")}
+        ))
+    })
+    @GetMapping("/{id}")
+    DocumentResponse find(@PathVariable String id) {
+        return docService.find(id);
+    }
+
+    @Operation(description = "Search documents", responses = {
+        @ApiResponse(responseCode = "200", description = "The documents"),
+        @ApiResponse(responseCode = "400", description = "Validation failure", content = @Content(
+            mediaType = "application/problem+json",
+            schema = @Schema(implementation = ProblemDetail.class),
+            examples = {@ExampleObject(ref = "#/components/examples/Validation")}
+        ))
+    })
+    @GetMapping
+    DocPage search(
+        @NotBlank @RequestParam String query,
+        @RequestParam(required = false) Instant start,
+        @RequestParam(required = false) Instant end,
+        @RequestParam DocType type,
+        @RequestParam(required = false) String lastDocId,
+        @RequestParam(required = false) Float lastDocScore) {
+        if (start == null) {
+            start = Instant.parse("2026-01-01T00:00:00Z");
+        }
+        if (end == null) {
+            end = Instant.now();
+        }
+        LastDoc lastDoc = null;
+        if (lastDocId != null) {
+            if (lastDocScore == null) {
+                lastDocScore = 0.0f;
             }
-            LastDoc lastDoc = null;
-            if (lastDocId != null) {
-                  if (lastDocScore == null) {
-                        lastDocScore = 0.0f;
-                  }
-                  lastDoc = new LastDoc(lastDocId, lastDocScore);
-            }
-            return searchService.search(new DocFilter(query, start, end, type, lastDoc));
-      }
+            lastDoc = new LastDoc(lastDocId, lastDocScore);
+        }
+        return searchService.search(new DocFilter(query, start, end, type, lastDoc));
+    }
 
 
-      @Operation(description = "Suggest documents", responses = {
-                @ApiResponse(responseCode = "200", description = "The suggestion text stream", content = @Content(
-                          mediaType = "text/plain",
-                          examples = {@ExampleObject(value = """
-                                          Hello, this is teri aka decade
-                                    """)}
-                )),
-      })
-      @PostMapping(path = "suggest", produces = MediaType.TEXT_PLAIN_VALUE)
-      Flux<String> suggest(@RequestParam String query) {
-            return suggestService.suggest(query);
-      }
+    @Operation(description = "Suggest documents", responses = {
+        @ApiResponse(responseCode = "200", description = "The suggestion text stream", content = @Content(
+            mediaType = "text/plain",
+            examples = {@ExampleObject(value = """
+                      Hello, this is teri aka decade
+                """)}
+        )),
+    })
+    @PostMapping(path = "suggest", produces = MediaType.TEXT_PLAIN_VALUE)
+    Flux<String> suggest(@RequestParam String query) {
+        return suggestService.suggest(query);
+    }
 }

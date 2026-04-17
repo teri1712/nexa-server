@@ -15,24 +15,25 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class DocService {
 
-      private final FileApi fileApi;
-      private final DocumentRepository docs;
+    private final FileApi fileApi;
+    private final DocumentRepository docs;
 
-      public void add(CreateDocumentRequest request) throws FileIntegrityException {
-            fileApi.getFile(request.fileKey(), request.eTag());
-            Documentation documentation = new Documentation(request.fileKey(), request.filename(), request.title(), request.description(), request.type());
-            docs.save(documentation);
-      }
+    public void add(CreateDocumentRequest request) throws FileIntegrityException {
+        fileApi.getFile(request.fileKey(), request.eTag());
+        Documentation documentation = new Documentation(request.fileKey(), request.filename(), request.title(), request.description(), request.type());
+        docs.save(documentation);
+    }
 
-      public DocumentResponse find(String id) {
-            return docs.findById(id).map(documentation ->
-                      DocumentResponse.builder()
-                                .id(documentation.getId())
-                                .title(documentation.getTitle())
-                                .filename(documentation.getFilename())
-                                .description(documentation.getDescription())
-                                .fileType(documentation.getContentType())
-                                .createdAt(documentation.getCreatedAt())
-                                .build()).orElseThrow();
-      }
+    public DocumentResponse find(String id) {
+        return docs.findById(id).map(documentation ->
+            DocumentResponse.builder()
+                .id(documentation.getId())
+                .title(documentation.getTitle())
+                .filename(documentation.getFilename())
+                .fileKey(documentation.getId())
+                .description(documentation.getDescription())
+                .fileType(documentation.getContentType())
+                .createdAt(documentation.getCreatedAt())
+                .build()).orElseThrow();
+    }
 }
