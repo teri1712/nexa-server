@@ -49,7 +49,7 @@ public class ProfileController {
                 responses = {
                           @ApiResponse(responseCode = "200", description = "User profile information"),
                 })
-      public ProfileResponse get(Principal principal) {
+      ProfileResponse get(Principal principal) {
             return profileService.findByUsername(principal.getName());
       }
 
@@ -58,7 +58,7 @@ public class ProfileController {
                 responses = {
                           @ApiResponse(responseCode = "200", description = "User profile after update")
                 })
-      public ProfileResponse changeProfile(
+      ProfileResponse changeProfile(
                 @RequestBody @Valid ProfileRequest profile,
                 @AuthenticationPrincipal(expression = "id") UUID id
       ) {
@@ -76,7 +76,6 @@ public class ProfileController {
                                               @ExampleObject(name = "Request validation", ref = "#/components/examples/Validation"),
                                               @ExampleObject(name = "Password mismatched", value = """
                                                         {
-                                                              "type": "https://example.com/errors/password-mismatch",
                                                               "title": "Confirm password constraint",
                                                               "status": 400,
                                                               "detail": "Wrong password",
@@ -87,7 +86,7 @@ public class ProfileController {
                           )),
                           @ApiResponse(responseCode = "200", description = "Password is changed, returning profile")
                 })
-      public ProfileResponse changePassword(
+      ProfileResponse changePassword(
                 @AuthenticationPrincipal(expression = "id") UUID id,
                 @RequestParam(value = "password", required = false) String password,
                 @StrongPassword @RequestParam("new_password") String newPassword

@@ -60,7 +60,7 @@ public class DocumentController {
                                                               "title": "File integrity error",
                                                               "status": 400,
                                                               "detail": "Mismatch Etag",
-                                                              "instance": "/tokens/refresh"
+                                                              "instance": "/docs/add"
                                                         }
                                               """)
                           }
