@@ -12,14 +12,15 @@ spring:
       init:
         pull-model-strategy: when_missing
       chat:
-        model: phi3
+        model: Qwen2:0.5b
         options:
           temperature: 0.5
       embedding:
         model: nomic-embed-text
 logging:
   level:
-    root: DEBUG
+    root: WARN
+    com.decade.news: INFO
 
 aws:
   s3:

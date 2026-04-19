@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @Getter
 @Setter
-public class S3PresignedResponse {
-      private String fileKey;
-      private String presignedUploadUrl;
+public class PresignedUploadResponse {
+    private String fileKey;
+    private String presignedUploadUrl;
 }

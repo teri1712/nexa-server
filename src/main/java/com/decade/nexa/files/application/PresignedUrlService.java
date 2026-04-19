@@ -1,7 +1,8 @@
 package com.decade.nexa.files.application;
 
 import com.decade.nexa.files.application.ports.out.StoragePathGenerator;
-import com.decade.nexa.files.dto.S3PresignedResponse;
+import com.decade.nexa.files.dto.PresignedDownloadResponse;
+import com.decade.nexa.files.dto.PresignedUploadResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -9,18 +10,29 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class PresignedUrlService {
 
-      private final StoragePathGenerator pathGenerator;
+    private final StoragePathGenerator pathGenerator;
 
 
-      public S3PresignedResponse generateUploadUrl(String filename, String username) {
+    public PresignedUploadResponse generateUploadUrl(String filename, String username) {
 
-            StoragePathGenerator.Path generation = pathGenerator.generateUpload(username, filename);
-            String key = generation.key();
+        StoragePathGenerator.Path generation = pathGenerator.generateUpload(username, filename);
+        String key = generation.key();
 
-            return S3PresignedResponse.builder()
-                      .fileKey(key)
-                      .presignedUploadUrl(generation.url())
-                      .build();
-      }
+        return PresignedUploadResponse.builder()
+            .fileKey(key)
+            .presignedUploadUrl(generation.url())
+            .build();
+    }
+
+    public PresignedDownloadResponse generateDownloadUrl(String fileKey, String username) {
+
+        StoragePathGenerator.Path generation = pathGenerator.generateDownload(username, fileKey);
+        String key = generation.key();
+
+        return PresignedDownloadResponse.builder()
+            .fileKey(key)
+            .presignedDownloadUrl(generation.url())
+            .build();
+    }
 
 }
