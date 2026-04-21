@@ -1,24 +1,26 @@
 package com.decade.nexa.messages.domain;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "message_type")
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @Getter
-@Table(name = "messages")
 @NoArgsConstructor
 public abstract class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long sequenceId;
 
-    private String message;
+    @Column(name = "content", nullable = true)
+    @Setter(AccessLevel.PROTECTED)
+    private String content;
 
     @Column(name = "user_id")
     private UUID userId;
@@ -27,8 +29,8 @@ public abstract class Message {
     private Instant createdAt;
 
 
-    protected Message(String message, UUID userId) {
-        this.message = message;
+    protected Message(String content, UUID userId) {
+        this.content = content;
         this.userId = userId;
         this.createdAt = Instant.now();
     }

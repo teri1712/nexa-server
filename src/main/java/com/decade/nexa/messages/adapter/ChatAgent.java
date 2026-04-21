@@ -38,7 +38,7 @@ public class ChatAgent implements Agent {
 //                information about our documents. Please answer based on the provided context,
 //                If the provided context didn't explicitly say about it, just say you dont know
 //                or if you can answer it yourself, you can answer it based on your knowledge.
-//                If the user has just started chatting (by measuring the time between current and previous message).
+//                If the user has just started chatting (by measuring the time between current and previous content).
 //                Give him a greeting, sth like "Good morning, how can I help you today, Teri?".)
 //                """)
             .build();

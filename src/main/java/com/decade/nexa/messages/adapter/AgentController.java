@@ -1,6 +1,10 @@
 package com.decade.nexa.messages.adapter;
 
 import com.decade.nexa.messages.application.ports.in.AgentService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,8 +22,16 @@ public class AgentController {
 
     private final AgentService agentService;
 
+    @Operation(description = "Ask agent to answer",
+        parameters = {
+            @Parameter(name = "placeholderSequence", description = "Placeholder sequence number", required = true)
+        }
+        , responses = {
+        @ApiResponse(responseCode = "200", description = "Agent answer, return a text stream",
+            content = @Content(mediaType = "text/plain"))
+    })
     @PostMapping("/ask")
-    Flux<String> ask(@RequestParam String query, @AuthenticationPrincipal(expression = "id") UUID userId) {
-        return agentService.ask(userId, query);
+    Flux<String> ask(@RequestParam Long placeholderSequence, @AuthenticationPrincipal(expression = "id") UUID userId) {
+        return agentService.ask(userId, placeholderSequence);
     }
 }

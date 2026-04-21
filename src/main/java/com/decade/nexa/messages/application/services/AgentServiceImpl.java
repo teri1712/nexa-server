@@ -2,7 +2,7 @@ package com.decade.nexa.messages.application.services;
 
 import com.decade.nexa.messages.application.ports.in.AgentService;
 import com.decade.nexa.messages.application.ports.out.Agent;
-import com.decade.nexa.messages.application.ports.out.MessageRepository;
+import com.decade.nexa.messages.application.ports.out.AgentMessageRepository;
 import com.decade.nexa.messages.domain.AgentMessage;
 import com.decade.nexa.messages.domain.UserMessage;
 import lombok.RequiredArgsConstructor;
@@ -14,19 +14,23 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class AgentServiceImpl implements AgentService {
-    private final MessageRepository messages;
+    private final AgentMessageRepository agentMessages;
     private final Agent agent;
 
     @Override
-    public Flux<String> ask(UUID userId, String question) {
-        UserMessage message = new UserMessage(question, userId);
-        messages.save(message);
+    public Flux<String> ask(UUID userId, Long placeholderSequence) {
+        AgentMessage agentMessage = agentMessages.findByUserIdAndSequenceId(userId, placeholderSequence)
+            .orElseThrow();
+        UserMessage userMessage = agentMessage.getUserMessage();
         StringBuilder sb = new StringBuilder();
+        if (agentMessage.getContent() != null) {
+            return Flux.just(agentMessage.getContent());
+        }
+        String question = userMessage.getContent();
         return agent.ask(userId, question)
             .doOnNext(sb::append)
             .doOnComplete(() -> {
-                AgentMessage agentMessage = new AgentMessage(sb.toString(), userId);
-                messages.save(agentMessage);
+                agentMessages.updateContent(placeholderSequence, sb.toString());
             });
     }
 }
