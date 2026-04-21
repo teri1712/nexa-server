@@ -20,62 +20,62 @@ import static org.testcontainers.containers.localstack.LocalStackContainer.Servi
 @TestConfiguration
 public class ContainerConfigs {
 
-      @Bean
-      @ServiceConnection
-      PostgreSQLContainer<?> postgres() {
-            return new PostgreSQLContainer<>("postgres:16-alpine")
-                      .withDatabaseName("mydatabase")
-                      .withUsername("myuser")
-                      .withPassword("secret");
-      }
+    @Bean
+    @ServiceConnection
+    PostgreSQLContainer<?> postgres() {
+        return new PostgreSQLContainer<>("postgres:16-alpine")
+            .withDatabaseName("mydatabase")
+            .withUsername("myuser")
+            .withPassword("secret");
+    }
 
-      @Bean
-      @ServiceConnection
-      RedisContainer redis() {
-            return new RedisContainer(DockerImageName.parse("redis:6.2.6"))
-                      .withExposedPorts(6379);
-      }
+    @Bean
+    @ServiceConnection
+    RedisContainer redis() {
+        return new RedisContainer(DockerImageName.parse("redis:6.2.6"))
+            .withExposedPorts(6379);
+    }
 
-      @Bean
-      @ServiceConnection
-      ElasticsearchContainer elasticsearch() {
-            return new ElasticsearchContainer(
-                      "docker.elastic.co/elasticsearch/elasticsearch:8.17.0"
-            )
-                      .withEnv("discovery.type", "single-node")
-                      .withEnv("xpack.security.enabled", "false")
-                      .withEnv("ES_JAVA_OPTS", "-Xms512m -Xmx512m");
-      }
+    @Bean
+    @ServiceConnection
+    ElasticsearchContainer elasticsearch() {
+        return new ElasticsearchContainer(
+            "docker.elastic.co/elasticsearch/elasticsearch:8.17.0"
+        )
+            .withEnv("discovery.type", "single-node")
+            .withEnv("xpack.security.enabled", "false")
+            .withEnv("ES_JAVA_OPTS", "-Xms512m -Xmx512m");
+    }
 
-      @ServiceConnection
-      @Bean
-      OllamaContainer ollama() {
-            return new OllamaContainer("ollama/ollama:0.6.2")
-                      .withFileSystemBind("/opt/.ollama", "/root/.ollama", BindMode.READ_WRITE)
-                      .waitingFor(Wait.forHttp("/api/tags"))
-                      .withExposedPorts(11434);
-      }
+    @ServiceConnection
+    @Bean
+    OllamaContainer ollama() {
+        return new OllamaContainer("ollama/ollama:0.6.6")
+            .withFileSystemBind("/opt/.ollama", "/root/.ollama", BindMode.READ_WRITE)
+            .waitingFor(Wait.forHttp("/api/tags"))
+            .withExposedPorts(11434);
+    }
 
-      @Bean
-      LocalStackContainer localStackContainer() {
-            return new LocalStackContainer(DockerImageName.parse("localstack/localstack:3.0"))
-                      .withServices(LocalStackContainer.Service.S3);
-      }
+    @Bean
+    LocalStackContainer localStackContainer() {
+        return new LocalStackContainer(DockerImageName.parse("localstack/localstack:3.0"))
+            .withServices(LocalStackContainer.Service.S3);
+    }
 
-      @Bean
-      TaskExecutor taskExecutor() {
-            return new SyncTaskExecutor();
-      }
+    @Bean
+    TaskExecutor taskExecutor() {
+        return new SyncTaskExecutor();
+    }
 
 
-      @Bean
-      DynamicPropertyRegistrar awsProperties(LocalStackContainer localStack) {
-            return registry -> {
-                  registry.add("aws.s3.endpoint", () -> localStack.getEndpointOverride(S3).toString());
-                  registry.add("aws.s3.access.id", localStack::getAccessKey);
-                  registry.add("aws.s3.access.secret", localStack::getSecretKey);
-                  registry.add("aws.s3.region", localStack::getRegion);
-            };
-      }
+    @Bean
+    DynamicPropertyRegistrar awsProperties(LocalStackContainer localStack) {
+        return registry -> {
+            registry.add("aws.s3.endpoint", () -> localStack.getEndpointOverride(S3).toString());
+            registry.add("aws.s3.access.id", localStack::getAccessKey);
+            registry.add("aws.s3.access.secret", localStack::getSecretKey);
+            registry.add("aws.s3.region", localStack::getRegion);
+        };
+    }
 
 }

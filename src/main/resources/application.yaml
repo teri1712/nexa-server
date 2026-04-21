@@ -76,6 +76,8 @@ spring:
         repository:
           jdbc:
             initialize-schema: always
+    model:
+      chat: google-genai
 server:
   port: 8080
 

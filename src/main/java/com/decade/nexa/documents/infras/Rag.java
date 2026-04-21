@@ -3,7 +3,6 @@ package com.decade.nexa.documents.infras;
 import com.decade.nexa.documents.adapters.AiSuggestionService;
 import com.decade.nexa.documents.application.ports.out.Ingestor;
 import com.decade.nexa.documents.domain.DocType;
-import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.model.ChatModel;
@@ -24,64 +23,62 @@ import java.util.List;
 import java.util.Objects;
 
 @Component
-@RequiredArgsConstructor
 public class Rag implements Ingestor, AiSuggestionService {
 
-      private final VectorStore vectorStore;
-      private final ChatModel chatModel;
-      private final ChatClient chatClient;
+    private final VectorStore vectorStore;
+    private final ChatModel chatModel;
+    private final ChatClient chatClient;
 
-      private TokenTextSplitter splitter() {
-            return TokenTextSplitter.builder()
-                      .withChunkSize(800)
-                      .withMinChunkSizeChars(200)
-                      .withMinChunkLengthToEmbed(5)
-                      .withMaxNumChunks(5000)
-                      .withKeepSeparator(true)
-                      .build();
-      }
+    public Rag(VectorStore vectorStore, ChatModel chatModel, ChatClient.Builder builder) {
+        this.vectorStore = vectorStore;
+        this.chatModel = chatModel;
+        this.chatClient = builder
+            .defaultAdvisors(QuestionAnswerAdvisor.builder(vectorStore)
+                .searchRequest(SearchRequest.builder()
+                    .topK(5)
+                    .similarityThreshold(0.7)
+                    .build())
+                .build())
+            .build();
+    }
 
-      private KeywordMetadataEnricher enricher() {
-            return new KeywordMetadataEnricher(chatModel, 5);
-      }
+    private TokenTextSplitter splitter() {
+        return TokenTextSplitter.builder()
+            .withChunkSize(800)
+            .withMinChunkSizeChars(200)
+            .withMinChunkLengthToEmbed(5)
+            .withMaxNumChunks(5000)
+            .withKeepSeparator(true)
+            .build();
+    }
 
-      private List<Document> read(DocType type, Resource resource) {
-            if (Objects.requireNonNull(type) == DocType.PDF) {
-                  return new PagePdfDocumentReader(resource).read();
-            }
-            return new TikaDocumentReader(resource).read();
-      }
+    private KeywordMetadataEnricher enricher() {
+        return new KeywordMetadataEnricher(chatModel, 5);
+    }
 
-      @Override
-      public void ingest(DocType docType, Resource file) {
-            List<Document> documents = read(docType, file);
-            documents = splitter()
+    private List<Document> read(DocType type, Resource resource) {
+        if (Objects.requireNonNull(type) == DocType.PDF) {
+            return new PagePdfDocumentReader(resource).read();
+        }
+        return new TikaDocumentReader(resource).read();
+    }
+
+    @Override
+    public void ingest(DocType docType, Resource file) {
+        List<Document> documents = read(docType, file);
+        documents = splitter()
 //                      .andThen(enricher())
-                      .apply(documents);
-            vectorStore.add(documents);
-      }
+            .apply(documents);
+        vectorStore.add(documents);
+    }
 
-      @Override
-      public Flux<ChatResponse> suggest(Prompt prompt) {
-            return chatClient.prompt(prompt)
-                      .advisors(QuestionAnswerAdvisor.builder(vectorStore)
-                                .searchRequest(SearchRequest.builder()
-                                          .topK(5)
-                                          .similarityThreshold(0.7)
-                                          .build())
-                                .build())
-                      .stream().chatResponse();
-      }
+    @Override
+    public Flux<ChatResponse> suggest(Prompt prompt) {
+        return chatClient.prompt(prompt).stream().chatResponse();
+    }
 
-      @Override
-      public ChatResponse suggestImmediately(Prompt prompt) {
-            return chatClient.prompt(prompt)
-                      .advisors(QuestionAnswerAdvisor.builder(vectorStore)
-                                .searchRequest(SearchRequest.builder()
-                                          .topK(5)
-                                          .similarityThreshold(0.7)
-                                          .build())
-                                .build())
-                      .call().chatResponse();
-      }
+    @Override
+    public ChatResponse suggestImmediately(Prompt prompt) {
+        return chatClient.prompt(prompt).call().chatResponse();
+    }
 }

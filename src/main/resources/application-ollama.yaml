@@ -9,7 +9,7 @@ spring:
       init:
         pull-model-strategy: when_missing
       chat:
-        model: Qwen2:0.5b
+        model: qwen3:0.6b
         options:
           temperature: 0.5
       embedding:

@@ -5,7 +5,7 @@ import org.springframework.ai.chat.prompt.Prompt;
 import reactor.core.publisher.Flux;
 
 public interface AiSuggestionService {
-      Flux<ChatResponse> suggest(Prompt prompt);
+    Flux<ChatResponse> suggest(Prompt prompt);
 
-      ChatResponse suggestImmediately(Prompt prompt);
+    ChatResponse suggestImmediately(Prompt prompt);
 }
