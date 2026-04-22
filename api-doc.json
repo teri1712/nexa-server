@@ -170,6 +170,78 @@
         ]
       }
     },
+    "/messages": {
+      "get": {
+        "tags": [
+          "message-controller"
+        ],
+        "description": "Get message list whose sequence number are less than a sequence number",
+        "operationId": "list",
+        "parameters": [
+          {
+            "name": "anchorSeq",
+            "in": "query",
+            "description": "Anchor sequence number that ",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "max 20 messages in decreasing order",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MessageDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "message-controller"
+        ],
+        "description": "Place a message to get agent response",
+        "operationId": "post",
+        "parameters": [
+          {
+            "name": "message",
+            "in": "query",
+            "description": "Message to be placed",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message placed successfully, return the placed message and an empty placeholder message used to ask bot to fill",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/login": {
       "post": {
         "tags": [
@@ -252,7 +324,43 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/S3PresignedResponse"
+                  "$ref": "#/components/schemas/PresignedUploadResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/files/download": {
+      "post": {
+        "tags": [
+          "presign-controller"
+        ],
+        "summary": "Generate presigned url for downloading file",
+        "operationId": "downloadUrl",
+        "parameters": [
+          {
+            "name": "filekey",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PresignedDownloadResponse"
                 }
               }
             }
@@ -396,7 +504,7 @@
                       "title": "File integrity error",
                       "status": 400,
                       "detail": "Mismatch Etag",
-                      "instance": "/docs/add"
+                      "instance": "/docs"
                     }
                   }
                 }
@@ -443,6 +551,35 @@
             "bearerAuth": []
           }
         ]
+      }
+    },
+    "/bot/fill": {
+      "post": {
+        "tags": [
+          "bot-controller"
+        ],
+        "description": "Ask bot to answer",
+        "operationId": "fill",
+        "parameters": [
+          {
+            "name": "placeholderSequence",
+            "in": "query",
+            "description": "Placeholder sequence number",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bot answer, return a text stream",
+            "content": {
+              "text/plain": {}
+            }
+          }
+        }
       }
     },
     "/admins": {
@@ -705,13 +842,24 @@
           }
         }
       },
-      "S3PresignedResponse": {
+      "PresignedUploadResponse": {
         "type": "object",
         "properties": {
           "fileKey": {
             "type": "string"
           },
           "presignedUploadUrl": {
+            "type": "string"
+          }
+        }
+      },
+      "PresignedDownloadResponse": {
+        "type": "object",
+        "properties": {
+          "fileKey": {
+            "type": "string"
+          },
+          "presignedDownloadUrl": {
             "type": "string"
           }
         }
@@ -804,6 +952,25 @@
           }
         }
       },
+      "MessageDto": {
+        "type": "object",
+        "properties": {
+          "sequenceNumber": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "content": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "mine": {
+            "type": "boolean"
+          }
+        }
+      },
       "DocPage": {
         "type": "object",
         "properties": {
@@ -854,6 +1021,9 @@
           "id": {
             "type": "string"
           },
+          "fileKey": {
+            "type": "string"
+          },
           "filename": {
             "type": "string"
           },
@@ -885,17 +1055,17 @@
       "Validation": {
         "summary": "Validation failure",
         "value": {
-          "type": "https://example.com/errors/validation",
           "status": 400,
-          "title": "Validation failure",
-          "detail": "Email is invalid"
+          "type": "https://example.com/errors/validation",
+          "detail": "Email is invalid",
+          "title": "Validation failure"
         }
       },
       "NotFound": {
         "summary": "Resource not found",
         "value": {
-          "status": 404,
-          "title": "The requested resource was not found"
+          "title": "The requested resource was not found",
+          "status": 404
         }
       }
     },
