@@ -5,3 +5,11 @@ spring:
 logging:
   level:
     root: DEBUG
+
+
+
+aws:
+  s3:
+    access:
+      id: test
+      secret: test

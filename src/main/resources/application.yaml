@@ -1,6 +1,4 @@
 spring:
-  autoconfigure:
-    exclude: org.springframework.ai.vectorstore.elasticsearch.autoconfigure.ElasticsearchVectorStoreAutoConfiguration
   application:
     name: nexa
   profiles:
@@ -49,6 +47,24 @@ spring:
 
   elasticsearch:
     uris: http://localhost:9200
+  ai:
+    google:
+      genai:
+        embedding:
+          text:
+            options:
+              model: gemini-embedding-001
+          project-id: ${GEMINI_PROJECT_ID}
+          api-key: ${GEMINI_API_KEY}
+
+        project-id: ${GEMINI_PROJECT_ID}
+        api-key: ${GEMINI_API_KEY}
+    vectorstore:
+      elasticsearch:
+        dimensions: 1536
+        index-name: nexa-vectorstore
+        initialize-schema: true
+        similarity: cosine
 server:
   port: 8080
 

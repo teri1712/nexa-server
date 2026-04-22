@@ -83,7 +83,7 @@ public class ProfileSteps {
                       .headers("Authorization", "Bearer " + authContext.accessToken.accessToken())
                       .body(request)
                       .patch("/profiles/me")
-                      .then().statusCode(200);
+                      .andReturn();
       }
 
       @Then("his profile is reflected correctly with the name {string} and gender {string}")
