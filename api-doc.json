@@ -11,23 +11,23 @@
     }
   ],
   "paths": {
-    "/users": {
+    "/user-login": {
       "post": {
         "tags": [
           "user-controller"
         ],
-        "operationId": "registerUser",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SignUpRequest"
+        "operationId": "exchange",
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
               }
             }
           },
-          "required": true
-        },
-        "responses": {
           "409": {
             "description": "Conflict",
             "content": {
@@ -51,12 +51,12 @@
           "404": {
             "description": "Not Found"
           },
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProfileResponse"
+                  "$ref": "#/components/schemas/AccountResponse"
                 }
               }
             }
@@ -88,36 +88,14 @@
             "description": "Conflict"
           },
           "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/tokens/oauth2": {
-      "post": {
-        "tags": [
-          "token-controller"
-        ],
-        "operationId": "exchange",
-        "responses": {
-          "400": {
-            "description": "Bad Request",
+            "description": "OK",
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetail"
+                  "$ref": "#/components/schemas/AccountResponse"
                 }
               }
             }
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "409": {
-            "description": "Conflict"
-          },
-          "200": {
-            "description": "OK"
           }
         }
       }
@@ -168,7 +146,70 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/AccountResponse"
+                  "$ref": "#/components/schemas/ProfileResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admins": {
+      "post": {
+        "tags": [
+          "user-controller"
+        ],
+        "operationId": "registerAdmin",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignUpRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResponse"
                 }
               }
             }
@@ -344,6 +385,53 @@
           }
         }
       },
+      "AccessToken": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string"
+          },
+          "refreshToken": {
+            "type": "string"
+          }
+        }
+      },
+      "AccountResponse": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "$ref": "#/components/schemas/ProfileResponse"
+          },
+          "accessToken": {
+            "$ref": "#/components/schemas/AccessToken"
+          }
+        }
+      },
+      "ProfileResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "username": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "dob": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "role": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string"
+          }
+        }
+      },
       "SignUpRequest": {
         "type": "object",
         "properties": {
@@ -377,56 +465,6 @@
           "username"
         ]
       },
-      "ProfileResponse": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "username": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "dob": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "role": {
-            "type": "string"
-          },
-          "avatar": {
-            "type": "string"
-          },
-          "gender": {
-            "type": "string"
-          }
-        }
-      },
-      "AccessToken": {
-        "type": "object",
-        "properties": {
-          "accessToken": {
-            "type": "string"
-          },
-          "refreshToken": {
-            "type": "string"
-          }
-        }
-      },
-      "AccountResponse": {
-        "type": "object",
-        "properties": {
-          "profile": {
-            "$ref": "#/components/schemas/ProfileResponse"
-          },
-          "accessToken": {
-            "$ref": "#/components/schemas/AccessToken"
-          }
-        }
-      },
       "ProfileRequest": {
         "type": "object",
         "properties": {
@@ -441,9 +479,6 @@
           "dob": {
             "type": "string",
             "format": "date-time"
-          },
-          "avatar": {
-            "type": "string"
           }
         }
       },

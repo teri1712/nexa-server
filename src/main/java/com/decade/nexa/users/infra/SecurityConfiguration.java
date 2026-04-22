@@ -149,6 +149,7 @@ public class SecurityConfiguration extends GlobalAuthenticationConfigurerAdapter
                                           .loginPage("/login")
                                           .permitAll()
                       )
+                      .httpBasic(Customizer.withDefaults())
                       .exceptionHandling(exceptionHandling ->
                                 exceptionHandling.accessDeniedPage(null)
                                           .authenticationEntryPoint(new EntryPointStrategy())
@@ -162,17 +163,19 @@ public class SecurityConfiguration extends GlobalAuthenticationConfigurerAdapter
                       .authorizeHttpRequests(authorize ->
                                 authorize.requestMatchers("/files/**").permitAll()
                                           .requestMatchers(HttpMethod.POST, "/users").permitAll()
-                                          .requestMatchers("/tokens/**").permitAll()
+                                          .requestMatchers(HttpMethod.POST, "/tokens/**").permitAll()
                                           .requestMatchers(HttpMethod.POST, "/login").permitAll()
                                           .requestMatchers(
                                                     "/swagger-ui/**",
                                                     "/v3/api-docs/**",
                                                     "/swagger-ui.html"
                                           ).permitAll()
+                                          .requestMatchers(HttpMethod.POST, "/admins").hasRole("ADMIN")
+                                          .requestMatchers("/files/**").hasRole("ADMIN")
                                           .anyRequest().authenticated()
                       )
                       .oauth2ResourceServer(oauth2 -> {
-                            oauth2.bearerTokenResolver(new HeaderBearerTokenResolver("Oauth2-Token"));
+                            oauth2.bearerTokenResolver(new HeaderBearerTokenResolver("OIDC-Token"));
                             oauth2.jwt(Customizer.withDefaults());
                       })
                       .sessionManagement(session ->

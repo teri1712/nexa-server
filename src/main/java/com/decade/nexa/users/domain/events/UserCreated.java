@@ -8,7 +8,6 @@ public record UserCreated(
           String username,
           String name,
           String gender,
-          Instant dob,
-          String avatar
+          Instant dob
 ) {
 }
