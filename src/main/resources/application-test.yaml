@@ -19,8 +19,7 @@ spring:
         model: nomic-embed-text
 logging:
   level:
-    root: WARN
-    com.decade.news: INFO
+    root: DEBUG
 
 aws:
   s3:

@@ -43,9 +43,11 @@ public class MessageSteps {
             MessagePlacedDto response =
                 RestAssured.given()
                     .headers("Authorization", "Bearer " + authContext.accessToken.accessToken())
-                    .queryParam("userMessage", "HHeelloo" + (i + 1))
+                    .param("message", "HHeelloo" + (i + 1))
+
                     .when()
                     .post("/messages")
+
                     .then()
                     .body(not(emptyString()))
                     .statusCode(200)
@@ -56,14 +58,17 @@ public class MessageSteps {
 
             String agentReply = RestAssured.given()
                 .headers("Authorization", "Bearer " + authContext.accessToken.accessToken())
-                .queryParam("placeholderSequence", agentMessageId)
+                .contentType("application/x-www-form-urlencoded")
+                .param("placeholderSequence", agentMessageId)
+
                 .when()
-                .post("/agent/ask")
+                .post("/bot/fill")
+
                 .then()
                 .statusCode(200)
                 .extract()
                 .asString();
-            messages.add(new MessageDto(agentMessageId, agentReply, response.placeHolderMessage().createdAt()));
+            messages.add(new MessageDto(agentMessageId, agentReply, response.placeHolderMessage().createdAt(), false));
         }
         messageContext.messages = messages;
     }
@@ -72,13 +77,31 @@ public class MessageSteps {
 
     @When("user ask chat bot {string}")
     public void userAskChatBot(String query) {
+
+        MessagePlacedDto response =
+            RestAssured.given()
+                .headers("Authorization", "Bearer " + authContext.accessToken.accessToken())
+                .param("message", query)
+
+                .when()
+                .post("/messages")
+
+                .then()
+                .body(not(emptyString()))
+                .statusCode(200)
+                .extract()
+                .response().as(MessagePlacedDto.class);
+        Long agentMessageId = response.placeHolderMessage().sequenceNumber();
+
+
         askResponse = RestAssured
             .given()
             .headers("Authorization", "Bearer " + authContext.accessToken.accessToken())
-            .queryParam("query", query)
+            .contentType("application/x-www-form-urlencoded")
+            .param("placeholderSequence", agentMessageId)
 
             .when()
-            .post("/agent/ask");
+            .post("/bot/fill");
     }
 
     @Then("the chat bot answer something")
@@ -102,8 +125,9 @@ public class MessageSteps {
 
     @Then("the message list shows all of his {int} message")
     public void theMessageListShowsAllOfHisMessage(int count) {
-        assertThat(messageContext.messages.size()).isEqualTo(count);
+        assertThat(messageContext.messages).hasSize(count);
         List<MessageDto> gotMessages = messagesResponse.then()
+            .statusCode(200)
             .extract().as(new TypeRef<>() {
             });
         assertThat(gotMessages.reversed()).isEqualTo(messageContext.messages);
@@ -126,9 +150,8 @@ public class MessageSteps {
     public void theMessagesBeforeThatMessageAreReturned(int count) {
         List<MessageDto> messages = messagesResponse.as(new TypeRef<>() {
         });
-        assertThat(messages.size()).isEqualTo(count);
-        for (int i = 0; i < count; i++) {
-            assertThat(messages.get(i)).isEqualTo(messageContext.messages.get(i));
-        }
+        assertThat(messages).hasSize(count);
+        assertThat(messageContext.messages).hasSizeGreaterThanOrEqualTo(count);
+        assertThat(messages.reversed()).isEqualTo(messageContext.messages.subList(0, count));
     }
 }

@@ -11,6 +11,7 @@ public interface MessageMapper {
 
     @Mapping(target = "content", source = "content")
     @Mapping(target = "sequenceNumber", source = "sequenceId")
+    @Mapping(target = "mine", expression = "java(message instanceof com.decade.nexa.messages.domain.UserMessage)")
     MessageDto toDto(Message message);
 
 }

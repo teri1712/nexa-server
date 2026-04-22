@@ -27,7 +27,7 @@ public class MessageController {
         @Parameter(name = "anchorSeq", description = "Anchor sequence number that ", required = true)
     },
         responses = {
-            @ApiResponse(responseCode = "200", description = "max 20 messages in in increasing order"),
+            @ApiResponse(responseCode = "200", description = "max 20 messages in decreasing order"),
         }
     )
     @GetMapping
@@ -39,7 +39,7 @@ public class MessageController {
         parameters = @Parameter(name = "message", description = "Message to be placed", required = true),
         responses = {
             @ApiResponse(responseCode = "200",
-                description = "Message placed successfully, return the placed message and an empty placeholder message used to ask agent to answer",
+                description = "Message placed successfully, return the placed message and an empty placeholder message used to ask bot to fill",
                 content = @Content(mediaType = "application/json")),
         })
     @PostMapping

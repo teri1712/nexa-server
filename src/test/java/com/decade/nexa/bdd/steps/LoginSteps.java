@@ -71,7 +71,7 @@ public class LoginSteps {
         assertThat(authContext.profile).isNotNull();
     }
 
-    @Then("the user should be denied access with {string} content")
+    @Then("the user should be denied access with {string} message")
     public void thenDenied(String message) {
         assertThat(authContext.statusCode).isEqualTo(401);
         assertThat(authContext.errorMessage).isEqualTo(message);

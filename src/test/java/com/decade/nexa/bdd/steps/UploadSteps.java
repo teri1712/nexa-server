@@ -18,71 +18,71 @@ import static org.hamcrest.Matchers.notNullValue;
 @RequiredArgsConstructor
 public class UploadSteps {
 
-      private final Environment environment;
+    private final Environment environment;
 
-      private final AuthContext authContext;
-      private final UploadContext uploadContext;
-      private Response uploadResponse;
+    private final AuthContext authContext;
+    private final UploadContext uploadContext;
+    private Response uploadResponse;
 
-      @Before
-      public void setup() {
-            RestAssured.port = Integer.parseInt(environment.getProperty("local.server.port"));
-            RestAssured.baseURI = "http://localhost";
-      }
+    @Before
+    public void setup() {
+        RestAssured.port = Integer.parseInt(environment.getProperty("local.server.port"));
+        RestAssured.baseURI = "http://localhost";
+    }
 
-      @When("upload a {string} file at {string} with title {string} and description {string}")
-      public void whenUpload(String type, String fileName, String title, String description) {
-            uploadResponse = RestAssured.given()
-                      .headers("Authorization", "Bearer " + authContext.accessToken.accessToken())
-                      .queryParam("filename", fileName)
+    @When("upload a {string} file at {string} with title {string} and description {string}")
+    public void whenUpload(String type, String fileName, String title, String description) {
+        uploadResponse = RestAssured.given()
+            .headers("Authorization", "Bearer " + authContext.accessToken.accessToken())
+            .queryParam("filename", fileName)
 
-                      .when()
-                      .post("/files/upload")
+            .when()
+            .post("/files/upload")
 
-                      .then()
-                      .statusCode(200)
-                      .body("presignedUploadUrl", notNullValue())
-                      .body("fileKey", notNullValue())
+            .then()
+            .statusCode(200)
+            .body("presignedUploadUrl", notNullValue())
+            .body("fileKey", notNullValue())
 
-                      .extract()
-                      .response();
+            .extract()
+            .response();
 
-            String uploadUrl = uploadResponse.jsonPath().getString("presignedUploadUrl");
-            String key = uploadResponse.jsonPath().getString("fileKey");
-            String eTag = RestAssured.given()
-                      .urlEncodingEnabled(false)
-                      .contentType(ContentType.BINARY)
-                      .body(getClass().getResourceAsStream("/samples/" + fileName))
-                      .put(uploadUrl)
-                      .then()
-                      .statusCode(200)
-                      .header("ETag", notNullValue())
-                      .extract()
-                      .header("ETag");
+        String uploadUrl = uploadResponse.jsonPath().getString("presignedUploadUrl");
+        String key = uploadResponse.jsonPath().getString("fileKey");
+        String eTag = RestAssured.given()
+            .urlEncodingEnabled(false)
+            .contentType(ContentType.BINARY)
+            .body(getClass().getResourceAsStream("/samples/" + fileName))
+            .put(uploadUrl)
+            .then()
+            .statusCode(200)
+            .header("ETag", notNullValue())
+            .extract()
+            .header("ETag");
 
-            uploadResponse = RestAssured.given()
-                      .contentType("application/json")
-                      .headers("Authorization", "Bearer " + authContext.accessToken.accessToken())
-                      .body(Map.of(
-                                "key", key,
-                                "filename", fileName,
-                                "eTag", eTag,
-                                "type", type,
-                                "title", title,
-                                "description", description
+        uploadResponse = RestAssured.given()
+            .contentType("application/json")
+            .headers("Authorization", "Bearer " + authContext.accessToken.accessToken())
+            .body(Map.of(
+                "fileKey", key,
+                "filename", fileName,
+                "eTag", eTag,
+                "type", type,
+                "title", title,
+                "description", description
 
-                      ))
+            ))
 
-                      .when()
-                      .post("/docs");
-            uploadContext.key = key;
-            uploadContext.eTag = eTag;
+            .when()
+            .post("/docs");
+        uploadContext.key = key;
+        uploadContext.eTag = eTag;
 
-      }
+    }
 
-      @Then("the document is saved")
-      public void theDocumentIsSaved() {
-            uploadResponse.then()
-                      .statusCode(202);
-      }
+    @Then("the document is saved")
+    public void theDocumentIsSaved() {
+        uploadResponse.then()
+            .statusCode(202);
+    }
 }

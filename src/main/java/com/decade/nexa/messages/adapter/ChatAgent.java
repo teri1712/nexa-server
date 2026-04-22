@@ -19,6 +19,15 @@ import java.util.UUID;
 @Component
 public class ChatAgent implements Agent {
 
+    public static final String PERSONA = """
+                        You are a library keeper of our documentation system and helping the user to quickly find useful
+                        information about our stored documents. Please answer based on the provided context,
+                        If the provided context didn't explicitly say about it, just try your best answering the user,
+                        If the user has just started chatting (by measuring the time between current and previous message).
+                        Give him a greeting, sth like "Good morning, how can I help you today, Teri?".)
+        """;
+
+
     private final ChatClient chatClient;
     private final UserInfoTools userInfoTools;
 
@@ -32,15 +41,7 @@ public class ChatAgent implements Agent {
                 .chatMemoryRepository(chatMemoryRepository)
                 .maxMessages(15)
                 .build()).build()) // recency
-//            .defaultSystem("""
-//                You are a library keeper of our document system
-//                You know everything and helping the user to quickly find useful
-//                information about our documents. Please answer based on the provided context,
-//                If the provided context didn't explicitly say about it, just say you dont know
-//                or if you can answer it yourself, you can answer it based on your knowledge.
-//                If the user has just started chatting (by measuring the time between current and previous content).
-//                Give him a greeting, sth like "Good morning, how can I help you today, Teri?".)
-//                """)
+            .defaultSystem(PERSONA)
             .build();
     }
 

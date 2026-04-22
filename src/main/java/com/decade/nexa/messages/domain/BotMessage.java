@@ -13,15 +13,15 @@ import static jakarta.persistence.FetchType.LAZY;
 
 @Entity
 @NoArgsConstructor
-@Table(name = "agent_messages")
+@Table(name = "bot_messages")
 @Getter
-public class AgentMessage extends Message {
+public class BotMessage extends Message {
 
     @OneToOne(fetch = LAZY)
     @JoinColumn(name = "user_message_id", nullable = false)
     private UserMessage userMessage;
 
-    public AgentMessage(UserMessage userMessage, UUID userId) {
+    public BotMessage(UserMessage userMessage, UUID userId) {
         super(null, userId);
         this.userMessage = userMessage;
     }

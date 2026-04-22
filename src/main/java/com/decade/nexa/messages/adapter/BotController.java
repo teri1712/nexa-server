@@ -1,6 +1,6 @@
 package com.decade.nexa.messages.adapter;
 
-import com.decade.nexa.messages.application.ports.in.AgentService;
+import com.decade.nexa.messages.application.ports.in.BotService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -16,22 +16,22 @@ import reactor.core.publisher.Flux;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/agent")
+@RequestMapping("/bot")
 @RequiredArgsConstructor
-public class AgentController {
+public class BotController {
 
-    private final AgentService agentService;
+    private final BotService botService;
 
-    @Operation(description = "Ask agent to answer",
+    @Operation(description = "Ask bot to answer",
         parameters = {
             @Parameter(name = "placeholderSequence", description = "Placeholder sequence number", required = true)
-        }
-        , responses = {
-        @ApiResponse(responseCode = "200", description = "Agent answer, return a text stream",
-            content = @Content(mediaType = "text/plain"))
-    })
-    @PostMapping("/ask")
-    Flux<String> ask(@RequestParam Long placeholderSequence, @AuthenticationPrincipal(expression = "id") UUID userId) {
-        return agentService.ask(userId, placeholderSequence);
+        },
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Bot answer, return a text stream",
+                content = @Content(mediaType = "text/plain"))
+        })
+    @PostMapping("/fill")
+    Flux<String> fill(@RequestParam Long placeholderSequence, @AuthenticationPrincipal(expression = "id") UUID userId) {
+        return botService.fill(userId, placeholderSequence);
     }
 }

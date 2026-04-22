@@ -60,7 +60,7 @@ public class DocumentController {
                             "title": "File integrity error",
                             "status": 400,
                             "detail": "Mismatch Etag",
-                            "instance": "/docs/add"
+                            "instance": "/docs"
                       }
                     """)
             }
@@ -84,7 +84,7 @@ public class DocumentController {
     DocumentResponse find(@PathVariable String id) {
         return docService.find(id);
     }
-    
+
     @Operation(description = "Search documents", responses = {
         @ApiResponse(responseCode = "200", description = "The documents"),
         @ApiResponse(responseCode = "400", description = "Validation failure", content = @Content(

@@ -4,6 +4,6 @@ import reactor.core.publisher.Flux;
 
 import java.util.UUID;
 
-public interface AgentService {
-    Flux<String> ask(UUID userId, Long placeholderSequence);
+public interface BotService {
+    Flux<String> fill(UUID userId, Long placeholderSequence);
 }

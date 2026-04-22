@@ -26,4 +26,4 @@ Feature: Sign Up
 
     When sign up new account with username "teri1712" and password "12345678" by admin "admin1712" - "12345678"
 
-    Then fails with error "Username already exists"
+    Then fails with error "User already exist"

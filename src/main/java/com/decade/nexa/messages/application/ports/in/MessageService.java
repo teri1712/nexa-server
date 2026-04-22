@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface MessageService {
+
     List<MessageDto> getMessages(UUID userId, Long anchorSeq);
 
     MessagePlacedDto addMessage(UUID userId, String message);

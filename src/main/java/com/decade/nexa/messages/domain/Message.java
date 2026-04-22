@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 @Entity
@@ -28,10 +29,9 @@ public abstract class Message {
     @Column(name = "created_at")
     private Instant createdAt;
 
-
     protected Message(String content, UUID userId) {
         this.content = content;
         this.userId = userId;
-        this.createdAt = Instant.now();
+        this.createdAt = Instant.now().truncatedTo(ChronoUnit.MICROS);
     }
 }
