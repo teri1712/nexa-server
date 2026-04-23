@@ -16,48 +16,35 @@
         "tags": [
           "user-controller"
         ],
-        "operationId": "exchange",
+        "summary": "Exchange Google OIDC Token for JWT",
+        "operationId": "loginUser",
+        "parameters": [
+          {
+            "name": "OIDC-Token",
+            "in": "header",
+            "description": "Google OIDC Token",
+            "required": true
+          }
+        ],
         "responses": {
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetail"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetail"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetail"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found"
-          },
           "200": {
-            "description": "OK",
+            "description": "Successful operation",
             "content": {
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/AccountResponse"
                 }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid token",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                },
+                "example": "{\n      \"title\": \"Token validation\",\n      \"status\": 401,\n      \"detail\": \"Invalid token\",\n}\n"
               }
             }
           }
@@ -69,30 +56,41 @@
         "tags": [
           "token-controller"
         ],
+        "summary": "Refresh new access token",
         "operationId": "refresh",
-        "responses": {
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetail"
-                }
-              }
+        "parameters": [
+          {
+            "name": "refresh_token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "409": {
-            "description": "Conflict"
-          },
+          }
+        ],
+        "responses": {
           "200": {
-            "description": "OK",
+            "description": "New access token is generated",
             "content": {
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/AccountResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Expired token",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                },
+                "example": {
+                  "title": "Token validation",
+                  "status": 401,
+                  "detail": "Expired token",
+                  "instance": "/tokens/refresh"
                 }
               }
             }
@@ -105,6 +103,8 @@
         "tags": [
           "profile-controller"
         ],
+        "summary": "Change password",
+        "description": "Intended for admin",
         "operationId": "changePassword",
         "parameters": [
           {
@@ -125,24 +125,35 @@
           }
         ],
         "responses": {
+          "403": {
+            "description": "The user is not an admin"
+          },
           "400": {
-            "description": "Bad Request",
+            "description": "Request validation or Wrong confirm password",
             "content": {
-              "*/*": {
+              "application/problem+json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProblemDetail"
+                },
+                "examples": {
+                  "Request validation": {
+                    "$ref": "#/components/examples/Validation"
+                  },
+                  "Password mismatched": {
+                    "description": "Password mismatched",
+                    "value": {
+                      "title": "Confirm password constraint",
+                      "status": 400,
+                      "detail": "Wrong password",
+                      "instance": "/profiles/me/password"
+                    }
+                  }
                 }
               }
             }
           },
-          "404": {
-            "description": "Not Found"
-          },
-          "409": {
-            "description": "Conflict"
-          },
           "200": {
-            "description": "OK",
+            "description": "Password is changed, returning profile",
             "content": {
               "*/*": {
                 "schema": {
@@ -151,7 +162,287 @@
               }
             }
           }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/login": {
+      "post": {
+        "tags": [
+          "user-controller"
+        ],
+        "summary": "Login for admin",
+        "operationId": "loginAdmin",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "password",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid username or password",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                },
+                "examples": {
+                  "Wrong password": {
+                    "description": "Wrong password",
+                    "value": "          \"title\": \"Authentication Failed\",\n          \"status\": 401,\n          \"detail\": \"Wrong password\",\n          \"instance\": \"/login\"\n"
+                  },
+                  "Username not found": {
+                    "description": "Username not found",
+                    "value": "          \"title\": \"Authentication Failed\",\n          \"status\": 401,\n          \"detail\": \"Username not found\",\n          \"instance\": \"/login\"\n"
+                  }
+                }
+              }
+            }
+          }
         }
+      }
+    },
+    "/files/upload": {
+      "post": {
+        "tags": [
+          "presign-controller"
+        ],
+        "summary": "Generate presigned url for uploading file",
+        "operationId": "uploadUrl",
+        "parameters": [
+          {
+            "name": "filename",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/S3PresignedResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/docs": {
+      "get": {
+        "tags": [
+          "document-controller"
+        ],
+        "description": "Search documents",
+        "operationId": "search",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PDF",
+                "DOCX"
+              ]
+            }
+          },
+          {
+            "name": "lastDocId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lastDocScore",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "format": "float"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The documents",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failure",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                },
+                "example": null
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "document-controller"
+        ],
+        "description": "Add a new document",
+        "operationId": "add",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDocumentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Document added successfully"
+          },
+          "400": {
+            "description": "Validation failure",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                },
+                "examples": {
+                  "Request validation": {
+                    "$ref": "#/components/examples/Validation"
+                  },
+                  "File integrity violated": {
+                    "description": "File integrity violated",
+                    "value": {
+                      "title": "File integrity error",
+                      "status": 400,
+                      "detail": "Mismatch Etag",
+                      "instance": "/docs/add"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/docs/suggest": {
+      "post": {
+        "tags": [
+          "document-controller"
+        ],
+        "description": "Suggest documents",
+        "operationId": "suggest",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The suggestion text stream",
+            "content": {
+              "text/plain": {
+                "example": "      Hello, this is teri aka decade\n"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/admins": {
@@ -159,6 +450,8 @@
         "tags": [
           "user-controller"
         ],
+        "summary": "Register new admin",
+        "description": "Require an admin authentication",
         "operationId": "registerAdmin",
         "requestBody": {
           "content": {
@@ -171,41 +464,8 @@
           "required": true
         },
         "responses": {
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetail"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetail"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetail"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found"
-          },
           "201": {
-            "description": "Created",
+            "description": "New admin is created",
             "content": {
               "*/*": {
                 "schema": {
@@ -213,8 +473,52 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Require an admin authentication"
+          },
+          "400": {
+            "description": "Validation",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                },
+                "examples": {
+                  "Request validation": {
+                    "$ref": "#/components/examples/Validation"
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Username constraint",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                },
+                "examples": {
+                  "User already exist": {
+                    "description": "User already exist",
+                    "value": {
+                      "title": "Username constraint",
+                      "status": 409,
+                      "detail": "User already exist",
+                      "instance": "/admins"
+                    }
+                  }
+                }
+              }
+            }
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/profiles/me": {
@@ -222,26 +526,11 @@
         "tags": [
           "profile-controller"
         ],
+        "description": "Get user profile information",
         "operationId": "get",
         "responses": {
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetail"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "409": {
-            "description": "Conflict"
-          },
           "200": {
-            "description": "OK",
+            "description": "User profile information",
             "content": {
               "*/*": {
                 "schema": {
@@ -250,12 +539,18 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       },
       "patch": {
         "tags": [
           "profile-controller"
         ],
+        "description": "Change user profile",
         "operationId": "changeProfile",
         "requestBody": {
           "content": {
@@ -268,24 +563,8 @@
           "required": true
         },
         "responses": {
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetail"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "409": {
-            "description": "Conflict"
-          },
           "200": {
-            "description": "OK",
+            "description": "User profile after update",
             "content": {
               "*/*": {
                 "schema": {
@@ -294,63 +573,59 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
-    "/user-infos": {
+    "/docs/{id}": {
       "get": {
         "tags": [
-          "use-info-controller"
+          "document-controller"
         ],
-        "operationId": "getUsersByIds",
+        "description": "Find a document by id",
+        "operationId": "find",
         "parameters": [
           {
-            "name": "userId",
-            "in": "query",
+            "name": "id",
+            "in": "path",
             "required": true,
             "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "format": "uuid"
-              },
-              "maxItems": 50,
-              "minItems": 0,
-              "uniqueItems": true
+              "type": "string"
             }
           }
         ],
         "responses": {
-          "400": {
-            "description": "Bad Request",
+          "200": {
+            "description": "The document",
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetail"
+                  "$ref": "#/components/schemas/DocumentResponse"
                 }
               }
             }
           },
           "404": {
-            "description": "Not Found"
-          },
-          "409": {
-            "description": "Conflict"
-          },
-          "200": {
-            "description": "OK",
+            "description": "Document not found",
             "content": {
-              "*/*": {
+              "application/problem+json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "$ref": "#/components/schemas/UserInfo"
-                  }
-                }
+                  "$ref": "#/components/schemas/ProblemDetail"
+                },
+                "example": null
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     }
   },
@@ -379,9 +654,7 @@
           },
           "properties": {
             "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            }
+            "additionalProperties": {}
           }
         }
       },
@@ -432,6 +705,54 @@
           }
         }
       },
+      "S3PresignedResponse": {
+        "type": "object",
+        "properties": {
+          "fileKey": {
+            "type": "string"
+          },
+          "presignedUploadUrl": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateDocumentRequest": {
+        "type": "object",
+        "properties": {
+          "filename": {
+            "type": "string",
+            "minLength": 1
+          },
+          "eTag": {
+            "type": "string"
+          },
+          "fileKey": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "PDF",
+              "DOCX"
+            ]
+          }
+        },
+        "required": [
+          "description",
+          "eTag",
+          "fileKey",
+          "filename",
+          "title"
+        ]
+      },
       "SignUpRequest": {
         "type": "object",
         "properties": {
@@ -445,7 +766,8 @@
             "type": "string"
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           },
           "gender": {
             "type": "number",
@@ -482,23 +804,110 @@
           }
         }
       },
-      "UserInfo": {
+      "DocPage": {
         "type": "object",
         "properties": {
-          "username": {
-            "type": "string"
+          "totalPages": {
+            "type": "integer",
+            "format": "int64"
           },
-          "name": {
-            "type": "string"
-          },
-          "avatar": {
-            "type": "string"
-          },
-          "id": {
-            "type": "string",
-            "format": "uuid"
+          "docs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentItemResponse"
+            }
           }
         }
+      },
+      "DocumentItemResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "fileType": {
+            "type": "string",
+            "enum": [
+              "PDF",
+              "DOCX"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "score": {
+            "type": "number",
+            "format": "float"
+          }
+        }
+      },
+      "DocumentResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "fileType": {
+            "type": "string",
+            "enum": [
+              "PDF",
+              "DOCX"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "score": {
+            "type": "number",
+            "format": "float"
+          }
+        }
+      }
+    },
+    "examples": {
+      "Validation": {
+        "summary": "Validation failure",
+        "value": {
+          "type": "https://example.com/errors/validation",
+          "status": 400,
+          "title": "Validation failure",
+          "detail": "Email is invalid"
+        }
+      },
+      "NotFound": {
+        "summary": "Resource not found",
+        "value": {
+          "status": 404,
+          "title": "The requested resource was not found"
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      },
+      "basicAuth": {
+        "type": "http",
+        "scheme": "basic"
       }
     }
   }

@@ -1,0 +1,2 @@
+insert into user_member (id,username,password,name,role,gender,version,dob)
+values (gen_random_uuid(), 'alice', '$2y$10$0f2jx8mr0kBHDSGqo4xGgODVDcQpJjRLZXIvZ3isAueK9lRydSezC', 'alice', 'USER', 1.0f,0,NOW());

@@ -8,7 +8,6 @@ import lombok.*;
 @Getter
 @Setter
 public class S3PresignedResponse {
-      private String key;
-      private String filename;
+      private String fileKey;
       private String presignedUploadUrl;
 }

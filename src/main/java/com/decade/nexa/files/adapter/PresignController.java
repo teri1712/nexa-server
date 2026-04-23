@@ -1,15 +1,16 @@
 package com.decade.nexa.files.adapter;
 
 import com.decade.nexa.files.application.PresignedUrlService;
-import com.decade.nexa.files.domain.FileIntegrityException;
-import com.decade.nexa.files.dto.CompleteUploadRequest;
 import com.decade.nexa.files.dto.S3PresignedResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ProblemDetail;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
@@ -17,25 +18,13 @@ import org.springframework.web.bind.annotation.*;
 @AllArgsConstructor
 public class PresignController {
 
-      @ExceptionHandler(FileIntegrityException.class)
-      @ResponseStatus(value = HttpStatus.UNPROCESSABLE_CONTENT)
-      public ProblemDetail handleFileIntegrityException(FileIntegrityException ex) {
-            log.warn("File integrity violation", ex);
-            ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);
-            pd.setTitle("File integrity violation");
-            return pd;
-      }
-
       private final PresignedUrlService service;
 
       @PostMapping("/upload")
+      @Operation(summary = "Generate presigned url for uploading file")
+      @SecurityRequirement(name = "bearerAuth")
       public S3PresignedResponse uploadUrl(@RequestParam String filename) {
             String user = SecurityContextHolder.getContextHolderStrategy().getContext().getAuthentication().getName();
             return service.generateUploadUrl(filename, user);
-      }
-
-      @PostMapping(value = "/finish", produces = "text/html")
-      public String finishUpload(@RequestBody CompleteUploadRequest request) {
-            return service.finishUpload(request);
       }
 }

@@ -3,7 +3,7 @@ package com.decade.nexa.users.domain;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class NeedAParentAdminException extends RuntimeException {
+public class NeedAParentAdminException extends Exception {
       private final String username;
 
       @Override

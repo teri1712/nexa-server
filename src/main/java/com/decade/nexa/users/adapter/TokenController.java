@@ -1,16 +1,21 @@
 package com.decade.nexa.users.adapter;
 
-import com.decade.nexa.users.application.ports.in.TokenSessionService;
+import com.decade.nexa.users.application.ports.in.SessionService;
+import com.decade.nexa.users.domain.ExpiredTokenException;
 import com.decade.nexa.users.dto.AccessToken;
 import com.decade.nexa.users.dto.AccountResponse;
-import com.decade.nexa.web.security.TokenUtils;
-import jakarta.servlet.http.HttpServletRequest;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
+import org.springframework.web.bind.annotation.*;
+
+import static com.decade.nexa.web.security.TokenUtils.REFRESH_PARAM;
 
 @Slf4j
 @RestController
@@ -18,16 +23,37 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/tokens")
 public class TokenController {
 
-      private final TokenSessionService tokenSessionService;
+      private final SessionService sessionService;
+
+      @ExceptionHandler(ExpiredTokenException.class)
+      @ResponseStatus(HttpStatus.UNAUTHORIZED)
+      ProblemDetail handleExpiredTokenException(ExpiredTokenException ex) {
+            log.debug("Expired token", ex);
+            ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.UNAUTHORIZED);
+            pd.setTitle("Token validation");
+            pd.setDetail("Expired token");
+            return pd;
+      }
 
       @PostMapping("/refresh")
-      public AccountResponse refresh(HttpServletRequest request) {
-            String refreshToken = TokenUtils.extractRefreshToken(request);
-            if (refreshToken == null) {
-                  throw new AccessDeniedException("No refresh token provided in the request");
-            }
-
-            String accessToken = tokenSessionService.refresh(refreshToken);
+      @Operation(summary = "Refresh new access token", responses = {
+                @ApiResponse(responseCode = "200", description = "New access token is generated"),
+                @ApiResponse(responseCode = "401", description = "Expired token", content = @Content(
+                          mediaType = "application/problem+json",
+                          schema = @Schema(implementation = ProblemDetail.class),
+                          examples = {
+                                    @ExampleObject(value = """
+                                              {
+                                                    "title": "Token validation",
+                                                    "status": 401,
+                                                    "detail": "Expired token",
+                                                    "instance": "/tokens/refresh"
+                                              }
+                                              """)
+                          }))
+      })
+      AccountResponse refresh(@RequestParam(REFRESH_PARAM) String refreshToken) throws ExpiredTokenException {
+            String accessToken = sessionService.refresh(refreshToken);
             return new AccountResponse(null, new AccessToken(accessToken, refreshToken));
       }
 }

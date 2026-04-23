@@ -1,34 +1,19 @@
 package com.decade.nexa.bdd.config;
 
+import com.decade.nexa.common.DataCleanUp;
 import io.cucumber.java.Before;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.jdbc.core.JdbcTemplate;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequiredArgsConstructor
 public class IsolationConfig {
-
-      private final JdbcTemplate jdbcTemplate;
-      private final StringRedisTemplate redisTemplate;
-      private final S3Client s3Client;
-      private @Value("${aws.s3.bucket}") String bucket;
+      
+      private final DataCleanUp data;
 
       @Before
-      public void setUpBucket() {
-            s3Client.createBucket(CreateBucketRequest.builder()
-                      .bucket(bucket)
-                      .build());
+      public void cleanUpDocs() {
+            data.clean();
       }
 
-      @Value("${super.admin.username}")
-      private String superAdmin;
-
-      @Before
-      public void cleanUp() {
-            jdbcTemplate.execute("delete from user_member where username != '" + superAdmin + "'");
-            redisTemplate.getConnectionFactory().getConnection().serverCommands().flushAll();
-      }
 }

@@ -95,4 +95,5 @@ public class ProfileSteps {
             assertThat(response.jsonPath().getString("name")).isEqualTo(name);
             assertThat(response.jsonPath().getString("gender")).isEqualTo(gender);
       }
+
 }

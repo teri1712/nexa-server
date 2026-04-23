@@ -10,7 +10,7 @@ public class UserPasswordPolicy {
 
       private final PasswordEncoder passwordEncoder;
 
-      public void change(User user, String oldPassword, String newPassword) {
+      public void change(User user, String oldPassword, String newPassword) throws WrongPasswordException {
             if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
                   throw new WrongPasswordException();
             }

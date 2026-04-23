@@ -1,7 +1,7 @@
 services:
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.2
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.0
     environment:
       discovery.type: single-node
       ES_JAVA_OPTS: "-Xms512m -Xmx512m"
@@ -9,7 +9,7 @@ services:
       network.host: 0.0.0.0
     ports:
       - "9200:9200"
-    cpu_percent: 20
+    cpus: 2
     mem_limit: 2g
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1" ]
@@ -58,13 +58,29 @@ services:
       SERVICES: s3
       AWS_DEFAULT_REGION: ap-southeast-1
     volumes:
-      - s3-data:/var/lib/localstack
       - /var/run/docker.sock:/var/run/docker.sock
       - ./s3/init:/etc/localstack/init/ready.d
     cpus: 0.5
     cpu_count: 3
     mem_limit: 500m
 
+  #  es-init:
+  #    build:
+  #      context: ./es
+  #    depends_on:
+  #      elasticsearch:
+  #        condition: service_healthy
+  ollama:
+    image: ollama/ollama:0.6.2
+    ports:
+      - "11434:11434"
+    volumes:
+      - /opt/.ollama:/root/.ollama
+    healthcheck:
+      test: [ "CMD", "ollama", "list" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 volumes:
   redis-data:
   postgres-data:

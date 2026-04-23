@@ -31,7 +31,6 @@ public class LoginFailedStrategy implements AuthenticationFailureHandler {
             ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.UNAUTHORIZED);
             problem.setTitle("Authentication Failed");
             problem.setDetail(message);
-            problem.setProperty("error", "AUTHENTICATION_FAILED");
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             response.setContentType("application/problem+json;charset=UTF-8");
 
