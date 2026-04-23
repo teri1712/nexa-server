@@ -84,7 +84,7 @@ public class DocumentController {
     DocumentResponse find(@PathVariable String id) {
         return docService.find(id);
     }
-
+    
     @Operation(description = "Search documents", responses = {
         @ApiResponse(responseCode = "200", description = "The documents"),
         @ApiResponse(responseCode = "400", description = "Validation failure", content = @Content(

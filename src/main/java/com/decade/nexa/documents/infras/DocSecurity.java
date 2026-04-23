@@ -18,34 +18,34 @@ import org.springframework.security.web.context.RequestAttributeSecurityContextR
 @Configuration
 public class DocSecurity {
 
-      @Bean
-      public SecurityFilterChain docsFilterChain(
-                HttpSecurity http,
-                JwtService jwtService
-      ) throws Exception {
-            http
-                      .securityMatcher("/docs/**")
-                      .requestCache(Customizer.withDefaults())
-                      .securityContext(context ->
-                                context.securityContextRepository(new RequestAttributeSecurityContextRepository())
-                      )
-                      .cors(Customizer.withDefaults())
-                      .csrf(AbstractHttpConfigurer::disable)
-                      .httpBasic(Customizer.withDefaults())
-                      .exceptionHandling(exceptionHandling ->
-                                exceptionHandling.accessDeniedPage(null)
-                                          .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
-                      )
-                      .addFilterAfter(new JwtTokenFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
-                      .authorizeHttpRequests(authorize ->
-                                authorize
-                                          .requestMatchers(HttpMethod.POST, "/docs").hasRole("ADMIN")
-                                          .anyRequest().authenticated()
-                      )
-                      .sessionManagement(session ->
-                                session
-                                          .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                      );
-            return http.build();
-      }
+    @Bean
+    public SecurityFilterChain docsFilterChain(
+        HttpSecurity http,
+        JwtService jwtService
+    ) throws Exception {
+        http
+            .securityMatcher("/docs/**")
+            .requestCache(Customizer.withDefaults())
+            .securityContext(context ->
+                context.securityContextRepository(new RequestAttributeSecurityContextRepository())
+            )
+            .cors(Customizer.withDefaults())
+            .csrf(AbstractHttpConfigurer::disable)
+            .httpBasic(Customizer.withDefaults())
+            .exceptionHandling(exceptionHandling ->
+                exceptionHandling.accessDeniedPage(null)
+                    .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+            )
+            .addFilterAfter(new JwtTokenFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
+            .authorizeHttpRequests(authorize ->
+                authorize
+                    .requestMatchers(HttpMethod.POST, "/docs").hasRole("ADMIN")
+                    .anyRequest().authenticated()
+            )
+            .sessionManagement(session ->
+                session
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            );
+        return http.build();
+    }
 }

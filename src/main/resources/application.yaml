@@ -89,8 +89,15 @@ management:
       probes:
         enabled: true
       show-details: ALWAYS
-
-
+  metrics:
+    tags:
+      application: ${spring.application.name}
+  tracing:
+    sampling:
+      probability: 1.0
+  otlp:
+    tracing:
+      endpoint: http://localhost:4318/v1/traces
 actuator:
   user:
     name: admin
@@ -119,3 +126,7 @@ aws:
 springdoc:
   override-with-generic-response: false
 
+logging:
+  level:
+    root: INFO
+    com.decade.nexa: DEBUG

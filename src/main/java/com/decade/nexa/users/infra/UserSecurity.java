@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.ProviderManager;
@@ -41,107 +42,108 @@ import static com.decade.nexa.users.infra.ODIC.OIDC_HEADER;
 @Configuration
 public class UserSecurity extends GlobalAuthenticationConfigurerAdapter {
 
-      @Value("${frontend.host.address}")
-      private String frontEndAddress;
+    @Value("${frontend.host.address}")
+    private String frontEndAddress;
 
 
-      @Configuration(proxyBeanMethods = false)
-      public static class ShowUserNotFoundConfiguration implements BeanPostProcessor {
-            // TODO: Will be removed latter
-            @Override
-            public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-                  if (bean instanceof ProviderManager) {
-                        ProviderManager providerManager = (ProviderManager) bean;
-                        for (var authProvider : providerManager.getProviders()) {
-                              if (authProvider instanceof AbstractUserDetailsAuthenticationProvider) {
-                                    ((AbstractUserDetailsAuthenticationProvider) authProvider).setHideUserNotFoundExceptions(false);
-                              }
-                        }
-                  }
-                  return bean;
+    @Configuration(proxyBeanMethods = false)
+    public static class ShowUserNotFoundConfiguration implements BeanPostProcessor {
+        // TODO: Will be removed latter
+        @Override
+        public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+            if (bean instanceof ProviderManager) {
+                ProviderManager providerManager = (ProviderManager) bean;
+                for (var authProvider : providerManager.getProviders()) {
+                    if (authProvider instanceof AbstractUserDetailsAuthenticationProvider) {
+                        ((AbstractUserDetailsAuthenticationProvider) authProvider).setHideUserNotFoundExceptions(false);
+                    }
+                }
             }
-      }
+            return bean;
+        }
+    }
 
-      @Override
-      public void configure(AuthenticationManagerBuilder auth) {
-            auth.eraseCredentials(false);
-      }
+    @Override
+    public void configure(AuthenticationManagerBuilder auth) {
+        auth.eraseCredentials(false);
+    }
 
-      @Bean
-      public PasswordEncoder passwordEncoder() {
-            return new BCryptPasswordEncoder(10);
-      }
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder(10);
+    }
 
 
-      @Bean
-      public SecurityContextRepository contextRepository() {
-            return new RequestAttributeSecurityContextRepository();
-      }
+    @Bean
+    public SecurityContextRepository contextRepository() {
+        return new RequestAttributeSecurityContextRepository();
+    }
 
-      @Bean
-      public UrlBasedCorsConfigurationSource corsConfigurationSource() {
-            CorsConfiguration config = new CorsConfiguration();
-            config.setAllowedOrigins(List.of(frontEndAddress));
-            config.setAllowedMethods(List.of("*"));
-            config.setAllowedHeaders(List.of("*"));
-            config.setAllowCredentials(true);
-            config.setMaxAge(3600L);
+    @Bean
+    public UrlBasedCorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of(frontEndAddress));
+        config.setAllowedMethods(List.of("*"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(true);
+        config.setMaxAge(3600L);
 
-            UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-            source.registerCorsConfiguration("/**", config);
-            return source;
-      }
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
 
-      @Bean
-      public SecurityFilterChain userFilterChain(
-                HttpSecurity http,
-                LoginSuccessStrategy successStrategy,
-                LoginFailedStrategy failedStrategy,
-                LogoutStrategy logoutHandler,
-                JwtService jwtService
-      ) throws Exception {
-            http
-                      .requestCache(Customizer.withDefaults())
-                      .securityContext(context ->
-                                context.securityContextRepository(contextRepository())
-                      )
-                      .cors(Customizer.withDefaults())
-                      .csrf(AbstractHttpConfigurer::disable)
-                      .formLogin(login ->
-                                login.successHandler(successStrategy)
-                                          .failureHandler(failedStrategy)
-                                          .loginPage("/login")
-                                          .permitAll()
-                      )
-                      .httpBasic(Customizer.withDefaults())
-                      .exceptionHandling(exceptionHandling ->
-                                exceptionHandling.accessDeniedPage(null)
-                                          .authenticationEntryPoint(new EntryPointStrategy())
-                      )
-                      .logout(logout ->
-                                logout.logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler(HttpStatus.OK))
-                                          .addLogoutHandler(logoutHandler)
-                                          .permitAll()
-                      )
-                      .addFilterAfter(new JwtTokenFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
-                      .authorizeHttpRequests(authorize ->
-                                authorize
-                                          .requestMatchers(HttpMethod.POST, "/login").permitAll()
-                                          .requestMatchers("/tokens").permitAll()
-                                          .requestMatchers("/user-login").permitAll()
-                                          .requestMatchers("/profiles/me/**").authenticated()
-                                          .requestMatchers("/profiles/me/password").hasRole("ADMIN")
-                                          .requestMatchers("/admins/**").hasRole("ADMIN")
-                                          .anyRequest().authenticated()
-                      )
-                      .oauth2ResourceServer(oauth2 -> {
-                            oauth2.bearerTokenResolver(new HeaderBearerTokenResolver(OIDC_HEADER));
-                            oauth2.jwt(Customizer.withDefaults());
-                      })
-                      .sessionManagement(session ->
-                                session
-                                          .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                      );
-            return http.build();
-      }
+    @Bean
+    @Order
+    public SecurityFilterChain userFilterChain(
+        HttpSecurity http,
+        LoginSuccessStrategy successStrategy,
+        LoginFailedStrategy failedStrategy,
+        LogoutStrategy logoutHandler,
+        JwtService jwtService
+    ) throws Exception {
+        http
+            .requestCache(Customizer.withDefaults())
+            .securityContext(context ->
+                context.securityContextRepository(contextRepository())
+            )
+            .cors(Customizer.withDefaults())
+            .csrf(AbstractHttpConfigurer::disable)
+            .formLogin(login ->
+                login.successHandler(successStrategy)
+                    .failureHandler(failedStrategy)
+                    .loginPage("/login")
+                    .permitAll()
+            )
+            .httpBasic(Customizer.withDefaults())
+            .exceptionHandling(exceptionHandling ->
+                exceptionHandling.accessDeniedPage(null)
+                    .authenticationEntryPoint(new EntryPointStrategy())
+            )
+            .logout(logout ->
+                logout.logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler(HttpStatus.OK))
+                    .addLogoutHandler(logoutHandler)
+                    .permitAll()
+            )
+            .addFilterAfter(new JwtTokenFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
+            .authorizeHttpRequests(authorize ->
+                authorize
+                    .requestMatchers(HttpMethod.POST, "/login").permitAll()
+                    .requestMatchers("/tokens/**").permitAll()
+                    .requestMatchers("/user-login").permitAll()
+                    .requestMatchers("/profiles/me/**").authenticated()
+                    .requestMatchers("/profiles/me/password").hasRole("ADMIN")
+                    .requestMatchers("/admins/**").hasRole("ADMIN")
+                    .anyRequest().authenticated()
+            )
+            .oauth2ResourceServer(oauth2 -> {
+                oauth2.bearerTokenResolver(new HeaderBearerTokenResolver(OIDC_HEADER));
+                oauth2.jwt(Customizer.withDefaults());
+            })
+            .sessionManagement(session ->
+                session
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            );
+        return http.build();
+    }
 }
