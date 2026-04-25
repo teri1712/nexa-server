@@ -3,3 +3,9 @@ spring:
     compose:
       enabled: true
       lifecycle-management: start_only
+
+
+jwt:
+  duration: 1m
+  refresh:
+    duration: 7d

@@ -9,27 +9,27 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class SuperAdminSeeding implements ApplicationRunner {
 
-      @Value("${super.admin.username}")
-      private String superAdminUsername;
+    @Value("${super.admin.username}")
+    private String superAdminUsername;
 
-      @Value("${super.admin.password}")
-      private String superAdminPassword;
+    @Value("${super.admin.password}")
+    private String superAdminPassword;
 
-      private final UserFactory userFactory;
-      private final AdminRepository admins;
+    private final UserFactory userFactory;
+    private final AdminRepository admins;
 
-      @Override
-      public void run(ApplicationArguments args) throws Exception {
-            if (!admins.existsByUsername(superAdminUsername)) {
-                  Admin admin = userFactory.createAdmin(superAdminUsername, superAdminPassword, "super admin", Instant.now(), 1.0f, Optional.empty());
-                  admins.save(admin);
-            }
-      }
+    @Override
+    public void run(ApplicationArguments args) throws Exception {
+        if (!admins.existsByUsername(superAdminUsername)) {
+            Admin admin = userFactory.createAdmin(superAdminUsername, superAdminPassword, "super admin", LocalDate.now(), 1.0f, Optional.empty());
+            admins.save(admin);
+        }
+    }
 }

@@ -68,8 +68,8 @@ public class DocumentController {
     })
     @PostMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
-    void add(@Valid @RequestBody CreateDocumentRequest request) throws FileIntegrityException {
-        docService.add(request);
+    DocumentResponse add(@Valid @RequestBody CreateDocumentRequest request) throws FileIntegrityException {
+        return docService.add(request);
     }
 
     @Operation(description = "Find a document by id", responses = {

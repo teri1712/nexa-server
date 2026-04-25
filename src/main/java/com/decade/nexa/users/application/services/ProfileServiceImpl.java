@@ -15,7 +15,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -25,66 +25,66 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProfileServiceImpl implements ProfileService {
 
-      private final UserFactory userFactory;
-      private final UserRepository users;
-      private final AdminRepository admins;
-      private final TokenStore tokens;
-      private final UserMapper userMapper;
+    private final UserFactory userFactory;
+    private final UserRepository users;
+    private final AdminRepository admins;
+    private final TokenStore tokens;
+    private final UserMapper userMapper;
 
-      private final UserPasswordPolicy passwordPolicy;
+    private final UserPasswordPolicy passwordPolicy;
 
 
-      @Override
-      public ProfileResponse create(SignUpRequest signUpRequest, UUID caller) throws NeedAParentAdminException, UserAlreadyExistException {
+    @Override
+    public ProfileResponse create(SignUpRequest signUpRequest, UUID caller) throws NeedAParentAdminException, UserAlreadyExistException {
 
-            String username = signUpRequest.getUsername();
-            String password = signUpRequest.getPassword();
-            String name = signUpRequest.getName();
-            Float gender = signUpRequest.getGender();
-            Instant dob = signUpRequest.getDob();
-            Optional<Admin> callerAdmin = admins.findById(caller);
+        String username = signUpRequest.getUsername();
+        String password = signUpRequest.getPassword();
+        String name = signUpRequest.getName();
+        Float gender = signUpRequest.getGender();
+        LocalDate dob = signUpRequest.getDob();
+        Optional<Admin> callerAdmin = admins.findById(caller);
 
-            if (users.findByUsername(username).isPresent()) {
-                  throw new UserAlreadyExistException(username, null);
-            }
-            Admin admin = userFactory.createAdmin(username, password, name, dob, gender, callerAdmin);
-            try {
-                  admins.saveAndFlush(admin);
-                  return userMapper.map(admin);
-            } catch (DataIntegrityViolationException ex) {
-                  throw new UserAlreadyExistException(username, ex);
-            }
-
-      }
-
-      @Override
-      public ProfileResponse changeProfile(UUID id, ProfileRequest profileRequest) {
-            Admin admin = admins.findById(id).orElseThrow();
-            if (profileRequest.getName() != null)
-                  admin.changeName(profileRequest.getName());
-            if (profileRequest.getDob() != null)
-                  admin.changeDob(profileRequest.getDob());
-            if (profileRequest.getGender() != null)
-                  admin.changeGender(profileRequest.getGender());
+        if (users.findByUsername(username).isPresent()) {
+            throw new UserAlreadyExistException(username, null);
+        }
+        Admin admin = userFactory.createAdmin(username, password, name, dob, gender, callerAdmin);
+        try {
+            admins.saveAndFlush(admin);
             return userMapper.map(admin);
-      }
+        } catch (DataIntegrityViolationException ex) {
+            throw new UserAlreadyExistException(username, ex);
+        }
+
+    }
+
+    @Override
+    public ProfileResponse changeProfile(UUID id, ProfileRequest profileRequest) {
+        Admin admin = admins.findById(id).orElseThrow();
+        if (profileRequest.getName() != null)
+            admin.changeName(profileRequest.getName());
+        if (profileRequest.getDob() != null)
+            admin.changeDob(profileRequest.getDob());
+        if (profileRequest.getGender() != null)
+            admin.changeGender(profileRequest.getGender());
+        return userMapper.map(admin);
+    }
 
 
-      @Override
-      public ProfileResponse changePassword(UUID id, String newPassword, String password) throws WrongPasswordException {
-            Admin admin = admins.findById(id).orElseThrow();
+    @Override
+    public ProfileResponse changePassword(UUID id, String newPassword, String password) throws WrongPasswordException {
+        Admin admin = admins.findById(id).orElseThrow();
 
-            passwordPolicy.change(admin, password, newPassword);
+        passwordPolicy.change(admin, password, newPassword);
 
-            users.save(admin);
-            tokens.evict(admin.getUsername());
+        users.save(admin);
+        tokens.evict(admin.getUsername());
 
-            return userMapper.map(admin);
-      }
+        return userMapper.map(admin);
+    }
 
-      @Override
-      public ProfileResponse findByUsername(String username) {
-            return users.findByUsername(username).map(userMapper::map).orElseThrow();
-      }
+    @Override
+    public ProfileResponse findByUsername(String username) {
+        return users.findByUsername(username).map(userMapper::map).orElseThrow();
+    }
 
 }

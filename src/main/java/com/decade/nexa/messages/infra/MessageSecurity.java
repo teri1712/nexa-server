@@ -1,4 +1,4 @@
-package com.decade.nexa.files.infra;
+package com.decade.nexa.messages.infra;
 
 import com.decade.nexa.web.security.jwt.JwtService;
 import com.decade.nexa.web.security.jwt.JwtTokenFilter;
@@ -15,15 +15,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.context.RequestAttributeSecurityContextRepository;
 
 @Configuration
-public class FileSecurity {
+public class MessageSecurity {
 
     @Bean
-    public SecurityFilterChain filesFilterChain(
+    public SecurityFilterChain messageFilterChain(
         HttpSecurity http,
         JwtService jwtService
     ) throws Exception {
         http
-            .securityMatcher("/files/**")
+            .securityMatcher("/messages/**", "/bot/**")
             .requestCache(Customizer.withDefaults())
             .securityContext(context ->
                 context.securityContextRepository(new RequestAttributeSecurityContextRepository())
@@ -37,8 +37,8 @@ public class FileSecurity {
             )
             .addFilterAfter(new JwtTokenFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(authorize ->
-                authorize.requestMatchers("files/upload").hasRole("ADMIN")
-                    .anyRequest().authenticated()
+                authorize.requestMatchers("/messages/**").authenticated()
+                    .requestMatchers("/bot/**").permitAll()
             )
             .sessionManagement(session ->
                 session

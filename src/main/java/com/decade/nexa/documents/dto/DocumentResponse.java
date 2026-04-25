@@ -18,6 +18,4 @@ public class DocumentResponse {
     private DocType fileType;
     private Instant createdAt;
 
-    private float score;
-
 }

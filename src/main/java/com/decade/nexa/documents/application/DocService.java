@@ -6,7 +6,7 @@ import com.decade.nexa.files.apis.FileIntegrityException;
 
 public interface DocService {
 
-    void add(CreateDocumentRequest request) throws FileIntegrityException;
+    DocumentResponse add(CreateDocumentRequest request) throws FileIntegrityException;
 
     DocumentResponse find(String id);
 }

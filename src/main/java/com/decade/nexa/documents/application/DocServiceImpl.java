@@ -78,10 +78,19 @@ public class DocServiceImpl implements SearchService, DocService {
     }
 
     @Override
-    public void add(CreateDocumentRequest request) throws FileIntegrityException {
+    public DocumentResponse add(CreateDocumentRequest request) throws FileIntegrityException {
         fileApi.getFile(request.fileKey(), request.eTag());
         Documentation documentation = new Documentation(request.fileKey(), request.filename(), request.title(), request.description(), request.type());
         docs.save(documentation);
+        return DocumentResponse.builder()
+            .id(documentation.getId())
+            .title(documentation.getTitle())
+            .filename(documentation.getFilename())
+            .fileKey(documentation.getId())
+            .description(documentation.getDescription())
+            .fileType(documentation.getContentType())
+            .createdAt(documentation.getCreatedAt())
+            .build();
     }
 
     @Override

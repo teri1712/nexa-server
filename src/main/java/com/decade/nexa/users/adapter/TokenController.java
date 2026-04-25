@@ -23,37 +23,37 @@ import static com.decade.nexa.web.security.TokenUtils.REFRESH_PARAM;
 @RequestMapping("/tokens")
 public class TokenController {
 
-      private final SessionService sessionService;
+    private final SessionService sessionService;
 
-      @ExceptionHandler(ExpiredTokenException.class)
-      @ResponseStatus(HttpStatus.UNAUTHORIZED)
-      ProblemDetail handleExpiredTokenException(ExpiredTokenException ex) {
-            log.debug("Expired token", ex);
-            ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.UNAUTHORIZED);
-            pd.setTitle("Token validation");
-            pd.setDetail("Expired token");
-            return pd;
-      }
+    @ExceptionHandler(ExpiredTokenException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    ProblemDetail handleExpiredTokenException(ExpiredTokenException ex) {
+        log.debug("Expired token", ex);
+        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.UNAUTHORIZED);
+        pd.setTitle("Token validation");
+        pd.setDetail("Expired token");
+        return pd;
+    }
 
-      @PostMapping("/refresh")
-      @Operation(summary = "Refresh new access token", responses = {
-                @ApiResponse(responseCode = "200", description = "New access token is generated"),
-                @ApiResponse(responseCode = "401", description = "Expired token", content = @Content(
-                          mediaType = "application/problem+json",
-                          schema = @Schema(implementation = ProblemDetail.class),
-                          examples = {
-                                    @ExampleObject(value = """
-                                              {
-                                                    "title": "Token validation",
-                                                    "status": 401,
-                                                    "detail": "Expired token",
-                                                    "instance": "/tokens/refresh"
-                                              }
-                                              """)
-                          }))
-      })
-      AccountResponse refresh(@RequestParam(REFRESH_PARAM) String refreshToken) throws ExpiredTokenException {
-            String accessToken = sessionService.refresh(refreshToken);
-            return new AccountResponse(null, new AccessToken(accessToken, refreshToken));
-      }
+    @PostMapping("/refresh")
+    @Operation(summary = "Refresh new access token", responses = {
+        @ApiResponse(responseCode = "200", description = "New access token is generated"),
+        @ApiResponse(responseCode = "401", description = "Expired token", content = @Content(
+            mediaType = "application/problem+json",
+            schema = @Schema(implementation = ProblemDetail.class),
+            examples = {
+                @ExampleObject(value = """
+                    {
+                          "title": "Token validation",
+                          "status": 401,
+                          "detail": "Expired token",
+                          "instance": "/tokens/refresh"
+                    }
+                    """)
+            }))
+    })
+    AccountResponse refresh(@RequestParam(REFRESH_PARAM) String refreshToken) throws ExpiredTokenException {
+        String accessToken = sessionService.refresh(refreshToken);
+        return new AccountResponse(null, new AccessToken(accessToken, refreshToken));
+    }
 }

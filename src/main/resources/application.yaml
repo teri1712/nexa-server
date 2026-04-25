@@ -115,6 +115,10 @@ actuator:
 
 jwt.secret: vcl-vcl-vcl-vcl-vcl-vcl-vcl-vcl-vcl
 
+jwt:
+  duration: 15m
+  refresh:
+    duration: 7d
 
 super:
   admin:
