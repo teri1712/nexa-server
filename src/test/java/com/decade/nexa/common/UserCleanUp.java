@@ -11,15 +11,14 @@ import java.util.Set;
 @TestComponent
 public class UserCleanUp implements DataCleanUp {
 
-      private final UserRepository users;
+    private final UserRepository users;
 
-      @Value("${super.admin.username}")
-      private String superAdmin;
+    @Value("${super.admin.username}")
+    private String superAdmin;
 
 
-      @Override
-      public void clean() {
-            users.deleteByUsernameNotIn(Set.of(superAdmin));
-
-      }
+    @Override
+    public void clean() {
+        users.deleteByUsernameNotIn(Set.of(superAdmin));
+    }
 }
