@@ -1,6 +1,6 @@
 package com.decade.nexa.integration.docs;
 
-import com.decade.nexa.documents.adapters.AiSuggestionService;
+import com.decade.nexa.documents.infras.AI;
 import com.decade.nexa.integration.BaseTestClass;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -23,12 +23,12 @@ class SuggestionTest extends BaseTestClass {
     Evaluator evaluator;
 
     @Autowired
-    AiSuggestionService ai;
+    AI ai;
 
     @Test
     void givenSqlAskingQuery_whenAISuggest_thenAISuggestionIsRelevant() {
         String query = "what are sql optimization techniques";
-        ChatResponse response = ai.suggestImmediately(new Prompt(query));
+        ChatResponse response = ai.suggest(new Prompt(query)).call().chatResponse();
         log.info("AI response: {}", response.getResult().getOutput().getText());
         EvaluationRequest request = new EvaluationRequest(
             query,

@@ -1,6 +1,7 @@
 package com.decade.nexa.documents.adapters;
 
 import com.decade.nexa.documents.application.ports.out.SuggestService;
+import com.decade.nexa.documents.infras.AI;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.messages.AbstractMessage;
 import org.springframework.ai.chat.model.Generation;
@@ -14,14 +15,14 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class AiSuggestionAdapter implements SuggestService {
-      private final AiSuggestionService ai;
+    private final AI ai;
 
-      @Override
-      public Flux<String> suggest(String query) {
-            return ai.suggest(new Prompt(query)).map(r -> Optional.ofNullable(r.getResult())
-                                .map(Generation::getOutput)
-                                .map(AbstractMessage::getText)
-                                .orElse(""))
-                      .filter(StringUtils::hasLength);
-      }
+    @Override
+    public Flux<String> suggest(String query) {
+        return ai.suggest(new Prompt(query)).stream().chatResponse().map(r -> Optional.ofNullable(r.getResult())
+                .map(Generation::getOutput)
+                .map(AbstractMessage::getText)
+                .orElse(""))
+            .filter(StringUtils::hasLength);
+    }
 }

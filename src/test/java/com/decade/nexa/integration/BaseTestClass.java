@@ -13,7 +13,7 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 @Import({ContainerConfigs.class, OIDCConfig.class, AIEvalutationConfig.class, DataCleanUpBeans.class})
 @AutoConfigureMockMvc
-class BaseTestClass {
+public abstract class BaseTestClass {
     @Autowired
     private DataCleanUp data;
 

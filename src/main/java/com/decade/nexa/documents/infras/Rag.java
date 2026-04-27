@@ -1,84 +1,75 @@
 package com.decade.nexa.documents.infras;
 
-import com.decade.nexa.documents.adapters.AiSuggestionService;
 import com.decade.nexa.documents.application.ports.out.Ingestor;
 import com.decade.nexa.documents.domain.DocType;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
-import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.document.Document;
-import org.springframework.ai.model.transformer.KeywordMetadataEnricher;
-import org.springframework.ai.reader.pdf.PagePdfDocumentReader;
-import org.springframework.ai.reader.tika.TikaDocumentReader;
-import org.springframework.ai.transformer.splitter.TokenTextSplitter;
-import org.springframework.ai.vectorstore.SearchRequest;
-import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.core.io.Resource;
+import org.springframework.ai.rag.Query;
+import org.springframework.ai.rag.advisor.RetrievalAugmentationAdvisor;
+import org.springframework.ai.rag.retrieval.search.DocumentRetriever;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Flux;
 
 import java.util.List;
-import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 @Component
-public class Rag implements Ingestor, AiSuggestionService {
+public class Rag implements AI, Ingestor, InitializingBean {
 
-    private final VectorStore vectorStore;
-    private final ChatModel chatModel;
-    private final ChatClient chatClient;
+    private final List<PictureRetriever> retrievers;
+    private final List<PictureBuilder> pictureBuilders;
+    private final ChatClient.Builder builder;
+    private ChatClient chatClient;
 
-    public Rag(VectorStore vectorStore, ChatModel chatModel, ChatClient.Builder builder) {
-        this.vectorStore = vectorStore;
-        this.chatModel = chatModel;
+    @Override
+    public void ingest(DocType docType, List<Document> documents) {
+        pictureBuilders.forEach(new Consumer<PictureBuilder>() {
+            @Override
+            public void accept(PictureBuilder pictureBuilder) {
+                pictureBuilder.build(documents);
+            }
+        });
+    }
+
+    protected Rag(List<PictureRetriever> retrievers, List<PictureBuilder> pictureBuilders, ChatClient.Builder builder) {
+        this.retrievers = retrievers;
+        this.pictureBuilders = pictureBuilders;
+        this.builder = builder;
+    }
+
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
         this.chatClient = builder
-            .defaultAdvisors(QuestionAnswerAdvisor.builder(vectorStore)
-                .searchRequest(SearchRequest.builder()
-                    .topK(5)
-                    .similarityThreshold(0.7)
-                    .build())
+            .defaultAdvisors(RetrievalAugmentationAdvisor.builder()
+                .documentRetriever(new DocumentRetriever() {
+                    @Override
+                    public List<Document> retrieve(Query query) {
+                        return retrievers.stream().flatMap(new Function<PictureRetriever, Stream<Picture>>() {
+                                @Override
+                                public Stream<Picture> apply(PictureRetriever pictureRetriever) {
+                                    return pictureRetriever.retrieve(query).stream();
+                                }
+                            })
+                            .map(new Function<Picture, Document>() {
+
+                                @Override
+                                public Document apply(Picture picture) {
+                                    return Document.builder().text(picture.getDescription()).build();
+                                }
+                            })
+                            .toList();
+                    }
+                })
                 .build())
             .build();
     }
 
-    private TokenTextSplitter splitter() {
-        return TokenTextSplitter.builder()
-            .withChunkSize(800)
-            .withMinChunkSizeChars(200)
-            .withMinChunkLengthToEmbed(5)
-            .withMaxNumChunks(5000)
-            .withKeepSeparator(true)
-            .build();
-    }
-
-    private KeywordMetadataEnricher enricher() {
-        return new KeywordMetadataEnricher(chatModel, 5);
-    }
-
-    private List<Document> read(DocType type, Resource resource) {
-        if (Objects.requireNonNull(type) == DocType.PDF) {
-            return new PagePdfDocumentReader(resource).read();
-        }
-        return new TikaDocumentReader(resource).read();
-    }
-
     @Override
-    public void ingest(DocType docType, Resource file) {
-        List<Document> documents = read(docType, file);
-        documents = splitter()
-//                      .andThen(enricher())
-            .apply(documents);
-        vectorStore.add(documents);
-    }
-
-    @Override
-    public Flux<ChatResponse> suggest(Prompt prompt) {
-        return chatClient.prompt(prompt).stream().chatResponse();
-    }
-
-    @Override
-    public ChatResponse suggestImmediately(Prompt prompt) {
-        return chatClient.prompt(prompt).call().chatResponse();
+    public ChatClient.ChatClientRequestSpec suggest(Prompt prompt) {
+        return chatClient.prompt(prompt);
     }
 }
