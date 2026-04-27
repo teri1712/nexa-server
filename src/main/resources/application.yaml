@@ -78,6 +78,11 @@ spring:
             initialize-schema: always
     model:
       chat: google-genai
+  neo4j:
+    uri: bolt://localhost:7687
+    authentication:
+      username: neo4j
+      password: decade1234
 server:
   port: 8080
 
@@ -142,3 +147,4 @@ logging:
   level:
     root: INFO
     com.decade.nexa: DEBUG
+

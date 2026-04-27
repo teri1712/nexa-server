@@ -130,6 +130,27 @@ services:
       - prometheus
       - loki
       - tempo
+  neo4j:
+    image: neo4j:5.15.0
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j-data:/data
+    environment:
+      - NEO4J_AUTH=neo4j/decade1234
+      - NEO4J_PLUGINS=["graph-data-science", "apoc"]
+      - NEO4J_dbms_security_procedures_unrestricted=gds.*,apoc.*
+      - NEO4J_dbms_security_procedures_allowlist=gds.*,apoc.*
+      - NEO4J_server_memory_heap_initial__size=1G
+      - NEO4J_server_memory_heap_max__size=2G
+      - NEO4J_server_memory_pagecache_size=1G
+
+    healthcheck:
+      test: [ "CMD-SHELL", "wget --no-proxy --quiet --tries=1 --spider http://localhost:7474 || exit 1" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
 volumes:
   redis-data:
   postgres-data:
@@ -137,3 +158,4 @@ volumes:
   prometheus-data:
   grafana-data:
   tempo-data:
+  neo4j-data:

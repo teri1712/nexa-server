@@ -8,6 +8,7 @@ import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.test.context.DynamicPropertyRegistrar;
 import org.testcontainers.containers.BindMode;
+import org.testcontainers.containers.Neo4jContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
@@ -76,6 +77,18 @@ public class ContainerConfigs {
             registry.add("aws.s3.access.secret", localStack::getSecretKey);
             registry.add("aws.s3.region", localStack::getRegion);
         };
+    }
+
+    @Bean
+    @ServiceConnection
+    Neo4jContainer<?> neo4jContainer() {
+        return new Neo4jContainer<>("neo4j:4.4")
+            .withLabsPlugins("graph-data-science", "apoc")
+            .withNeo4jConfig("dbms.security.procedures.unrestricted", "gds.*,apoc.*")
+            .withNeo4jConfig("dbms.security.procedures.allowlist", "gds.*,apoc.*")
+            .withNeo4jConfig("server.memory.heap.initial_size", "1G")
+            .withNeo4jConfig("server.memory.heap.max_size", "2G")
+            .withNeo4jConfig("server.memory.pagecache.size", "1G");
     }
 
 }
