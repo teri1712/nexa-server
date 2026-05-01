@@ -11,11 +11,13 @@ import org.springframework.ai.reader.pdf.PagePdfDocumentReader;
 import org.springframework.ai.reader.tika.TikaDocumentReader;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 import org.springframework.core.io.Resource;
-import org.springframework.modulith.events.ApplicationModuleListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -41,12 +43,16 @@ public class IngestionManagement {
         return new TikaDocumentReader(resource).read();
     }
 
-    @ApplicationModuleListener
-    void on(DocCreated docCreated) {
+    @Async
+    @TransactionalEventListener(id = "ingest-management")
+    CompletableFuture<Void> on(DocCreated docCreated) {
         Resource file = fileApi.getResource(docCreated.id());
         List<Document> documents = read(docCreated.contentType(), file);
         val proccessed = splitter()
             .apply(documents);
-        ingestors.forEach(i -> i.ingest(docCreated.contentType(), proccessed));
+        return CompletableFuture.allOf(ingestors.stream()
+            .map(ingestor ->
+                ingestor.ingest(docCreated.contentType(), proccessed))
+            .toArray(CompletableFuture[]::new));
     }
 }

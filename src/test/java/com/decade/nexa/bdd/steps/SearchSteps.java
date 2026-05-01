@@ -92,11 +92,11 @@ public class SearchSteps {
     @Then("AI suggest some information")
     public void aiSuggestSomeInformation() {
         String body = suggestContext.then()
-            .contentType("text/plain")
             .statusCode(200)
+            .contentType("text/plain")
             .body(not(emptyString()))
             .extract().asString();
-        ;
+        
         log.info("Suggested: {}", body);
     }
 

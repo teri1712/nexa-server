@@ -7,14 +7,16 @@ import org.springframework.ai.rag.retrieval.search.DocumentRetriever;
 import org.springframework.ai.rag.retrieval.search.VectorStoreDocumentRetriever;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 @Component
 @RequiredArgsConstructor
-public class JustRag implements PictureRetriever, InitializingBean {
+public class JustRag implements PictureRetriever, PictureBuilder, InitializingBean {
 
     private final VectorStore vectorStore;
     private DocumentRetriever documentRetriever;
@@ -40,5 +42,12 @@ public class JustRag implements PictureRetriever, InitializingBean {
             .topK(5)
             .similarityThreshold(0.7)
             .build();
+    }
+
+    @Override
+    @Async
+    public CompletableFuture<Void> build(List<Document> docs) {
+        vectorStore.write(docs);
+        return CompletableFuture.completedFuture(null);
     }
 }

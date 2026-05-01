@@ -1,5 +1,6 @@
 package com.decade.nexa.users.application.services;
 
+import com.decade.nexa.common.security.UserClaims;
 import com.decade.nexa.users.application.ports.in.SessionService;
 import com.decade.nexa.users.application.ports.out.TokenGenerator;
 import com.decade.nexa.users.application.ports.out.TokenStore;
@@ -12,7 +13,6 @@ import com.decade.nexa.users.dto.AccessToken;
 import com.decade.nexa.users.dto.AccountResponse;
 import com.decade.nexa.users.dto.ProfileResponse;
 import com.decade.nexa.users.dto.mapper.UserMapper;
-import com.decade.nexa.web.security.UserClaims;
 import io.jsonwebtoken.JwtException;
 import lombok.AllArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
@@ -90,7 +90,7 @@ public class SessionServiceImpl implements SessionService {
         if (user.isEmpty()) {
             String password = UUID.randomUUID().toString();
             Float gender = new Random().nextFloat();
-            LocalDate dob = LocalDate.now();
+            LocalDate dob = LocalDate.now().minusDays(1);
             User uwu = userFactory.createUser(username, password, name, dob, gender);
             try {
                 users.saveAndFlush(uwu);

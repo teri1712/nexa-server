@@ -11,25 +11,30 @@
         </encoder>
     </appender>
 
+    <springProfile name="!test">
 
-    <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
-        <http>
-            <url>http://localhost:3100/loki/api/v1/push</url>
-        </http>
-        <format>
-            <label>
-                <pattern>app=${APP_NAME},host=${HOSTNAME}</pattern>
-            </label>
-            <message>
-                <pattern>traceId=%X{traceId} spanId=%X{spanId} %d{HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>
-            </message>
-        </format>
-    </appender>
+        <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
+            <http>
+                <url>http://localhost:3100/loki/api/v1/push</url>
+            </http>
+            <format>
+                <label>
+                    <pattern>app=${APP_NAME},host=${HOSTNAME}</pattern>
+                </label>
+                <message>
+                    <pattern>traceId=%X{traceId} spanId=%X{spanId} %d{HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>
+                </message>
+            </format>
+        </appender>
+
+        <root>
+            <appender-ref ref="LOKI"/>
+        </root>
+    </springProfile>
 
     <!-- Root logger -->
     <root>
         <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="LOKI"/>
     </root>
 
 </configuration>

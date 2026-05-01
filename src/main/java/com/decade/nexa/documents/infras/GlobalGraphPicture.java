@@ -4,6 +4,7 @@ import com.decade.nexa.documents.application.ports.out.NexaObjectRepository;
 import com.decade.nexa.documents.domain.NexaObject;
 import lombok.RequiredArgsConstructor;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
+import org.jspecify.annotations.NonNull;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.rag.Query;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -38,15 +40,16 @@ public class GlobalGraphPicture implements PictureRetriever, InitializingBean {
 
     @Scheduled(cron = "0 0 2 * * *")
     @SchedulerLock(name = "global_picture_build", lockAtLeastFor = "1h", lockAtMostFor = "2h")
+    @Transactional(transactionManager = "neo4jtx")
     void bulkBuild() {
         nexaObjects.snapshotCluster();
         nexaObjects.recluster();
         List<Long> dirties = nexaObjects.dirtyOnes();
-        List<Document> documents = dirties.stream()
+        List<Document> documents = dirties.parallelStream()
             .map(communityId -> {
                 String summary = buildCommunitySummary(communityId);
                 return Document.builder()
-                    .id(communityId.toString())
+                    .id("community_" + communityId + "_summary")
                     .text(summary)
                     .metadata(Map.of("graph_info", "global_picture"))
                     .build();
@@ -57,6 +60,14 @@ public class GlobalGraphPicture implements PictureRetriever, InitializingBean {
 
     private String buildCommunitySummary(Long communityId) {
         List<NexaObject> objects = nexaObjects.findByCommunity(communityId);
+        Stream<Picture> globalPictures = getPictureStream(objects);
+        String context = String.join("\n", globalPictures.map(Picture::getDescription).toList());
+        String persona = "You are a an expert in summarzing documents. Please summarize the following text: " + context;
+
+        return client.prompt().user(persona).call().content();
+    }
+
+    private static @NonNull Stream<Picture> getPictureStream(List<NexaObject> objects) {
         Stream<Picture> objectPictures = objects.stream().map(NexaObjectPicture::new);
         Stream<Picture> rulePictures = objects.stream().flatMap(new Function<NexaObject, Stream<Picture>>() {
             @Override
@@ -64,11 +75,8 @@ public class GlobalGraphPicture implements PictureRetriever, InitializingBean {
                 return nexaObject.rules().stream().map(nexaRule -> new NexaRulePicture(nexaObject, nexaRule));
             }
         });
-        Stream<Picture> globalPictures = Stream.concat(objectPictures, rulePictures);
-        String context = String.join("\n", globalPictures.map(Picture::getDescription).toList());
-        String persona = "You are a an expert in summarzing documents. Please summarize the following text: " + context;
-
-        return client.prompt().user(persona).call().content();
+        return Stream.concat(objectPictures, rulePictures)
+            .limit(100);
     }
 
     @Override

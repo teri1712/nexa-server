@@ -2,6 +2,7 @@ package com.decade.nexa.documents.infras;
 
 import com.decade.nexa.documents.application.ports.out.Ingestor;
 import com.decade.nexa.documents.domain.DocType;
+import io.micrometer.observation.annotation.Observed;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.document.Document;
@@ -12,7 +13,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -25,13 +26,12 @@ public class Rag implements AI, Ingestor, InitializingBean {
     private ChatClient chatClient;
 
     @Override
-    public void ingest(DocType docType, List<Document> documents) {
-        pictureBuilders.forEach(new Consumer<PictureBuilder>() {
-            @Override
-            public void accept(PictureBuilder pictureBuilder) {
-                pictureBuilder.build(documents);
-            }
-        });
+    @Observed(name = "ingest.document")
+    public CompletableFuture<Void> ingest(DocType docType, List<Document> documents) {
+        return CompletableFuture.allOf(pictureBuilders
+            .stream()
+            .map(pictureBuilder ->
+                pictureBuilder.build(documents)).toArray(CompletableFuture[]::new));
     }
 
     protected Rag(List<PictureRetriever> retrievers, List<PictureBuilder> pictureBuilders, ChatClient.Builder builder) {

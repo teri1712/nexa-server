@@ -4,8 +4,7 @@ import com.redis.testcontainers.RedisContainer;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.task.SyncTaskExecutor;
-import org.springframework.core.task.TaskExecutor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.DynamicPropertyRegistrar;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.Neo4jContainer;
@@ -45,11 +44,12 @@ public class ContainerConfigs {
         )
             .withEnv("discovery.type", "single-node")
             .withEnv("xpack.security.enabled", "false")
-            .withEnv("ES_JAVA_OPTS", "-Xms512m -Xmx512m");
+            .withEnv("ES_JAVA_OPTS", "-Xms2g -Xmx2g");
     }
 
     @ServiceConnection
     @Bean
+    @Profile("ollama")
     OllamaContainer ollama() {
         return new OllamaContainer("ollama/ollama:0.6.6")
             .withFileSystemBind("/opt/.ollama", "/root/.ollama", BindMode.READ_WRITE)
@@ -61,11 +61,6 @@ public class ContainerConfigs {
     LocalStackContainer localStackContainer() {
         return new LocalStackContainer(DockerImageName.parse("localstack/localstack:3.0"))
             .withServices(LocalStackContainer.Service.S3);
-    }
-
-    @Bean
-    TaskExecutor taskExecutor() {
-        return new SyncTaskExecutor();
     }
 
 
@@ -82,13 +77,14 @@ public class ContainerConfigs {
     @Bean
     @ServiceConnection
     Neo4jContainer<?> neo4jContainer() {
-        return new Neo4jContainer<>("neo4j:4.4")
-            .withLabsPlugins("graph-data-science", "apoc")
-            .withNeo4jConfig("dbms.security.procedures.unrestricted", "gds.*,apoc.*")
-            .withNeo4jConfig("dbms.security.procedures.allowlist", "gds.*,apoc.*")
-            .withNeo4jConfig("server.memory.heap.initial_size", "1G")
-            .withNeo4jConfig("server.memory.heap.max_size", "2G")
-            .withNeo4jConfig("server.memory.pagecache.size", "1G");
+        return new Neo4jContainer<>("neo4j:5.15.0")
+            .withFileSystemBind(System.getProperty("user.home") + "/neo4j-plugins", "/plugins", BindMode.READ_WRITE)
+//            .withPlugins("graph-data-science", "apoc")
+            .withoutAuthentication()
+            .withNeo4jConfig("server.memory.heap.initial_size", "512M")
+            .withNeo4jConfig("server.memory.heap.max_size", "1G")
+            .withNeo4jConfig("server.memory.pagecache.size", "1G")
+            .withEnv("NEO4J_ACCEPT_LICENSE_AGREEMENT", "yes");
     }
 
 }

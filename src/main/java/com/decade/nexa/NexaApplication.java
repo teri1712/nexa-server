@@ -1,9 +1,9 @@
 package com.decade.nexa;
 
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.modulith.Modulith;
 
-@SpringBootApplication
+@Modulith(sharedModules = "common")
 public class NexaApplication {
 
     public static void main(String[] args) {

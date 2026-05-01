@@ -48,10 +48,10 @@ public class UserController {
     }
 
     @ExceptionHandler(UserAlreadyExistException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     ProblemDetail handle(UserAlreadyExistException ex) {
         log.debug("User already exist", ex);
-        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.CONFLICT);
+        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         pd.setTitle("Username constraint");
         pd.setDetail("User already exist");
         return pd;
@@ -69,15 +69,7 @@ public class UserController {
         responses = {
             @ApiResponse(responseCode = "201", description = "New admin is created"),
             @ApiResponse(responseCode = "403", description = "Require an admin authentication", content = @Content()),
-            @ApiResponse(responseCode = "400", description = "Validation", content = @Content(
-                mediaType = "application/problem+json",
-                schema = @Schema(implementation = ProblemDetail.class),
-                examples = {
-
-                    @ExampleObject(name = "Request validation", ref = "#/components/examples/Validation")
-                }
-            )),
-            @ApiResponse(responseCode = "409", description = "Username constraint",
+            @ApiResponse(responseCode = "400", description = "Username exist constraint or validation error",
                 content = @Content(
                     mediaType = "application/problem+json",
                     schema = @Schema(implementation = ProblemDetail.class),
@@ -85,11 +77,13 @@ public class UserController {
                         @ExampleObject(name = "User already exist", value = """
                             {
                                   "title": "Username constraint",
-                                  "status": 409,
+                                  "status": 400,
                                   "detail": "User already exist",
                                   "instance": "/admins"
                             }
-                            """)
+                            """),
+                        @ExampleObject(name = "Request validation", ref = "#/components/examples/Validation")
+
                     }
                 )),
         })

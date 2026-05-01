@@ -5,15 +5,17 @@ import io.cucumber.java.Before;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+
 @Slf4j
 @RequiredArgsConstructor
 public class IsolationConfig {
-      
-      private final DataCleanUp data;
 
-      @Before
-      public void cleanUpDocs() {
-            data.clean();
-      }
+    private final List<DataCleanUp> cleanups;
+
+    @Before
+    public void clean() {
+        cleanups.forEach(DataCleanUp::clean);
+    }
 
 }

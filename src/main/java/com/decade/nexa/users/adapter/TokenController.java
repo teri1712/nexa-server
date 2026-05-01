@@ -15,7 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.*;
 
-import static com.decade.nexa.web.security.TokenUtils.REFRESH_PARAM;
+import static com.decade.nexa.common.security.TokenUtils.REFRESH_PARAM;
 
 @Slf4j
 @RestController

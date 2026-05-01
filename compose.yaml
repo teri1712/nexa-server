@@ -137,9 +137,10 @@ services:
       - "7687:7687"
     volumes:
       - neo4j-data:/data
+      - ~/neo4j-plugins:/plugins
     environment:
       - NEO4J_AUTH=neo4j/decade1234
-      - NEO4J_PLUGINS=["graph-data-science", "apoc"]
+      #      - NEO4J_PLUGINS=["graph-data-science", "apoc"]
       - NEO4J_dbms_security_procedures_unrestricted=gds.*,apoc.*
       - NEO4J_dbms_security_procedures_allowlist=gds.*,apoc.*
       - NEO4J_server_memory_heap_initial__size=1G

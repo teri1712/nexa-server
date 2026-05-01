@@ -4,7 +4,8 @@ import com.decade.nexa.documents.domain.DocType;
 import org.springframework.ai.document.Document;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public interface Ingestor {
-    void ingest(DocType docType, List<Document> documents);
+    CompletableFuture<Void> ingest(DocType docType, List<Document> documents);
 }

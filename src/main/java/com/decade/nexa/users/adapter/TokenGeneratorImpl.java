@@ -1,9 +1,9 @@
 package com.decade.nexa.users.adapter;
 
+import com.decade.nexa.common.security.TokenService;
+import com.decade.nexa.common.security.UserClaims;
 import com.decade.nexa.users.application.ports.out.TokenGenerator;
 import com.decade.nexa.users.dto.AccessToken;
-import com.decade.nexa.web.security.TokenService;
-import com.decade.nexa.web.security.UserClaims;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

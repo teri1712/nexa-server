@@ -51,18 +51,6 @@ spring:
   elasticsearch:
     uris: http://localhost:9200
   ai:
-    google:
-      genai:
-        embedding:
-          text:
-            options:
-              model: gemini-embedding-001
-              dimensions: 768
-          project-id: ${GEMINI_PROJECT_ID}
-          api-key: ${GEMINI_API_KEY}
-
-        project-id: ${GEMINI_PROJECT_ID}
-        api-key: ${GEMINI_API_KEY}
     vectorstore:
       elasticsearch:
         dimensions: 768
@@ -76,13 +64,25 @@ spring:
         repository:
           jdbc:
             initialize-schema: always
-    model:
-      chat: google-genai
+    google:
+      genai:
+        embedding:
+          project-id: ${GEMINI_PROJECT_ID}
+          api-key: ${GEMINI_API_KEY}
+
+        project-id: ${GEMINI_PROJECT_ID}
+        api-key: ${GEMINI_API_KEY}
+
   neo4j:
     uri: bolt://localhost:7687
     authentication:
       username: neo4j
       password: decade1234
+  threads:
+    virtual:
+      enabled: true
+  aop:
+    proxy-target-class: true
 server:
   port: 8080
 
@@ -131,7 +131,6 @@ super:
     password: vclvclvclvcl
 
 
-
 aws:
   s3:
     region: ap-southeast-1
@@ -147,4 +146,3 @@ logging:
   level:
     root: INFO
     com.decade.nexa: DEBUG
-

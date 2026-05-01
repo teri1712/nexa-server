@@ -1,11 +1,11 @@
 package com.decade.nexa.users.infra;
 
+import com.decade.nexa.common.security.jwt.JwtService;
+import com.decade.nexa.common.security.jwt.JwtTokenFilter;
 import com.decade.nexa.users.adapter.security.strategies.EntryPointStrategy;
 import com.decade.nexa.users.adapter.security.strategies.LoginFailedStrategy;
 import com.decade.nexa.users.adapter.security.strategies.LoginSuccessStrategy;
 import com.decade.nexa.users.adapter.security.strategies.LogoutStrategy;
-import com.decade.nexa.web.security.jwt.JwtService;
-import com.decade.nexa.web.security.jwt.JwtTokenFilter;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;

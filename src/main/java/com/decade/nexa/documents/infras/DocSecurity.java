@@ -1,7 +1,7 @@
 package com.decade.nexa.documents.infras;
 
-import com.decade.nexa.web.security.jwt.JwtService;
-import com.decade.nexa.web.security.jwt.JwtTokenFilter;
+import com.decade.nexa.common.security.jwt.JwtService;
+import com.decade.nexa.common.security.jwt.JwtTokenFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;

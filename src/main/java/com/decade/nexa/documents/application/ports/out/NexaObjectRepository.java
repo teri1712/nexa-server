@@ -1,13 +1,16 @@
 package com.decade.nexa.documents.application.ports.out;
 
 import com.decade.nexa.documents.domain.NexaObject;
+import io.micrometer.observation.annotation.Observed;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
-public interface NexaObjectRepository extends Neo4jRepository<NexaObject, Long> {
+public interface NexaObjectRepository extends Neo4jRepository<NexaObject, String> {
     List<NexaObject> findByNameIsIn(Collection<String> names);
 
     @Query("""
@@ -19,17 +22,40 @@ public interface NexaObjectRepository extends Neo4jRepository<NexaObject, Long> 
     void upsertRule(String sourceName, String targetName, String ruleText, String description);
 
     @Query("""
-        MERGE (src:nexa_object {name: $sourceName, description: $description})
+         MERGE (src:nexa_object {name: $name})
+         ON CREATE SET src.description = $description
+         ON MATCH SET src.description = $description
         """)
     void upsertNode(String name, String description);
 
+    @Query("""
+         UNWIND $rows as row
+         MERGE (src:nexa_object {name: row.name})
+         ON CREATE SET src.description = row.description
+         ON MATCH SET src.description = src.description + ". " + row.description
+        """)
+    void upsertNodes(@Param("rows") List<Map<String, String>> rows);
 
+
+    @Query("""
+        UNWIND $rules as rule
+        MERGE (src:nexa_object {name: rule.sourceName})
+        MERGE (tgt:nexa_object {name: rule.targetName})
+        MERGE (src)-[rel:HAS_RULE_TO {rule: rule.ruleText}]->(tgt)
+        ON CREATE SET rel.description = rule.description
+        ON MATCH SET rel.description = coalesce(rel.description, '') + ". " + coalesce(rule.description, '')
+        """)
+    void upsertRules(@Param("rules") List<Map<String, String>> rules);
+
+
+    @Observed(name = "snapshot.community")
     @Query("""
         MATCH (o: nexa_object)
         SET o.last_community = o.community
         """)
     void snapshotCluster();
 
+    @Observed(name = "recluster.community")
     @Query("""
         CALL gds.graph.project('ragCommunity', 'nexa_object', 'HAS_RULE_TO') YIELD graphName
         CALL gds.leiden.write('ragCommunity', { writeProperty: 'community' }) YIELD communityCount
