@@ -14,6 +14,14 @@ public interface NexaObjectRepository extends Neo4jRepository<NexaObject, String
     List<NexaObject> findByNameIsIn(Collection<String> names);
 
     @Query("""
+        MATCH (n:nexa_object) WHERE n.name IN $names
+        OPTIONAL MATCH (n)-[r1:HAS_RULE_TO]->(m1:nexa_object)
+        OPTIONAL MATCH (m1)-[r2:HAS_RULE_TO]->(m2:nexa_object)
+        RETURN n, collect(r1), collect(m1), collect(r2), collect(m2)
+        """)
+    List<NexaObject> findByNameIsInWithTwoHops(@Param("names") Collection<String> names);
+
+    @Query("""
         MATCH (src:nexa_object {name: $sourceName})
         MATCH(tgt:nexa_object {name: $targetName})
         MERGE (src)-[rel:HAS_RULE_TO {rule: $ruleText}]->(tgt)

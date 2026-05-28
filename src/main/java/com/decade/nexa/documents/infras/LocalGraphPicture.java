@@ -46,7 +46,7 @@ public class LocalGraphPicture implements PictureRetriever, PictureBuilder {
                 .get("nexa_entity").toString())
             .distinct()
             .toList();
-        List<NexaObject> objects = nexaObjects.findByNameIsIn(entityNames);
+        List<NexaObject> objects = nexaObjects.findByNameIsInWithTwoHops(entityNames);
         Stream<Picture> objectPictures = objects.stream().map(NexaObjectPicture::new);
         Stream<Picture> rulePictures = objects.stream().flatMap(new Function<NexaObject, Stream<Picture>>() {
 

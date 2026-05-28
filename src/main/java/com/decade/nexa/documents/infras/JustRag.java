@@ -7,6 +7,7 @@ import org.springframework.ai.rag.retrieval.search.DocumentRetriever;
 import org.springframework.ai.rag.retrieval.search.VectorStoreDocumentRetriever;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,7 @@ import java.util.function.Function;
 
 @Component
 @RequiredArgsConstructor
+@Profile("!graph-rag")
 public class JustRag implements PictureRetriever, PictureBuilder, InitializingBean {
 
     private final VectorStore vectorStore;
