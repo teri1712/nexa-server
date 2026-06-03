@@ -485,7 +485,14 @@
         },
         "responses": {
           "202": {
-            "description": "Document added successfully"
+            "description": "Document added successfully",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentResponse"
+                }
+              }
+            }
           },
           "400": {
             "description": "Validation failure",
@@ -615,22 +622,7 @@
             "description": "Require an admin authentication"
           },
           "400": {
-            "description": "Validation",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetail"
-                },
-                "examples": {
-                  "Request validation": {
-                    "$ref": "#/components/examples/Validation"
-                  }
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Username constraint",
+            "description": "Username exist constraint or validation error",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -641,10 +633,13 @@
                     "description": "User already exist",
                     "value": {
                       "title": "Username constraint",
-                      "status": 409,
+                      "status": 400,
                       "detail": "User already exist",
                       "instance": "/admins"
                     }
+                  },
+                  "Request validation": {
+                    "$ref": "#/components/examples/Validation"
                   }
                 }
               }
@@ -716,6 +711,30 @@
             "bearerAuth": []
           }
         ]
+      }
+    },
+    "/faqs": {
+      "get": {
+        "tags": [
+          "faq-controller"
+        ],
+        "summary": "Get today FAQ list",
+        "operationId": "faqs",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FaqResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/docs/{id}": {
@@ -832,7 +851,7 @@
           },
           "dob": {
             "type": "string",
-            "format": "date-time"
+            "format": "date"
           },
           "role": {
             "type": "string"
@@ -901,6 +920,37 @@
           "title"
         ]
       },
+      "DocumentResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "fileKey": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "fileType": {
+            "type": "string",
+            "enum": [
+              "PDF",
+              "DOCX"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "SignUpRequest": {
         "type": "object",
         "properties": {
@@ -923,13 +973,14 @@
           },
           "dob": {
             "type": "string",
-            "format": "date-time"
+            "format": "date"
           },
           "avatar": {
             "type": "string"
           }
         },
         "required": [
+          "dob",
           "gender",
           "name",
           "username"
@@ -948,7 +999,7 @@
           },
           "dob": {
             "type": "string",
-            "format": "date-time"
+            "format": "date"
           }
         }
       },
@@ -968,6 +1019,14 @@
           },
           "mine": {
             "type": "boolean"
+          }
+        }
+      },
+      "FaqResponse": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string"
           }
         }
       },
@@ -1014,41 +1073,6 @@
             "format": "float"
           }
         }
-      },
-      "DocumentResponse": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "fileKey": {
-            "type": "string"
-          },
-          "filename": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "fileType": {
-            "type": "string",
-            "enum": [
-              "PDF",
-              "DOCX"
-            ]
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "score": {
-            "type": "number",
-            "format": "float"
-          }
-        }
       }
     },
     "examples": {
@@ -1056,16 +1080,16 @@
         "summary": "Validation failure",
         "value": {
           "status": 400,
-          "type": "https://example.com/errors/validation",
+          "title": "Validation failure",
           "detail": "Email is invalid",
-          "title": "Validation failure"
+          "type": "https://example.com/errors/validation"
         }
       },
       "NotFound": {
         "summary": "Resource not found",
         "value": {
-          "title": "The requested resource was not found",
-          "status": 404
+          "status": 404,
+          "title": "The requested resource was not found"
         }
       }
     },

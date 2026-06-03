@@ -3,7 +3,22 @@ spring:
     compose:
       enabled: true
       lifecycle-management: start_only
+  datasource:
+    url: jdbc:postgresql://localhost:5432/nexa
+    username: root
+    password: root
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  neo4j:
+    uri: bolt://localhost:7687
+    authentication:
+      username: neo4j
+      password: decade1234
 
+  elasticsearch:
+    uris: http://localhost:9200
 loki:
   url: http://localhost:3100/loki/api/v1/push
 
@@ -15,7 +30,7 @@ management:
 
 faq:
   sidecar:
-    url: "http://localhost:8000"
+    url: http://localhost:8000
 
 jwt:
   duration: 1m
