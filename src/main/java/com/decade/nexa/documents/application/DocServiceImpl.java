@@ -3,10 +3,12 @@ package com.decade.nexa.documents.application;
 import com.decade.nexa.documents.application.ports.in.SearchService;
 import com.decade.nexa.documents.application.ports.out.DocumentRepository;
 import com.decade.nexa.documents.domain.Documentation;
+import com.decade.nexa.documents.domain.events.UserSearched;
 import com.decade.nexa.documents.dto.*;
 import com.decade.nexa.files.apis.FileApi;
 import com.decade.nexa.files.apis.FileIntegrityException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
@@ -25,11 +27,14 @@ public class DocServiceImpl implements SearchService, DocService {
     private final ElasticsearchOperations es;
     private final FileApi fileApi;
     private final DocumentRepository docs;
+    private final ApplicationEventPublisher publisher;
 
 
     @Override
     public DocPage search(DocFilter filter) {
         String query = filter.query();
+        publisher.publishEvent(new UserSearched(filter.query()));
+
         DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
         NativeQueryBuilder buidler = NativeQuery.builder()
             .withQuery(q -> q.bool(bool ->

@@ -108,9 +108,9 @@ management:
   tracing:
     sampling:
       probability: 1.0
-  otlp:
-    tracing:
-      endpoint: http://localhost:4318/v1/traces
+  observations:
+    annotations:
+      enabled: true
 actuator:
   user:
     name: admin
@@ -146,3 +146,8 @@ logging:
   level:
     root: INFO
     com.decade.nexa: DEBUG
+
+nexa:
+  faq:
+    cron: "0 0 1 * * *"
+    poll-interval: "1m"

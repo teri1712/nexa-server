@@ -2,8 +2,8 @@ package com.decade.nexa.documents;
 
 import com.decade.nexa.common.BaseTestClass;
 import com.decade.nexa.documents.application.ports.out.NexaObjectRepository;
-import com.decade.nexa.documents.domain.DocCreated;
 import com.decade.nexa.documents.domain.DocType;
+import com.decade.nexa.documents.domain.events.DocCreated;
 import com.decade.nexa.documents.infras.Picture;
 import com.decade.nexa.documents.infras.PictureRetriever;
 import com.decade.nexa.files.apis.FileApi;

@@ -4,6 +4,18 @@ spring:
       enabled: true
       lifecycle-management: start_only
 
+loki:
+  url: http://localhost:3100/loki/api/v1/push
+
+management:
+  otlp:
+    tracing:
+      endpoint: http://localhost:4318/v1/traces
+
+
+faq:
+  sidecar:
+    url: "http://localhost:8000"
 
 jwt:
   duration: 1m

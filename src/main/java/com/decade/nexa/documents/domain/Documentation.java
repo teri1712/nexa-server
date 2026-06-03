@@ -1,5 +1,6 @@
 package com.decade.nexa.documents.domain;
 
+import com.decade.nexa.documents.domain.events.DocCreated;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;

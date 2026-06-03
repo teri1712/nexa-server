@@ -1,8 +1,8 @@
 package com.decade.nexa.documents.application;
 
 import com.decade.nexa.documents.application.ports.out.Ingestor;
-import com.decade.nexa.documents.domain.DocCreated;
 import com.decade.nexa.documents.domain.DocType;
+import com.decade.nexa.documents.domain.events.DocCreated;
 import com.decade.nexa.files.apis.FileApi;
 import lombok.RequiredArgsConstructor;
 import lombok.val;

@@ -1,15 +1,15 @@
 package com.decade.nexa.common;
 
 import com.redis.testcontainers.RedisContainer;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.DynamicPropertyRegistrar;
-import org.testcontainers.containers.BindMode;
-import org.testcontainers.containers.Neo4jContainer;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.*;
 import org.testcontainers.containers.localstack.LocalStackContainer;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testcontainers.ollama.OllamaContainer;
@@ -17,16 +17,22 @@ import org.testcontainers.utility.DockerImageName;
 
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.S3;
 
+@Slf4j
 @TestConfiguration
 public class ContainerConfigs {
+
+    Network network = Network.newNetwork();
 
     @Bean
     @ServiceConnection
     PostgreSQLContainer<?> postgres() {
         return new PostgreSQLContainer<>("postgres:16-alpine")
             .withDatabaseName("mydatabase")
+            .withExposedPorts(5432)
             .withUsername("myuser")
-            .withPassword("secret");
+            .withPassword("secret")
+            .withNetworkAliases("postgres")
+            .withNetwork(network);
     }
 
     @Bean
@@ -43,8 +49,7 @@ public class ContainerConfigs {
             "docker.elastic.co/elasticsearch/elasticsearch:8.17.0"
         )
             .withEnv("discovery.type", "single-node")
-            .withEnv("xpack.security.enabled", "false")
-            .withEnv("ES_JAVA_OPTS", "-Xms2g -Xmx2g");
+            .withEnv("xpack.security.enabled", "false");
     }
 
     @ServiceConnection
@@ -85,6 +90,29 @@ public class ContainerConfigs {
             .withNeo4jConfig("server.memory.heap.max_size", "1G")
             .withNeo4jConfig("server.memory.pagecache.size", "1G")
             .withEnv("NEO4J_ACCEPT_LICENSE_AGREEMENT", "yes");
+    }
+
+
+    @Bean
+    GenericContainer<?> faqSideCar() {
+        return new GenericContainer<>("teri1712/faq_sidecar:latest")
+            .withNetwork(network)
+            .withLogConsumer(new Slf4jLogConsumer(log))
+            .withExposedPorts(8000)
+            .withEnv("DB_USER", "myuser")
+            .withEnv("DB_PASSWORD", "secret")
+            .withEnv("DB_HOST", "postgres")
+            .withEnv("DB_PORT", "5432")
+            .withEnv("DB_NAME", "mydatabase")
+            .withEnv("NUM_CLUSTERS", "3");
+    }
+
+    @Bean
+    DynamicPropertyRegistrar faqSideCarProperties(GenericContainer<?> faqSideCar) {
+        return registry -> {
+            registry.add("faq.sidecar.url", () -> "http://localhost:" + faqSideCar.getMappedPort(8000));
+            log.info("faq.sidecar.url: {}", "http://localhost:" + faqSideCar.getMappedPort(8000));
+        };
     }
 
 }
