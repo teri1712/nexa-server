@@ -1,6 +1,9 @@
+import json
 import logging
 import os
+import uuid
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Optional
 
 import numpy as np
@@ -30,11 +33,47 @@ NUM_CLUSTERS = int(os.getenv("NUM_CLUSTERS"))
 
 DB_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
-job_status = {
-    "process_date": None,
-    "status": "IDLE",  # IDLE, RUNNING, COMPLETED, ERROR
-    "error_message": None
-}
+# Status persistence configuration
+STATUS_DIR = Path(__file__).parent / "status_records"
+STATUS_DIR.mkdir(parents=True, exist_ok=True)
+
+# Generate a unique instance ID for this process
+INSTANCE_ID = str(uuid.uuid4())[:8]
+logger.info(f"Service instance started with ID: {INSTANCE_ID}")
+
+def get_status_path(date_str: str) -> Path:
+    return STATUS_DIR / f"{date_str}.json"
+
+def save_status(date_str: str, status_data: dict):
+    # Ensure instance_id is included in the saved data
+    if "process_id" not in status_data:
+        status_data["process_id"] = INSTANCE_ID
+    with open(get_status_path(date_str), "w") as f:
+        json.dump(status_data, f)
+
+def load_status(date_str: str) -> dict:
+    path = get_status_path(date_str)
+    if path.exists():
+        try:
+            with open(path, "r") as f:
+                data = json.load(f)
+                
+                # Check for hash mismatch: if RUNNING but process_id differs, it's orphaned
+                if data.get("status") == "RUNNING" and data.get("process_id") != INSTANCE_ID:
+                    logger.warning(f"Orphaned job detected for {date_str} (ID mismatch). Marking as IN_COMPLETED.")
+                    data["status"] = "IN_COMPLETED"
+                    data["error_message"] = "Process interrupted or crashed"
+                    save_status(date_str, data)
+                
+                return data
+        except Exception as e:
+            logger.error(f"Error loading status for {date_str}: {e}")
+    return {"process_date": date_str, "status": "IDLE", "error_message": None, "process_id": None}
+
+def is_job_running_for_date(date_str: str) -> bool:
+    """Checks if a job for the specific date is currently in RUNNING state for THIS instance."""
+    status = load_status(date_str)
+    return status.get("status") == "RUNNING" and status.get("process_id") == INSTANCE_ID
 
 # Global model instance to avoid reloading
 logger.info("Loading embedding model (all-MiniLM-L6-v2)...")
@@ -42,10 +81,13 @@ model = SentenceTransformer('all-MiniLM-L6-v2')
 
 
 def perform_clustering(date_str: str):
-    global job_status
-    job_status["status"] = "RUNNING"
-    job_status["process_date"] = date_str
-    job_status["error_message"] = None
+    current_status = {
+        "process_date": date_str,
+        "status": "RUNNING",
+        "error_message": None,
+        "process_id": INSTANCE_ID
+    }
+    save_status(date_str, current_status)
 
     logger.info(f"Starting clustering for date: {date_str}")
 
@@ -69,7 +111,8 @@ def perform_clustering(date_str: str):
 
         if df_queries.empty:
             logger.info(f"No queries found since {start_date} to cluster.")
-            job_status["status"] = "COMPLETED"
+            current_status["status"] = "COMPLETED"
+            save_status(date_str, current_status)
             return
 
         raw_user_queries = df_queries['query'].tolist()
@@ -109,12 +152,14 @@ def perform_clustering(date_str: str):
                 })
 
         logger.info(f"Successfully completed clustering for {date_str}")
-        job_status["status"] = "COMPLETED"
+        current_status["status"] = "COMPLETED"
+        save_status(date_str, current_status)
 
     except Exception as e:
         logger.error(f"Error during clustering process: {e}")
-        job_status["status"] = "ERROR"
-        job_status["error_message"] = str(e)
+        current_status["status"] = "ERROR"
+        current_status["error_message"] = str(e)
+        save_status(date_str, current_status)
 
 
 @app.post("/cluster")
@@ -123,17 +168,17 @@ async def trigger_clustering(background_tasks: BackgroundTasks, date: Optional[s
     if not date:
         date = datetime.now().strftime("%Y-%m-%d")
 
-    if job_status["status"] == "RUNNING":
-        return {"status": "already_running", "date": job_status["process_date"]}
+    if is_job_running_for_date(date):
+        return {"status": "already_running", "date": date}
 
     background_tasks.add_task(perform_clustering, date)
     return {"status": "started", "date": date}
 
 
-@app.get("/status")
-def get_status():
-    """Returns the status of the last clustering job."""
-    return job_status
+@app.get("/status/{date}")
+def get_status(date: str):
+    """Returns the status of the clustering job for a specific date."""
+    return load_status(date)
 
 
 @app.get("/health")

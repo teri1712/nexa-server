@@ -139,3 +139,6 @@ nexa:
   faq:
     cron: "0 0 1 * * *"
     poll-interval: "1m"
+  graph:
+    cron: "0 0 1 * * *"
+    poll-interval: "1m"

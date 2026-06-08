@@ -1,0 +1,7 @@
+graphrag
+fastapi
+uvicorn
+pydantic
+python-dotenv
+pandas
+python-multipart

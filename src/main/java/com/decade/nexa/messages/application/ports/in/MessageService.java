@@ -8,8 +8,8 @@ import java.util.UUID;
 
 public interface MessageService {
 
-    List<MessageDto> getMessages(UUID userId, Long anchorSeq);
+    List<MessageDto> getMessages(String docId, UUID userId, Long anchorSeq);
 
-    MessagePlacedDto addMessage(UUID userId, String message);
+    MessagePlacedDto addMessage(String docId, UUID userId, String message);
 
 }

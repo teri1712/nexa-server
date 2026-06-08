@@ -61,7 +61,7 @@ public class FaqPipelineTest {
             .cluster(today);
 
         verify(publisher)
-            .publishEvent(new FaqClusteringFinished(today));
+            .publishEvent(eq(new FaqClusteringFinished(today)));
     }
 
     @Test
@@ -99,18 +99,15 @@ public class FaqPipelineTest {
             ));
         List<String> synthesizedQuestions = List.of("What is Kubernetes?", "What is a Pod in Kubernetes?", "What is a Service in Kubernetes?");
 
-        when(faqs.findByCreatedAt(eq(today)))
-            .thenReturn(todayFaqList);
+        when(faqs.findByCreatedAt(eq(today))).thenReturn(todayFaqList);
 
-        when(synthesizer.synthesize(eq(todayFaqList)))
-            .thenReturn(synthesizedQuestions);
+        when(synthesizer.synthesize(eq(todayFaqList))).thenReturn(synthesizedQuestions);
+
         faqManagement.on(new FaqClusteringFinished(today));
-        verify(faqs)
-            .findByCreatedAt(today);
-        verify(synthesizer)
-            .synthesize(todayFaqList);
-        verify(faqs)
-            .saveAll(faqsCaptor.capture());
+
+        verify(faqs).findByCreatedAt(today);
+        verify(synthesizer).synthesize(todayFaqList);
+        verify(faqs).saveAll(faqsCaptor.capture());
 
         List<FAQ> savedFaqs = faqsCaptor.getValue();
 

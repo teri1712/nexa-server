@@ -1,0 +1,28 @@
+# GraphRAG Configuration - Native Gemini Version
+encoding_model: cl100k_base
+
+
+completion_models:
+  default_completion_model:
+    model_provider: openai
+    model: gpt-4.1
+    auth_method: api_key
+    api_key: ${GRAPHRAG_API_KEY}
+    api_base: ${GRAPHRAG_API_BASE}
+
+embedding_models:
+  default_embedding_model:
+    model_provider: openai
+    model: text-embedding-3-large
+    auth_method: api_key
+    api_key: ${GRAPHRAG_API_KEY}
+    api_base: ${GRAPHRAG_API_BASE}
+
+input:
+  type: text
+
+embed_text:
+  dimensions: 768
+
+extract_graph:
+  entity_types: [ animal, object, person, organization, location, event, concept ]

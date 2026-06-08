@@ -1,6 +1,6 @@
 package com.decade.nexa.users;
 
-import com.decade.nexa.common.DataCleanUp;
+import com.decade.nexa.common.TestDataset;
 import com.decade.nexa.users.application.ports.out.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,7 +10,7 @@ import java.util.Set;
 
 @RequiredArgsConstructor
 @TestComponent
-public class UserCleanUp implements DataCleanUp {
+public class UserCleanUp implements TestDataset {
 
     private final UserRepository users;
 

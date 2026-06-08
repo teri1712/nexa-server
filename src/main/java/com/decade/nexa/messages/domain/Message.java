@@ -29,9 +29,13 @@ public abstract class Message {
     @Column(name = "created_at")
     private Instant createdAt;
 
-    protected Message(String content, UUID userId) {
+    @Column(name = "doc_id")
+    private String docId;
+
+    protected Message(String content, UUID userId, String docId) {
         this.content = content;
         this.userId = userId;
+        this.docId = docId;
         this.createdAt = Instant.now().truncatedTo(ChronoUnit.MICROS);
     }
 }

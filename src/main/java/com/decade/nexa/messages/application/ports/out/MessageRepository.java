@@ -7,5 +7,5 @@ import java.util.List;
 import java.util.UUID;
 
 public interface MessageRepository extends JpaRepository<Message, Long> {
-    List<Message> findTop20ByUserIdAndSequenceIdLessThanOrderBySequenceIdDesc(UUID userId, Long seq);
+    List<Message> findTop20ByUserIdAndDocIdAndSequenceIdLessThanOrderBySequenceIdDesc(UUID userId, String docId, Long seq);
 }

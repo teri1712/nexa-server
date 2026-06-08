@@ -24,7 +24,6 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.server.resource.web.HeaderBearerTokenResolver;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
@@ -34,8 +33,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
-
-import static com.decade.nexa.users.infra.ODIC.OIDC_HEADER;
 
 @EnableMethodSecurity
 @Configuration
@@ -134,10 +131,6 @@ public class UserSecurity extends GlobalAuthenticationConfigurerAdapter {
                     .requestMatchers("/admins/**").hasRole("ADMIN")
                     .anyRequest().authenticated()
             )
-            .oauth2ResourceServer(oauth2 -> {
-                oauth2.bearerTokenResolver(new HeaderBearerTokenResolver(OIDC_HEADER));
-                oauth2.jwt(Customizer.withDefaults());
-            })
             .sessionManagement(session ->
                 session
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

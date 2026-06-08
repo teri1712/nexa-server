@@ -10,7 +10,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Table(name = "user_messages")
 public class UserMessage extends Message {
-    public UserMessage(String message, UUID userId) {
-        super(message, userId);
+    public UserMessage(String message, UUID userId, String docId) {
+        super(message, userId, docId);
     }
 }

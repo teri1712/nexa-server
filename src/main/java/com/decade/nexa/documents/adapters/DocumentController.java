@@ -2,7 +2,6 @@ package com.decade.nexa.documents.adapters;
 
 import com.decade.nexa.documents.application.DocService;
 import com.decade.nexa.documents.application.ports.in.SearchService;
-import com.decade.nexa.documents.application.ports.out.SuggestService;
 import com.decade.nexa.documents.domain.DocType;
 import com.decade.nexa.documents.dto.*;
 import com.decade.nexa.files.apis.FileIntegrityException;
@@ -17,11 +16,9 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
 
 import java.time.Instant;
 
@@ -35,7 +32,6 @@ public class DocumentController {
 
     private final DocService docService;
     private final SearchService searchService;
-    private final SuggestService suggestService;
 
     @ExceptionHandler(FileIntegrityException.class)
     ProblemDetail handle(FileIntegrityException exception) {
@@ -101,33 +97,16 @@ public class DocumentController {
         @RequestParam DocType type,
         @RequestParam(required = false) String lastDocId,
         @RequestParam(required = false) Float lastDocScore) {
-        if (start == null) {
-            start = Instant.parse("2026-01-01T00:00:00Z");
-        }
-        if (end == null) {
-            end = Instant.now();
-        }
+
+        if (start == null) start = Instant.parse("2026-01-01T00:00:00Z");
+        if (end == null) end = Instant.now();
+
         LastDoc lastDoc = null;
         if (lastDocId != null) {
-            if (lastDocScore == null) {
-                lastDocScore = 0.0f;
-            }
+            if (lastDocScore == null) lastDocScore = 0.0f;
             lastDoc = new LastDoc(lastDocId, lastDocScore);
         }
         return searchService.search(new DocFilter(query, start, end, type, lastDoc));
     }
 
-
-    @Operation(description = "Suggest documents", responses = {
-        @ApiResponse(responseCode = "200", description = "The suggestion text stream", content = @Content(
-            mediaType = "text/plain",
-            examples = {@ExampleObject(value = """
-                      Hello, this is teri aka decade
-                """)}
-        )),
-    })
-    @PostMapping(path = "suggest", produces = MediaType.TEXT_PLAIN_VALUE)
-    Flux<String> suggest(@RequestParam String query) {
-        return suggestService.suggest(query);
-    }
 }

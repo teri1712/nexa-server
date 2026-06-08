@@ -2,7 +2,6 @@ package com.decade.nexa.users.application.services;
 
 import com.decade.nexa.users.application.ports.in.ProfileService;
 import com.decade.nexa.users.application.ports.out.AdminRepository;
-import com.decade.nexa.users.application.ports.out.TokenStore;
 import com.decade.nexa.users.application.ports.out.UserRepository;
 import com.decade.nexa.users.domain.*;
 import com.decade.nexa.users.dto.ProfileRequest;
@@ -28,7 +27,6 @@ public class ProfileServiceImpl implements ProfileService {
     private final UserFactory userFactory;
     private final UserRepository users;
     private final AdminRepository admins;
-    private final TokenStore tokens;
     private final UserMapper userMapper;
 
     private final UserPasswordPolicy passwordPolicy;
@@ -75,9 +73,7 @@ public class ProfileServiceImpl implements ProfileService {
         Admin admin = admins.findById(id).orElseThrow();
 
         passwordPolicy.change(admin, password, newPassword);
-
         users.save(admin);
-        tokens.evict(admin.getUsername());
 
         return userMapper.map(admin);
     }

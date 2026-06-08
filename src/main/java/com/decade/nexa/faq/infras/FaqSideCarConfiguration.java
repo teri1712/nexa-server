@@ -11,7 +11,7 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 @Configuration
 public class FaqSideCarConfiguration {
     @Bean
-    FaqSideCar sideCar(@Value("${faq.sidecar.url}") String url) {
+    FaqSideCar faqSideCar(@Value("${faq.sidecar.url}") String url) {
 
         RestClient restClient = RestClient.builder()
             .baseUrl(url)

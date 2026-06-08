@@ -1,0 +1,51 @@
+T RI M INH T HAI
+(+84) 366-743-666 | tritm06@gmail.com | github.com/teri1712 | codeforces.com/decade-
+E DUCATION
+Ho Chi Minh City University of Science
+2025
+B.E. in Software Engineering
+GPA: 8.2
+A CHIEVEMENTS
+• 4th Prize — Vietnam Mathematical Olympiad (2020); achieved 1st Prize with a perfect score at the provincial level.
+• Gold Medal — Traditional Mathematical Olympiad 30/4 (2018)
+W ORK E XPERIENCE
+NAB Innovation Center Vietnam
+Starcamp
+Oct. 2025 – Jan. 2026
+• Collaborated in a 12-member bootcamp team over 4 sprints to deliver a Competency Dashboard designed to assess
+NAB’s employee skills and enable cross-squads comparison.
+• Built the RESTful backbone and a GraphQL Backend-for-Frontend backed by 20+ APIs to simplify frontend calls.
+Implementing and refining B-tree indexes and resolving Hibernate N+1 issues.
+• Developed the mock server to support E2E testing, leveraging Amazon Q for data generation. Built automated test
+suites on Spring and Mockito covering business rules, controllers, and database interaction (90%+ coverage).
+• Led backend for a 6-member bootcamp team to propose a chatbot that provides convenient access to NAB internal
+documents, built on Kafka-based event-driven architecture.
+Tech stack: Spring, Microservices, PostgreSQL, Express, Micro-frontend, GraphQL, Generative AI, Redis
+Anonymous outsource company
+Agentic Web Engineer
+Apr. 2026 – May. 2026
+• Developed agentic automation and LLM-driven workflows for Builder.io, leveraging prompts, reusable skills, and
+context engineering to automate UI operations and accelerate content delivery.
+Tech stack: Node.js, Prompt Engineering, Claude, Codex, LLM, MCP
+P ROJECTS
+GitHub
+T1iChat (Side Project)
+• T1iChat is a real-time chat platform built on Spring Modulith and Angular. Designed polymorphic message with
+Hibernate and idempotent RESTful APIs for reliable message posting.
+• Using Redis Pub/Sub for real-time messaging across distributed WebSocket servers and optimized frequent user
+lookups with Redis caching, reducing read latency by 30%.
+• Migrated Spring Modulith’s module-based event communication to Apache Kafka to handle high-volume message
+fanout, increasing successful message publishing under stress from 6% to 34%.
+• Built unit, integration, and E2E tests (85%+ coverage) using Spring Boot Test, Mockito, and Cypress. Developed
+GitHub Actions CI/CD pipelines and deployed to Google Kubernetes Engine.
+Tech stack: Spring Modulith, Kubernetes, Generative AI, Angular, Hibernate, PostgreSQL, Redis, WebSocket
+GitHub
+Remote Folder Change Monitoring Application (University Project)
+• Developed a low-level client–server application using TCP sockets to monitor remote directories and stream real-time
+file system events to a Java Swing UI, leveraging Java Serialization for protocol communication.
+• Implemented non-blocking I/O with Java NIO using the Reactor pattern, combined with thread pools and
+BlockingQueue-based synchronization to improve concurrency task handling.
+Tech stack: Java Core, TCP Sockets, Java NIO, Multithreading
+C ERTIFICATES & P RACTICES
+Data Structures and Algorithms
+• Solved nearly 700 advanced algorithm and data structure problems on Codeforces.

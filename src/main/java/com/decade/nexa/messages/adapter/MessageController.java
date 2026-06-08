@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/messages")
+@RequestMapping("/doc-messages/{docId}")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 public class MessageController {
@@ -31,8 +31,11 @@ public class MessageController {
         }
     )
     @GetMapping
-    public List<MessageDto> list(@RequestParam Long anchorSeq, @AuthenticationPrincipal(expression = "id") UUID userId) {
-        return messageService.getMessages(userId, anchorSeq);
+    public List<MessageDto> list(
+        @PathVariable String docId,
+        @RequestParam Long anchorSeq,
+        @AuthenticationPrincipal(expression = "id") UUID userId) {
+        return messageService.getMessages(docId, userId, anchorSeq);
     }
 
     @Operation(description = "Place a message to get agent response",
@@ -43,7 +46,10 @@ public class MessageController {
                 content = @Content(mediaType = "application/json")),
         })
     @PostMapping
-    public MessagePlacedDto post(@RequestParam String message, @AuthenticationPrincipal(expression = "id") UUID userId) {
-        return messageService.addMessage(userId, message);
+    public MessagePlacedDto post(
+        @PathVariable String docId,
+        @RequestParam String message,
+        @AuthenticationPrincipal(expression = "id") UUID userId) {
+        return messageService.addMessage(docId, userId, message);
     }
 }

@@ -8,6 +8,7 @@ import com.decade.nexa.documents.dto.*;
 import com.decade.nexa.files.apis.FileApi;
 import com.decade.nexa.files.apis.FileIntegrityException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DocServiceImpl implements SearchService, DocService {
@@ -87,6 +89,7 @@ public class DocServiceImpl implements SearchService, DocService {
         fileApi.getFile(request.fileKey(), request.eTag());
         Documentation documentation = new Documentation(request.fileKey(), request.filename(), request.title(), request.description(), request.type());
         docs.save(documentation);
+
         return DocumentResponse.builder()
             .id(documentation.getId())
             .title(documentation.getTitle())
