@@ -1,8 +1,8 @@
 package com.decade.nexa.faq.integration;
 
-import com.decade.nexa.common.BaseTestClass;
+import com.decade.nexa.common.ComponentTest;
 import com.decade.nexa.documents.domain.events.UserSearched;
-import com.decade.nexa.faq.application.FAQManagement;
+import com.decade.nexa.faq.adapters.ClusterScheduler;
 import com.decade.nexa.faq.application.ports.out.QueryRepository;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
@@ -12,18 +12,21 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.time.Duration;
 import java.util.List;
-import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RequiredArgsConstructor
 @ActiveProfiles({"test", "ollama"})
-public class FaqControllerTest extends BaseTestClass {
+@ComponentTest(datasets = {FaqDataset.class})
+public class FaqControllerTest {
+
     final MockMvc mvc;
-    final FAQManagement faqManagement;
+    final ClusterScheduler scheduler;
     final QueryRepository queries;
 
     @Test
@@ -64,17 +67,17 @@ public class FaqControllerTest extends BaseTestClass {
                 });
         }
         assertThat(this.queries.count()).isEqualTo(15);
-        queries.stream().map(UserSearched::new).forEach(new Consumer<UserSearched>() {
-            @Override
-            public void accept(UserSearched event) {
-                scenario.publish(event)
-                    .andWaitForStateChange(FaqControllerTest.this.queries::count)
-                    .andVerify(count -> {
-                    });
-            }
-        });
+        scheduler.onPrepare();
+        scheduler.onCluster();
 
-        faqManagement.runFaqPipeline(); // 1AM hit
+        await().atMost(Duration.ofSeconds(30))
+            .pollInterval(Duration.ofSeconds(2))
+            .untilAsserted(() -> {
+                assertThat(scheduler.onCheck()).isTrue();
+            });
+
+        scheduler.onDeadline();
+
         // When
         // Then
 

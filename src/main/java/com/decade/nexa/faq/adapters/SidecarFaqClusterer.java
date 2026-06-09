@@ -17,20 +17,20 @@ public class SidecarFaqClusterer implements FaqClusterer {
 
 
     @Override
-    public void cluster(LocalDate today) {
-        sideCar.cluster(today);
+    public void cluster(Long requestId, LocalDate today) {
+        sideCar.cluster(requestId, today);
     }
 
     @Override
-    public boolean isFinish(LocalDate date) {
-        Map<String, String> body = sideCar.status(date);
+    public boolean isFinish(Long requestId) {
+        Map<String, String> body = sideCar.progress(requestId);
         String status = body.get("status");
         return switch (status) {
             case "COMPLETED" -> {
-                log.debug("Python clustering is COMPLETED for {}. Checking if synthesis is needed...", date);
+                log.debug("Python clustering is COMPLETED for {}. Checking if synthesis is needed...", requestId);
                 yield true;
             }
-            case "ERROR", "IN_COMPLETED" -> throw new RuntimeException("Clustering job failed on Python side for %s: %s".formatted(date.toString(), body.get("error_message")));
+            case "ERROR", "IN_COMPLETED" -> throw new RuntimeException("Clustering job failed on Python side for %s: %s".formatted(requestId, body.get("error_message")));
             default -> false;
         };
     }

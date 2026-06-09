@@ -47,7 +47,7 @@ public class GraphManagementTest {
         LocalDate today = LocalDate.now();
         IndexLog log = spy(new IndexLog(today));
 
-        when(logs.findByDate(eq(today))).thenReturn(Optional.of(log));
+        when(logs.findByIndexDate(eq(today))).thenReturn(Optional.of(log));
         when(graph.isFinished(any()))
             .thenReturn(false)
             .thenReturn(true);
@@ -83,7 +83,7 @@ public class GraphManagementTest {
     void givenLogDoesNotExistYet_whenIndexing_thenInvokeGraphIndexAndWaitUntilFinished() {
         LocalDate today = LocalDate.now();
 
-        when(logs.findByDate(eq(today))).thenReturn(Optional.empty());
+        when(logs.findByIndexDate(eq(today))).thenReturn(Optional.empty());
         when(graph.isFinished(any()))
             .thenReturn(false)
             .thenReturn(true);

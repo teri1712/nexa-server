@@ -1,6 +1,5 @@
-package com.decade.nexa.documents.domain;
+package com.decade.nexa.faq.domain;
 
-import com.decade.nexa.documents.domain.events.IndexCompleted;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
@@ -10,22 +9,22 @@ import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDate;
 
-@Table(name = "knowledge_log")
+@Table(name = "cluster_log")
 @NoArgsConstructor
 @Getter
-public class IndexLog extends AbstractAggregateRoot<IndexLog> {
+public class ClusterLog extends AbstractAggregateRoot<ClusterLog> {
 
     @Id
     private Long id;
 
-    @Column("index_date")
-    private LocalDate indexDate;
+    @Column("cluster_date")
+    private LocalDate clusterDate;
 
     private LogStatus status;
     private String message;
 
-    public IndexLog(LocalDate indexDate) {
-        this.indexDate = indexDate;
+    public ClusterLog(LocalDate clusterDate) {
+        this.clusterDate = clusterDate;
         this.status = LogStatus.CREATED;
     }
 
@@ -40,7 +39,7 @@ public class IndexLog extends AbstractAggregateRoot<IndexLog> {
 
     public void markAsCompleted() {
         this.status = LogStatus.COMPLETED;
-        registerEvent(new IndexCompleted(indexDate));
+        registerEvent(new FaqClusteringFinished(clusterDate));
     }
 
     public Long getRequestId() {

@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 public interface FaqClusterer {
 
-    void cluster(LocalDate date);
+    void cluster(Long requestId, LocalDate date);
 
-    boolean isFinish(LocalDate date);
+    boolean isFinish(Long requestId);
 }

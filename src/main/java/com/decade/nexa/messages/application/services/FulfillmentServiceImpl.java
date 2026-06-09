@@ -2,7 +2,7 @@ package com.decade.nexa.messages.application.services;
 
 import com.decade.nexa.messages.application.ports.in.FulfillmentService;
 import com.decade.nexa.messages.application.ports.out.Agent;
-import com.decade.nexa.messages.application.ports.out.BotMessageRepository;
+import com.decade.nexa.messages.application.ports.out.AnswerMessageRepository;
 import com.decade.nexa.messages.domain.AnswerMessage;
 import com.decade.nexa.messages.domain.UserMessage;
 import lombok.RequiredArgsConstructor;
@@ -14,12 +14,12 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class FulfillmentServiceImpl implements FulfillmentService {
-    private final BotMessageRepository agentMessages;
+    private final AnswerMessageRepository answers;
     private final Agent agent;
 
     @Override
     public Flux<String> fill(UUID userId, Long placeholderSequence) {
-        AnswerMessage answerMessage = agentMessages.findByUserIdAndSequenceId(userId, placeholderSequence)
+        AnswerMessage answerMessage = answers.findByUserIdAndSequenceId(userId, placeholderSequence)
             .orElseThrow();
         UserMessage userMessage = answerMessage.getUserMessage();
         StringBuilder sb = new StringBuilder();
@@ -30,7 +30,7 @@ public class FulfillmentServiceImpl implements FulfillmentService {
         return agent.ask(answerMessage.getDocId(), userId, question)
             .doOnNext(sb::append)
             .doOnComplete(() -> {
-                agentMessages.updateContent(placeholderSequence, sb.toString());
+                answers.updateContent(placeholderSequence, sb.toString());
             });
     }
 }

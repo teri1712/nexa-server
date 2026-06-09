@@ -1,0 +1,18 @@
+spring:
+  ai:
+    openai:
+      api-key: ${ULTIMATE_API_KEY}
+      chat:
+        options:
+          model: gpt-4o
+      embedding:
+        options:
+          model: text-embedding-3-small
+          dimensions: 768
+      base-url: https://api.shopaikey.com
+    model:
+      chat: openai
+      embedding: openai
+    vectorstore:
+      elasticsearch:
+        dimensions: 768

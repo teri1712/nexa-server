@@ -1,12 +1,22 @@
 import json
 import logging
 import os
-import subprocess
-import uuid
+import asyncio
 from datetime import datetime
+from typing import Any
+from pathlib import Path
 
+import pandas as pd
 from fastapi import FastAPI, HTTPException, BackgroundTasks, UploadFile, File
 from fastapi.responses import PlainTextResponse
+
+# GraphRAG API imports
+import graphrag.api as api
+from graphrag.config.load_config import load_config
+from graphrag.config.enums import IndexingMethod
+from graphrag.storage.factory import StorageFactory
+from graphrag.storage.tables.table_provider_factory import TableProviderFactory
+from graphrag.data_model.data_reader import DataReader
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -88,27 +98,38 @@ async def get_index_progress(id: str):
     return {k: str(v) for k, v in status_data.items()}
 
 
-def run_indexing_task(run_id: str):
+async def run_indexing_task(run_id: str):
     try:
         logger.info(f"Running indexing (RunID: {run_id})")
-        result = subprocess.run(
-            ["graphrag", "index", "--root", GRAPHRAG_ROOT],
-            capture_output=True,
-            text=True
+        config = load_config(root_dir=GRAPHRAG_ROOT)
+
+        # Call the indexing API
+        outputs = await api.build_index(
+            config=config,
+            method=IndexingMethod.Standard,
+            verbose=True
         )
 
-        status = "completed" if result.returncode == 0 else "failed"
-        output = result.stdout if result.returncode == 0 else result.stderr
+        # Check for errors in workflows (PipelineRunResult has 'errors' as list[BaseException])
+        all_errors = []
+        for output in outputs:
+            if output.errors:
+                all_errors.extend(output.errors)
+
+        if all_errors:
+            status = "failed"
+            message = f"Indexing failed with {len(all_errors)} errors. Last error: {str(all_errors[-1])}"
+        else:
+            status = "completed"
+            message = "Indexing completed successfully."
 
         update_status(run_id, {
             "status": status,
             "end_time": datetime.now().isoformat(),
-            "message": output[-1000:],
-            "return_code": str(result.returncode)
+            "message": message
         })
 
         logger.info(f"Indexing {status} for {run_id}")
-        logger.info(f"Indexing output: {output}")
     except Exception as e:
         logger.error(f"Background indexing failed: {str(e)}")
         update_status(run_id, {
@@ -116,6 +137,39 @@ def run_indexing_task(run_id: str):
             "end_time": datetime.now().isoformat(),
             "message": str(e)
         })
+
+
+async def _resolve_output_files(
+    config: Any,
+    output_list: list[str],
+    optional_list: list[str] | None = None,
+) -> dict[str, Any]:
+    """Read indexing output files to a dataframe dict, with correct column types."""
+    dataframe_dict = {}
+    
+    # StorageFactory and TableProviderFactory are used in 2.7.2
+    storage_obj = StorageFactory.create_storage(config.output_storage.type, config.output_storage.model_dump())
+    table_provider = TableProviderFactory.create_table_provider(config.table_provider.type, {"storage": storage_obj})
+    
+    reader = DataReader(table_provider)
+    for name in output_list:
+        df_value = await getattr(reader, name)()
+        dataframe_dict[name] = df_value
+
+    if optional_list:
+        for optional_file in optional_list:
+            # Check if optional file exists
+            try:
+                has_method = getattr(table_provider, "has", None)
+                if has_method and await has_method(optional_file):
+                    df_value = await getattr(reader, optional_file)()
+                    dataframe_dict[optional_file] = df_value
+                else:
+                    dataframe_dict[optional_file] = None
+            except Exception:
+                dataframe_dict[optional_file] = None
+                
+    return dataframe_dict
 
 
 @app.get("/global")
@@ -136,21 +190,61 @@ async def drift_query(query: str):
 
 async def run_query(query: str, method: str):
     logger.info(f"Running {method} query: {query}")
-    result = subprocess.run(
-        [
-            "graphrag", "query",
-            "--root", GRAPHRAG_ROOT,
-            "--method", method,
-            query
-        ],
-        capture_output=True,
-        text=True
-    )
-    if result.returncode != 0:
-        logger.error(f"Query failed: {result.stderr}")
-        raise HTTPException(status_code=500, detail=result.stderr)
+    config = load_config(root_dir=GRAPHRAG_ROOT)
 
-    return result.stdout.strip()
+    if method == "global":
+        dataframe_dict = await _resolve_output_files(
+            config=config,
+            output_list=["entities", "communities", "community_reports"]
+        )
+        response, _ = await api.global_search(
+            config=config,
+            entities=dataframe_dict["entities"],
+            communities=dataframe_dict["communities"],
+            community_reports=dataframe_dict["community_reports"],
+            community_level=2,
+            dynamic_community_selection=False,
+            response_type="Multiple Paragraphs",
+            query=query
+        )
+    elif method == "local":
+        dataframe_dict = await _resolve_output_files(
+            config=config,
+            output_list=["communities", "community_reports", "text_units", "relationships", "entities"],
+            optional_list=["covariates"]
+        )
+        response, _ = await api.local_search(
+            config=config,
+            entities=dataframe_dict["entities"],
+            communities=dataframe_dict["communities"],
+            community_reports=dataframe_dict["community_reports"],
+            text_units=dataframe_dict["text_units"],
+            relationships=dataframe_dict["relationships"],
+            covariates=dataframe_dict.get("covariates"),
+            community_level=2,
+            response_type="Multiple Paragraphs",
+            query=query
+        )
+    elif method == "drift":
+        dataframe_dict = await _resolve_output_files(
+            config=config,
+            output_list=["communities", "community_reports", "text_units", "relationships", "entities"]
+        )
+        response, _ = await api.drift_search(
+            config=config,
+            entities=dataframe_dict["entities"],
+            communities=dataframe_dict["communities"],
+            community_reports=dataframe_dict["community_reports"],
+            text_units=dataframe_dict["text_units"],
+            relationships=dataframe_dict["relationships"],
+            community_level=2,
+            response_type="Multiple Paragraphs",
+            query=query
+        )
+    else:
+        raise HTTPException(status_code=400, detail=f"Invalid method: {method}")
+
+    return response
 
 
 if __name__ == "__main__":

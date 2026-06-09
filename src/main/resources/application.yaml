@@ -57,14 +57,6 @@ spring:
         repository:
           jdbc:
             initialize-schema: always
-    google:
-      genai:
-        embedding:
-          project-id: ${GEMINI_PROJECT_ID}
-          api-key: ${GEMINI_API_KEY}
-
-        project-id: ${GEMINI_PROJECT_ID}
-        api-key: ${GEMINI_API_KEY}
 
   threads:
     virtual:
@@ -137,8 +129,10 @@ logging:
 
 nexa:
   faq:
-    cron: "0 0 1 * * *"
-    poll-interval: "1m"
+    start: "0 0 1 * * *"
+    cluster: "0 1 1 * * *"
+    check-interval: "0 1-59 1 * * *"
+    deadline: "0 0 2 * * *"
   graph:
     start: "0 0 1 * * *"
     index: "0 1 1 * * *"

@@ -25,7 +25,7 @@ public class GraphManagement {
     }
 
     public void index(LocalDate date) {
-        logs.findByDate(date).ifPresent(log -> {
+        logs.findByIndexDate(date).ifPresent(log -> {
             graph.index(log.getRequestId());
             log.markAsRunning();
             logs.save(log);
@@ -33,7 +33,7 @@ public class GraphManagement {
     }
 
     public void check(LocalDate date) {
-        logs.findByDate(date).ifPresent(log -> {
+        logs.findByIndexDate(date).ifPresent(log -> {
             if (graph.isFinished(log.getRequestId())) {
                 log.markAsCompleted();
                 logs.save(log);
@@ -42,7 +42,7 @@ public class GraphManagement {
     }
 
     public void deadline(LocalDate date) {
-        logs.findByDate(date).ifPresent(log -> {
+        logs.findByIndexDate(date).ifPresent(log -> {
             if (log.getStatus() != LogStatus.COMPLETED) {
                 log.markAsFailed("Indexing took too long.");
                 logs.save(log);

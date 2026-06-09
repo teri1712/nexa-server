@@ -1,12 +1,13 @@
 package com.decade.nexa.common;
 
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.redis.testcontainers.RedisContainer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
-import org.springframework.core.env.Environment;
 import org.springframework.test.context.DynamicPropertyRegistrar;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
@@ -99,6 +100,11 @@ public class Containers {
             .withEnv("NUM_CLUSTERS", "3");
     }
 
+    @Bean(initMethod = "start", destroyMethod = "stop")
+    public WireMockServer graphWireMockServer() {
+        return new WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort());
+    }
+
     @Bean
     DynamicPropertyRegistrar faqSideCarProperties(GenericContainer<?> faqSideCarContainer) {
         return registry -> {
@@ -109,12 +115,10 @@ public class Containers {
 
 
     @Bean
-    DynamicPropertyRegistrar graphSideCarProperties(Environment env) {
+    DynamicPropertyRegistrar graphSideCarProperties(WireMockServer graphWireMockServer) {
         return registry -> {
-            registry.add("graph.sidecar.url", () -> {
-                String wiremockPort = env.getProperty("wiremock.server.port");
-                return "http://localhost:" + wiremockPort;
-            });
+            registry.add("graph.sidecar.url", () -> "http://localhost:" + graphWireMockServer.port());
+            log.info("graph.sidecar.url: {}", "http://localhost:" + graphWireMockServer.port());
         };
     }
 

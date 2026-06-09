@@ -1,9 +1,14 @@
 spring:
   ai:
     model:
+
       chat: ollama
-      embedding:
-        text: ollama
+      embedding: ollama
+      audio:
+        transcription: ollama
+        speech: ollama
+      image: ollama
+      moderation: ollama
     ollama:
       base-url: http://localhost:11434
       init:

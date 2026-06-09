@@ -12,9 +12,9 @@ import java.util.Map;
 public interface FaqSideCar {
 
     @PostExchange(value = "/cluster", contentType = "application/json")
-    Map<String, String> cluster(@RequestParam
-                                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date);
+    void cluster(@RequestParam("requestId") Long requestId,
+                 @RequestParam(value = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date);
 
-    @GetExchange("/status/{date}")
-    Map<String, String> status(@PathVariable("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date);
+    @GetExchange("/cluster/{id}/progress")
+    Map<String, String> progress(@PathVariable("id") Long id);
 }
