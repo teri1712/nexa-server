@@ -32,7 +32,7 @@ public class S3Storage implements StoragePathGenerator, FileStorage {
     private String s3Endpoint;
 
     private String generateKey(String username, String filename) {
-        return username + "/" + filename;
+        return username + "_" + filename;
     }
 
     @Override

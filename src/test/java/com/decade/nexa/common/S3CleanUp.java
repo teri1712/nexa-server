@@ -11,21 +11,28 @@ import software.amazon.awssdk.services.s3.model.DeleteBucketRequest;
 @Slf4j
 @RequiredArgsConstructor
 @TestComponent
-public class S3CleanUp implements DataCleanUp {
-      private final S3Client s3Client;
-      private @Value("${aws.s3.bucket}") String bucket;
+public class S3CleanUp implements TestDataset {
+    private final S3Client s3Client;
+    private @Value("${aws.s3.bucket}") String bucket;
 
-      @Override
-      public void clean() {
-            try {
-                  s3Client.deleteBucket(DeleteBucketRequest.builder()
-                            .bucket(bucket)
-                            .build());
-            } catch (Exception ignore) {
-                  log.debug("Bucket {} might be already deleted", bucket);
-            }
+    @Override
+    public void setup() {
+        try {
             s3Client.createBucket(CreateBucketRequest.builder()
-                      .bucket(bucket)
-                      .build());
-      }
+                .bucket(bucket)
+                .build());
+        } catch (Exception e) {
+        }
+    }
+
+    @Override
+    public void clean() {
+        try {
+            s3Client.deleteBucket(DeleteBucketRequest.builder()
+                .bucket(bucket)
+                .build());
+        } catch (Exception ignore) {
+            log.debug("Bucket {} might be already deleted", bucket);
+        }
+    }
 }

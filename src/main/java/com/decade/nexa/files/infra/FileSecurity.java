@@ -1,7 +1,7 @@
 package com.decade.nexa.files.infra;
 
-import com.decade.nexa.web.security.jwt.JwtService;
-import com.decade.nexa.web.security.jwt.JwtTokenFilter;
+import com.decade.nexa.common.security.jwt.JwtService;
+import com.decade.nexa.common.security.jwt.JwtTokenFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -17,32 +17,33 @@ import org.springframework.security.web.context.RequestAttributeSecurityContextR
 @Configuration
 public class FileSecurity {
 
-      @Bean
-      public SecurityFilterChain filesFilterChain(
-                HttpSecurity http,
-                JwtService jwtService
-      ) throws Exception {
-            http
-                      .securityMatcher("/files/**")
-                      .requestCache(Customizer.withDefaults())
-                      .securityContext(context ->
-                                context.securityContextRepository(new RequestAttributeSecurityContextRepository())
-                      )
-                      .cors(Customizer.withDefaults())
-                      .csrf(AbstractHttpConfigurer::disable)
-                      .httpBasic(Customizer.withDefaults())
-                      .exceptionHandling(exceptionHandling ->
-                                exceptionHandling.accessDeniedPage(null)
-                                          .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
-                      )
-                      .addFilterAfter(new JwtTokenFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
-                      .authorizeHttpRequests(authorize ->
-                                authorize.anyRequest().hasRole("ADMIN")
-                      )
-                      .sessionManagement(session ->
-                                session
-                                          .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                      );
-            return http.build();
-      }
+    @Bean
+    public SecurityFilterChain filesFilterChain(
+        HttpSecurity http,
+        JwtService jwtService
+    ) throws Exception {
+        http
+            .securityMatcher("/files/**")
+            .requestCache(Customizer.withDefaults())
+            .securityContext(context ->
+                context.securityContextRepository(new RequestAttributeSecurityContextRepository())
+            )
+            .cors(Customizer.withDefaults())
+            .csrf(AbstractHttpConfigurer::disable)
+            .httpBasic(Customizer.withDefaults())
+            .exceptionHandling(exceptionHandling ->
+                exceptionHandling.accessDeniedPage(null)
+                    .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+            )
+            .addFilterAfter(new JwtTokenFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
+            .authorizeHttpRequests(authorize ->
+                authorize.requestMatchers("files/upload").hasRole("ADMIN")
+                    .anyRequest().authenticated()
+            )
+            .sessionManagement(session ->
+                session
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            );
+        return http.build();
+    }
 }

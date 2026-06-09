@@ -170,6 +170,78 @@
         ]
       }
     },
+    "/messages": {
+      "get": {
+        "tags": [
+          "message-controller"
+        ],
+        "description": "Get message list whose sequence number are less than a sequence number",
+        "operationId": "list",
+        "parameters": [
+          {
+            "name": "anchorSeq",
+            "in": "query",
+            "description": "Anchor sequence number that ",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "max 20 messages in decreasing order",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MessageDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "message-controller"
+        ],
+        "description": "Place a message to get agent response",
+        "operationId": "post",
+        "parameters": [
+          {
+            "name": "message",
+            "in": "query",
+            "description": "Message to be placed",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message placed successfully, return the placed message and an empty placeholder message used to ask bot to fill",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/login": {
       "post": {
         "tags": [
@@ -252,7 +324,43 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/S3PresignedResponse"
+                  "$ref": "#/components/schemas/PresignedUploadResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/files/download": {
+      "post": {
+        "tags": [
+          "presign-controller"
+        ],
+        "summary": "Generate presigned url for downloading file",
+        "operationId": "downloadUrl",
+        "parameters": [
+          {
+            "name": "filekey",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PresignedDownloadResponse"
                 }
               }
             }
@@ -377,7 +485,14 @@
         },
         "responses": {
           "202": {
-            "description": "Document added successfully"
+            "description": "Document added successfully",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentResponse"
+                }
+              }
+            }
           },
           "400": {
             "description": "Validation failure",
@@ -396,7 +511,7 @@
                       "title": "File integrity error",
                       "status": 400,
                       "detail": "Mismatch Etag",
-                      "instance": "/docs/add"
+                      "instance": "/docs"
                     }
                   }
                 }
@@ -445,6 +560,35 @@
         ]
       }
     },
+    "/bot/fill": {
+      "post": {
+        "tags": [
+          "bot-controller"
+        ],
+        "description": "Ask bot to answer",
+        "operationId": "fill",
+        "parameters": [
+          {
+            "name": "placeholderSequence",
+            "in": "query",
+            "description": "Placeholder sequence number",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bot answer, return a text stream",
+            "content": {
+              "text/plain": {}
+            }
+          }
+        }
+      }
+    },
     "/admins": {
       "post": {
         "tags": [
@@ -478,22 +622,7 @@
             "description": "Require an admin authentication"
           },
           "400": {
-            "description": "Validation",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetail"
-                },
-                "examples": {
-                  "Request validation": {
-                    "$ref": "#/components/examples/Validation"
-                  }
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Username constraint",
+            "description": "Username exist constraint or validation error",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -504,10 +633,13 @@
                     "description": "User already exist",
                     "value": {
                       "title": "Username constraint",
-                      "status": 409,
+                      "status": 400,
                       "detail": "User already exist",
                       "instance": "/admins"
                     }
+                  },
+                  "Request validation": {
+                    "$ref": "#/components/examples/Validation"
                   }
                 }
               }
@@ -579,6 +711,30 @@
             "bearerAuth": []
           }
         ]
+      }
+    },
+    "/faqs": {
+      "get": {
+        "tags": [
+          "faq-controller"
+        ],
+        "summary": "Get today FAQ list",
+        "operationId": "faqs",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FaqResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/docs/{id}": {
@@ -695,7 +851,7 @@
           },
           "dob": {
             "type": "string",
-            "format": "date-time"
+            "format": "date"
           },
           "role": {
             "type": "string"
@@ -705,13 +861,24 @@
           }
         }
       },
-      "S3PresignedResponse": {
+      "PresignedUploadResponse": {
         "type": "object",
         "properties": {
           "fileKey": {
             "type": "string"
           },
           "presignedUploadUrl": {
+            "type": "string"
+          }
+        }
+      },
+      "PresignedDownloadResponse": {
+        "type": "object",
+        "properties": {
+          "fileKey": {
+            "type": "string"
+          },
+          "presignedDownloadUrl": {
             "type": "string"
           }
         }
@@ -753,6 +920,37 @@
           "title"
         ]
       },
+      "DocumentResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "fileKey": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "fileType": {
+            "type": "string",
+            "enum": [
+              "PDF",
+              "DOCX"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "SignUpRequest": {
         "type": "object",
         "properties": {
@@ -775,13 +973,14 @@
           },
           "dob": {
             "type": "string",
-            "format": "date-time"
+            "format": "date"
           },
           "avatar": {
             "type": "string"
           }
         },
         "required": [
+          "dob",
           "gender",
           "name",
           "username"
@@ -800,7 +999,34 @@
           },
           "dob": {
             "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "MessageDto": {
+        "type": "object",
+        "properties": {
+          "sequenceNumber": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "content": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
             "format": "date-time"
+          },
+          "mine": {
+            "type": "boolean"
+          }
+        }
+      },
+      "FaqResponse": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string"
           }
         }
       },
@@ -847,48 +1073,16 @@
             "format": "float"
           }
         }
-      },
-      "DocumentResponse": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "filename": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "fileType": {
-            "type": "string",
-            "enum": [
-              "PDF",
-              "DOCX"
-            ]
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "score": {
-            "type": "number",
-            "format": "float"
-          }
-        }
       }
     },
     "examples": {
       "Validation": {
         "summary": "Validation failure",
         "value": {
-          "type": "https://example.com/errors/validation",
           "status": 400,
           "title": "Validation failure",
-          "detail": "Email is invalid"
+          "detail": "Email is invalid",
+          "type": "https://example.com/errors/validation"
         }
       },
       "NotFound": {

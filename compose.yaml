@@ -4,21 +4,21 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.17.0
     environment:
       discovery.type: single-node
-      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
       xpack.security.enabled: "false"
       network.host: 0.0.0.0
+      cluster.routing.allocation.disk.watermark.low: "98%"
+      cluster.routing.allocation.disk.watermark.high: "99%"
+      cluster.routing.allocation.disk.watermark.flood_stage: "99.5%"
     ports:
       - "9200:9200"
-    cpus: 2
-    mem_limit: 2g
+    cpus: 4
+    mem_limit: 4g
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 30s
-    volumes:
-      - elasticsearch-data:/usr/share/elasticsearch/data
     restart: always
   postgres:
     image: 'postgres:16-alpine'
@@ -28,8 +28,6 @@ services:
       POSTGRES_USER: root
     ports:
       - '5432:5432'
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U root -d nexa" ]
       interval: 10s
@@ -41,8 +39,6 @@ services:
     ports:
       - '6379:6379'
       - '8001:8001'
-    volumes:
-      - redis-data:/data
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 5s
@@ -51,7 +47,7 @@ services:
       start_period: 5s
 
   s3:
-    image: localstack/localstack:2.3
+    image: localstack/localstack:3.0
     ports:
       - "4566:4566"
     environment:
@@ -59,19 +55,13 @@ services:
       AWS_DEFAULT_REGION: ap-southeast-1
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./s3/init:/etc/localstack/init/ready.d
+      - ./compose/s3:/etc/localstack/init/ready.d
     cpus: 0.5
     cpu_count: 3
     mem_limit: 500m
 
-  #  es-init:
-  #    build:
-  #      context: ./es
-  #    depends_on:
-  #      elasticsearch:
-  #        condition: service_healthy
   ollama:
-    image: ollama/ollama:0.6.2
+    image: ollama/ollama:0.6.6
     ports:
       - "11434:11434"
     volumes:
@@ -86,15 +76,14 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus-data:/prometheus
+      - ./compose/prometheus.yml:/etc/prometheus/prometheus.yml
     extra_hosts:
       - "host.docker.internal:host-gateway"
     cpus: 0.5
     cpu_count: 2
     mem_limit: 1g
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:9090/-/ready" ]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/-/ready"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -103,7 +92,6 @@ services:
     image: grafana/loki:3.0.0
     ports:
       - "3100:3100"
-    command: -config.file=/etc/loki/local-config.yaml
   tempo:
     image: grafana/tempo:2.5.0
     command: -config.file=/etc/tempo.yaml
@@ -112,8 +100,7 @@ services:
       - "4317:4317"
       - "4318:4318"
     volumes:
-      - ./observability/tempo.yml:/etc/tempo.yaml
-      - tempo-data:/var/tempo
+      - ./compose/tempo.yml:/etc/tempo.yaml
 
   grafana:
     image: grafana/grafana:11.0.0
@@ -124,16 +111,50 @@ services:
       GF_SECURITY_ADMIN_PASSWORD: admin
     mem_limit: 800m
     cpu_count: 1
-    volumes:
-      - grafana-data:/var/lib/grafana
     depends_on:
       - prometheus
       - loki
       - tempo
-volumes:
-  redis-data:
-  postgres-data:
-  elasticsearch-data:
-  prometheus-data:
-  grafana-data:
-  tempo-data:
+  faq:
+    build:
+      tags:
+        - teri1712/faq_sidecar:latest
+      context: ./faq
+    ports:
+      - "8000:8000"
+    environment:
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: nexa
+      NUM_CLUSTERS: 3
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  graphrag-sidecar:
+    build:
+      tags:
+        - teri1712/sidecar-graphrag:latest
+      context: ./graphrag
+    ports:
+      - "8002:8000"
+    volumes:
+      - ./graphrag/input:/app/input
+      - ./graphrag/output:/app/output
+      - ./graphrag/config:/app/config
+    environment:
+      - GRAPHRAG_API_BASE=https://api.shopaikey.com/v1
+      - GRAPHRAG_API_KEY=${ULTIMATE_API_KEY}
+      - GRAPHRAG_ROOT=/app
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5

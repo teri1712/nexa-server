@@ -1,17 +1,16 @@
 package com.decade.nexa.users.infra;
 
+import com.decade.nexa.common.security.jwt.JwtService;
+import com.decade.nexa.common.security.jwt.JwtTokenFilter;
 import com.decade.nexa.users.adapter.security.strategies.EntryPointStrategy;
 import com.decade.nexa.users.adapter.security.strategies.LoginFailedStrategy;
 import com.decade.nexa.users.adapter.security.strategies.LoginSuccessStrategy;
 import com.decade.nexa.users.adapter.security.strategies.LogoutStrategy;
-import com.decade.nexa.web.security.jwt.JwtService;
-import com.decade.nexa.web.security.jwt.JwtTokenFilter;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.ProviderManager;
@@ -25,7 +24,6 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.server.resource.web.HeaderBearerTokenResolver;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
@@ -35,8 +33,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
-
-import static com.decade.nexa.users.infra.ODIC.OIDC_HEADER;
 
 @EnableMethodSecurity
 @Configuration
@@ -94,7 +90,6 @@ public class UserSecurity extends GlobalAuthenticationConfigurerAdapter {
     }
 
     @Bean
-    @Order
     public SecurityFilterChain userFilterChain(
         HttpSecurity http,
         LoginSuccessStrategy successStrategy,
@@ -136,10 +131,6 @@ public class UserSecurity extends GlobalAuthenticationConfigurerAdapter {
                     .requestMatchers("/admins/**").hasRole("ADMIN")
                     .anyRequest().authenticated()
             )
-            .oauth2ResourceServer(oauth2 -> {
-                oauth2.bearerTokenResolver(new HeaderBearerTokenResolver(OIDC_HEADER));
-                oauth2.jwt(Customizer.withDefaults());
-            })
             .sessionManagement(session ->
                 session
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

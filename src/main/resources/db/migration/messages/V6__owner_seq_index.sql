@@ -1,0 +1,1 @@
+create index idx_user_seq on messages (user_id, sequence_id);

@@ -8,10 +8,7 @@ import com.decade.nexa.users.domain.UserAlreadyExistException;
 import com.decade.nexa.users.dto.AccountResponse;
 import com.decade.nexa.users.dto.ProfileResponse;
 import com.decade.nexa.users.dto.SignUpRequest;
-import com.decade.nexa.users.infra.ODIC;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -23,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -48,10 +44,10 @@ public class UserController {
     }
 
     @ExceptionHandler(UserAlreadyExistException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     ProblemDetail handle(UserAlreadyExistException ex) {
         log.debug("User already exist", ex);
-        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.CONFLICT);
+        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         pd.setTitle("Username constraint");
         pd.setDetail("User already exist");
         return pd;
@@ -69,15 +65,7 @@ public class UserController {
         responses = {
             @ApiResponse(responseCode = "201", description = "New admin is created"),
             @ApiResponse(responseCode = "403", description = "Require an admin authentication", content = @Content()),
-            @ApiResponse(responseCode = "400", description = "Validation", content = @Content(
-                mediaType = "application/problem+json",
-                schema = @Schema(implementation = ProblemDetail.class),
-                examples = {
-
-                    @ExampleObject(name = "Request validation", ref = "#/components/examples/Validation")
-                }
-            )),
-            @ApiResponse(responseCode = "409", description = "Username constraint",
+            @ApiResponse(responseCode = "400", description = "Username exist constraint or validation error",
                 content = @Content(
                     mediaType = "application/problem+json",
                     schema = @Schema(implementation = ProblemDetail.class),
@@ -85,11 +73,13 @@ public class UserController {
                         @ExampleObject(name = "User already exist", value = """
                             {
                                   "title": "Username constraint",
-                                  "status": 409,
+                                  "status": 400,
                                   "detail": "User already exist",
                                   "instance": "/admins"
                             }
-                            """)
+                            """),
+                        @ExampleObject(name = "Request validation", ref = "#/components/examples/Validation")
+
                     }
                 )),
         })
@@ -101,34 +91,6 @@ public class UserController {
         return profileService.create(signUpRequest, caller);
     }
 
-
-    @PostMapping("/user-login")
-    @Operation(summary = "Exchange Google OIDC Token for JWT",
-        parameters = {
-            @Parameter(name = ODIC.OIDC_HEADER, in = ParameterIn.HEADER, required = true, description = "Google OIDC Token")
-        },
-        responses = {
-            @ApiResponse(responseCode = "200", description = "Successful operation"),
-            @ApiResponse(responseCode = "401",
-                description = "Invalid token",
-                content = @Content(
-                    mediaType = "application/problem+json",
-                    schema = @Schema(implementation = ProblemDetail.class),
-                    examples = {
-                        @ExampleObject(value = """
-                            {
-                                  "title": "Token validation",
-                                  "status": 401,
-                                  "detail": "Invalid token",
-                            }
-                            """)
-                    }
-                )),
-        }
-    )
-    AccountResponse loginUser(@AuthenticationPrincipal Jwt jwt) throws InvalidTokenException {
-        return sessionService.loginOauth(jwt);
-    }
 
     @PostMapping("/login")
     @Operation(summary = "Login for admin", responses = {

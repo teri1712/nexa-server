@@ -6,20 +6,20 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.Instant;
+import java.time.LocalDate;
 
 @Getter
 @Setter
 public class ProfileRequest {
 
-      @Pattern(regexp = "\\S.*")
-      @Nullable
-      private String name;
+    @Pattern(regexp = "\\S.*")
+    @Nullable
+    private String name;
 
-      @Nullable
-      private Float gender;
+    @Nullable
+    private Float gender;
 
-      @Past
-      @Nullable
-      private Instant dob;
+    @Past
+    @Nullable
+    private LocalDate dob;
 }

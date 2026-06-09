@@ -1,7 +1,7 @@
 package com.decade.nexa.documents.infras;
 
-import com.decade.nexa.web.security.jwt.JwtService;
-import com.decade.nexa.web.security.jwt.JwtTokenFilter;
+import com.decade.nexa.common.security.jwt.JwtService;
+import com.decade.nexa.common.security.jwt.JwtTokenFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -24,7 +24,7 @@ public class DocSecurity {
         JwtService jwtService
     ) throws Exception {
         http
-            .securityMatcher("/docs/**")
+            .securityMatcher("/docs/**", "/knowledge/**")
             .requestCache(Customizer.withDefaults())
             .securityContext(context ->
                 context.securityContextRepository(new RequestAttributeSecurityContextRepository())
@@ -39,8 +39,9 @@ public class DocSecurity {
             .addFilterAfter(new JwtTokenFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(authorize ->
                 authorize
-                    .requestMatchers(HttpMethod.POST, "/docs").hasRole("ADMIN")
-                    .anyRequest().authenticated()
+                    .requestMatchers(HttpMethod.POST, "/docs")
+                    .hasRole("ADMIN")
+                    .anyRequest().permitAll()
             )
             .sessionManagement(session ->
                 session

@@ -3,3 +3,41 @@ spring:
     compose:
       enabled: true
       lifecycle-management: start_only
+  datasource:
+    url: jdbc:postgresql://localhost:5432/nexa
+    username: root
+    password: root
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  elasticsearch:
+    uris: http://localhost:9200
+loki:
+  url: http://localhost:3100/loki/api/v1/push
+
+management:
+  otlp:
+    tracing:
+      endpoint: http://localhost:4318/v1/traces
+
+
+faq:
+  sidecar:
+    url: http://localhost:8000
+
+graph:
+  sidecar:
+    url: http://localhost:8002
+  poll:
+    interval: 1m
+
+jwt:
+  duration: 30m
+  refresh:
+    duration: 7d
+
+logging:
+  level:
+    root: INFO

@@ -1,8 +1,5 @@
 package com.decade.nexa.users.adapter.security.strategies;
 
-import com.decade.nexa.users.application.ports.in.SessionService;
-import com.decade.nexa.users.application.ports.out.TokenGenerator;
-import com.decade.nexa.web.security.TokenUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
@@ -14,21 +11,11 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class LogoutStrategy implements LogoutHandler {
 
-      private final SessionService sessionService;
-      private final TokenGenerator tokenGenerator;
-
-
-      @Override
-      public void logout(
-                HttpServletRequest request,
-                HttpServletResponse response,
-                Authentication authentication
-      ) {
-            String refreshToken = TokenUtils.extractRefreshToken(request);
-            if (refreshToken == null) {
-                  return;
-            }
-            String username = tokenGenerator.decode(refreshToken).username();
-            sessionService.logout(username, refreshToken);
-      }
+    @Override
+    public void logout(
+        HttpServletRequest request,
+        HttpServletResponse response,
+        Authentication authentication
+    ) {
+    }
 }

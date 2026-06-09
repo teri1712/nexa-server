@@ -16,20 +16,21 @@ import java.io.IOException;
 @AllArgsConstructor
 public class LoginSuccessStrategy implements AuthenticationSuccessHandler {
 
-      private final SessionService sessionService;
-      private final ObjectMapper objectMapper = new ObjectMapper();
+    private final SessionService sessionService;
+    private final ObjectMapper objectMapper;
 
-      @Override
-      public void onAuthenticationSuccess(
-                HttpServletRequest httpRequest,
-                HttpServletResponse httpResponse,
-                Authentication authentication
-      ) throws IOException {
+    @Override
+    public void onAuthenticationSuccess(
+        HttpServletRequest httpRequest,
+        HttpServletResponse httpResponse,
+        Authentication authentication
+    ) throws IOException {
 
-            AccountResponse accountResponse = sessionService.login(authentication.getName());
-            httpResponse.setContentType("application/json;charset=UTF-8");
-            httpResponse.getWriter().write(objectMapper.writeValueAsString(accountResponse));
-            httpResponse.setStatus(HttpServletResponse.SC_OK);
-            httpResponse.getWriter().flush();
-      }
+        AccountResponse accountResponse = sessionService.login(authentication.getName());
+        httpResponse.setContentType("application/json;charset=UTF-8");
+        httpResponse.getWriter().write(objectMapper.writeValueAsString(accountResponse));
+        httpResponse.setStatus(HttpServletResponse.SC_OK);
+        httpResponse.getWriter().flush();
+
+    }
 }

@@ -10,10 +10,7 @@ spring:
           issuer-uri: https://accounts.google.com
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:postgresql://localhost:5432/nexa
     driver-class-name: org.postgresql.Driver
-    username: root
-    password: root
     hikari:
       maximum-pool-size: 15
       connection-timeout: 30000
@@ -37,8 +34,6 @@ spring:
         order_updates: true
   data:
     redis:
-      host: localhost
-      port: 6379
       timeout: 60000
       client-type: lettuce
     elasticsearch:
@@ -48,21 +43,7 @@ spring:
     clean-disabled: false
     enabled: true
 
-  elasticsearch:
-    uris: http://localhost:9200
   ai:
-    google:
-      genai:
-        embedding:
-          text:
-            options:
-              model: gemini-embedding-001
-              dimensions: 768
-          project-id: ${GEMINI_PROJECT_ID}
-          api-key: ${GEMINI_API_KEY}
-
-        project-id: ${GEMINI_PROJECT_ID}
-        api-key: ${GEMINI_API_KEY}
     vectorstore:
       elasticsearch:
         dimensions: 768
@@ -70,6 +51,26 @@ spring:
         initialize-schema: true
         similarity: cosine
         embedding-field-name: embedding
+
+    chat:
+      memory:
+        repository:
+          jdbc:
+            initialize-schema: always
+    google:
+      genai:
+        embedding:
+          project-id: ${GEMINI_PROJECT_ID}
+          api-key: ${GEMINI_API_KEY}
+
+        project-id: ${GEMINI_PROJECT_ID}
+        api-key: ${GEMINI_API_KEY}
+
+  threads:
+    virtual:
+      enabled: true
+  aop:
+    proxy-target-class: true
 server:
   port: 8080
 
@@ -95,9 +96,9 @@ management:
   tracing:
     sampling:
       probability: 1.0
-  otlp:
-    tracing:
-      endpoint: http://localhost:4318/v1/traces
+  observations:
+    annotations:
+      enabled: true
 actuator:
   user:
     name: admin
@@ -107,12 +108,15 @@ actuator:
 
 jwt.secret: vcl-vcl-vcl-vcl-vcl-vcl-vcl-vcl-vcl
 
+jwt:
+  duration: 15m
+  refresh:
+    duration: 7d
 
 super:
   admin:
     username: super_ultimate_supreme_admin
     password: vclvclvclvcl
-
 
 
 aws:
@@ -130,3 +134,11 @@ logging:
   level:
     root: INFO
     com.decade.nexa: DEBUG
+
+nexa:
+  faq:
+    cron: "0 0 1 * * *"
+    poll-interval: "1m"
+  graph:
+    cron: "0 0 1 * * *"
+    poll-interval: "1m"

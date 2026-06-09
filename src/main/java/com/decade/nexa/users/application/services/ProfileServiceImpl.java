@@ -2,7 +2,6 @@ package com.decade.nexa.users.application.services;
 
 import com.decade.nexa.users.application.ports.in.ProfileService;
 import com.decade.nexa.users.application.ports.out.AdminRepository;
-import com.decade.nexa.users.application.ports.out.TokenStore;
 import com.decade.nexa.users.application.ports.out.UserRepository;
 import com.decade.nexa.users.domain.*;
 import com.decade.nexa.users.dto.ProfileRequest;
@@ -15,7 +14,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -28,7 +27,6 @@ public class ProfileServiceImpl implements ProfileService {
     private final UserFactory userFactory;
     private final UserRepository users;
     private final AdminRepository admins;
-    private final TokenStore tokens;
     private final UserMapper userMapper;
 
     private final UserPasswordPolicy passwordPolicy;
@@ -41,7 +39,7 @@ public class ProfileServiceImpl implements ProfileService {
         String password = signUpRequest.getPassword();
         String name = signUpRequest.getName();
         Float gender = signUpRequest.getGender();
-        Instant dob = signUpRequest.getDob();
+        LocalDate dob = signUpRequest.getDob();
         Optional<Admin> callerAdmin = admins.findById(caller);
 
         if (users.findByUsername(username).isPresent()) {
@@ -59,14 +57,14 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     public ProfileResponse changeProfile(UUID id, ProfileRequest profileRequest) {
-        User user = users.findById(id).orElseThrow();
+        Admin admin = admins.findById(id).orElseThrow();
         if (profileRequest.getName() != null)
-            user.changeName(profileRequest.getName());
+            admin.changeName(profileRequest.getName());
         if (profileRequest.getDob() != null)
-            user.changeDob(profileRequest.getDob());
+            admin.changeDob(profileRequest.getDob());
         if (profileRequest.getGender() != null)
-            user.changeGender(profileRequest.getGender());
-        return userMapper.map(user);
+            admin.changeGender(profileRequest.getGender());
+        return userMapper.map(admin);
     }
 
 
@@ -75,9 +73,7 @@ public class ProfileServiceImpl implements ProfileService {
         Admin admin = admins.findById(id).orElseThrow();
 
         passwordPolicy.change(admin, password, newPassword);
-
         users.save(admin);
-        tokens.evict(admin.getUsername());
 
         return userMapper.map(admin);
     }

@@ -1,13 +1,13 @@
 package com.decade.nexa.users.domain.events;
 
-import java.time.Instant;
+import java.time.LocalDate;
 import java.util.UUID;
 
 public record UserCreated(
-          UUID userId,
-          String username,
-          String name,
-          String gender,
-          Instant dob
+    UUID userId,
+    String username,
+    String name,
+    String gender,
+    LocalDate dob
 ) {
 }
