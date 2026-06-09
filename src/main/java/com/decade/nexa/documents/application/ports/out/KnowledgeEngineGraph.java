@@ -6,8 +6,6 @@ public interface KnowledgeEngineGraph extends KnowledgeEngine {
 
     void index(UUID requestId);
 
-    boolean isIndexed(UUID requestId);
-
     boolean isFinished(UUID requestId);
 
 }

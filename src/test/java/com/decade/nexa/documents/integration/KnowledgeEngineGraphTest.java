@@ -28,7 +28,7 @@ public class KnowledgeEngineGraphTest extends DocumentModuleIntegrationTest {
 
     @Test
     @WithMockUser(username = "teri", roles = "ADMIN")
-    void shouldAnswerSomeMeaningFulContext_afterIndexing() throws Exception {
+    void shouldAnswerSomeMeaningFullContext_afterIndexing() throws Exception {
         doReturn(new ClassPathResource("/samples/sql.pdf")).when(fileApi).getResource("123");
         ingestion.on(new DocCreated("123", DocType.PDF, Instant.now()));
 

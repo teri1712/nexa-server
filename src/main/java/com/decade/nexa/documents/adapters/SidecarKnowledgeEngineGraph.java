@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpClientErrorException;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -26,16 +25,6 @@ public class SidecarKnowledgeEngineGraph implements Ingestor, KnowledgeEngineGra
     @Override
     public void index(UUID requestId) {
         sideCar.index(requestId);
-    }
-
-    @Override
-    public boolean isIndexed(UUID requestId) {
-        try {
-            sideCar.progress(requestId);
-        } catch (HttpClientErrorException.NotFound e) {
-            return true;
-        }
-        return false;
     }
 
     @Override
