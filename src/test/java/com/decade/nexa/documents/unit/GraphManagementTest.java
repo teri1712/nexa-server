@@ -6,16 +6,14 @@ import com.decade.nexa.documents.application.ports.out.LogRepository;
 import com.decade.nexa.documents.domain.IndexLog;
 import com.decade.nexa.documents.domain.LogStatus;
 import com.decade.nexa.documents.domain.events.IndexCompleted;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -40,16 +38,8 @@ public class GraphManagementTest {
     @Mock
     LogRepository logs;
 
-    Duration pollInterval = Duration.ofSeconds(1);
-
+    @InjectMocks
     GraphManagement graphManagement;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-        graphManagement = new GraphManagement(graph, publisher, logs);
-        ReflectionTestUtils.setField(graphManagement, "pollInterval", pollInterval);
-    }
 
 
     @Test
@@ -57,14 +47,19 @@ public class GraphManagementTest {
         LocalDate today = LocalDate.now();
         IndexLog log = spy(new IndexLog(today));
 
-        when(logs.findById(eq(today))).thenReturn(Optional.of(log));
+        when(logs.findByDate(eq(today))).thenReturn(Optional.of(log));
         when(graph.isFinished(any()))
             .thenReturn(false)
             .thenReturn(true);
         runAsync(() ->
         {
             try {
-                graphManagement.indexing();
+                graphManagement.prepare(today);
+                graphManagement.index(today);
+                graphManagement.check(today);
+                graphManagement.deadline(today);
+
+
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -88,14 +83,18 @@ public class GraphManagementTest {
     void givenLogDoesNotExistYet_whenIndexing_thenInvokeGraphIndexAndWaitUntilFinished() {
         LocalDate today = LocalDate.now();
 
-        when(logs.findById(eq(today))).thenReturn(Optional.empty());
+        when(logs.findByDate(eq(today))).thenReturn(Optional.empty());
         when(graph.isFinished(any()))
             .thenReturn(false)
             .thenReturn(true);
         runAsync(() ->
         {
             try {
-                graphManagement.indexing();
+                graphManagement.prepare(today);
+                graphManagement.index(today);
+                graphManagement.check(today);
+                graphManagement.deadline(today);
+
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -105,7 +104,7 @@ public class GraphManagementTest {
             .untilAsserted(() -> {
                 verify(logs, times(2)).save(logCaptor.capture());
                 IndexLog log = logCaptor.getValue();
-                assertThat(log).extracting(IndexLog::getDate).isEqualTo(today);
+                assertThat(log).extracting(IndexLog::getIndexDate).isEqualTo(today);
                 assertThat(log).extracting(IndexLog::getStatus).isEqualTo(LogStatus.COMPLETED);
                 verify(graph, times(2)).isFinished(eq(log.getRequestId()));
                 verify(publisher).publishEvent(eq(new IndexCompleted(today)));

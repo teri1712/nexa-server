@@ -1,28 +1,32 @@
 package com.decade.nexa.documents.domain;
 
+import com.decade.nexa.documents.domain.events.IndexCompleted;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.AbstractAggregateRoot;
-import org.springframework.data.redis.core.RedisHash;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDate;
 import java.util.UUID;
 
-@RedisHash("knowledge-log")
+@Table(name = "knowledge_log")
 @NoArgsConstructor
 @Getter
 public class IndexLog extends AbstractAggregateRoot<IndexLog> {
-    @Id
-    private LocalDate date;
 
+    @Id
+    @Column("id")
     private UUID requestId;
+
+    private LocalDate indexDate;
+
     private LogStatus status;
     private String message;
 
-    public IndexLog(LocalDate date) {
-        this.date = date;
-        this.requestId = UUID.randomUUID();
+    public IndexLog(LocalDate indexDate) {
+        this.indexDate = indexDate;
         this.status = LogStatus.CREATED;
     }
 
@@ -37,10 +41,7 @@ public class IndexLog extends AbstractAggregateRoot<IndexLog> {
 
     public void markAsCompleted() {
         this.status = LogStatus.COMPLETED;
-    }
-
-    public void markAsIncompleted() {
-        this.status = LogStatus.IN_COMPLETED;
+        registerEvent(new IndexCompleted(indexDate));
     }
 
 }

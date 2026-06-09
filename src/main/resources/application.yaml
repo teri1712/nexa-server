@@ -140,5 +140,7 @@ nexa:
     cron: "0 0 1 * * *"
     poll-interval: "1m"
   graph:
-    cron: "0 0 1 * * *"
-    poll-interval: "1m"
+    start: "0 0 1 * * *"
+    index: "0 1 1 * * *"
+    check-interval: "0 1-59 1 * * *"
+    deadline: "0 0 2 * * *"
