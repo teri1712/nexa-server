@@ -83,7 +83,7 @@ services:
     cpu_count: 2
     mem_limit: 1g
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/-/ready"]
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/-/ready" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -142,13 +142,13 @@ services:
     build:
       tags:
         - teri1712/sidecar-graphrag:latest
-      context: ./graphrag
+      context: graph_rag
     ports:
       - "8002:8000"
     volumes:
-      - ./graphrag/input:/app/input
-      - ./graphrag/output:/app/output
-      - ./graphrag/config:/app/config
+      - ./graph_rag/input:/app/input
+      - ./graph_rag/output:/app/output
+      - ./graph_rag/config:/app/config
     environment:
       - GRAPHRAG_API_BASE=https://api.shopaikey.com/v1
       - GRAPHRAG_API_KEY=${ULTIMATE_API_KEY}

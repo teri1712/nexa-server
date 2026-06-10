@@ -32,6 +32,6 @@ build/
 ### VS Code ###
 .vscode/
 
-/graphrag/output
+/graph_rag/output
 
 .gemini/settings.json
