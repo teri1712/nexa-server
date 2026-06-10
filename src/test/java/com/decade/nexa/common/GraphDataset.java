@@ -1,38 +1,51 @@
 package com.decade.nexa.common;
 
+import com.github.tomakehurst.wiremock.WireMockServer;
+import org.springframework.beans.factory.annotation.Qualifier;
+
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 public class GraphDataset implements TestDataset {
 
+    private final WireMockServer graphWireMockServer;
+
+    public GraphDataset(@Qualifier("graphWireMockServer") WireMockServer graphWireMockServer) {
+        this.graphWireMockServer = graphWireMockServer;
+    }
+
     @Override
     public void setup() {
         // POST /index
-        stubFor(post(urlPathEqualTo("/index"))
+        graphWireMockServer.stubFor(post(urlPathEqualTo("/index"))
             .willReturn(aResponse()
                 .withStatus(200)
                 .withHeader("Content-Type", "text/plain")
                 .withBody("started")));
 
         // POST /upload
-        stubFor(post(urlPathEqualTo("/upload"))
+        graphWireMockServer.stubFor(post(urlPathEqualTo("/upload"))
             .willReturn(aResponse()
                 .withStatus(200)
                 .withHeader("Content-Type", "application/json")
                 .withBody("{\"status\": \"saved\"}")));
 
         // GET /index/{id}/progress
-        stubFor(get(urlPathMatching("/index/[^/]+/progress"))
+        graphWireMockServer.stubFor(get(urlPathMatching("/index/[^/]+/progress"))
             .willReturn(aResponse()
                 .withStatus(200)
                 .withHeader("Content-Type", "application/json")
                 .withBody("{\"status\": \"" + "completed" + "\", \"message\": \"done\"}")));
 
         // GET /drift (query method)
-        stubFor(get(urlPathEqualTo("/drift"))
+        graphWireMockServer.stubFor(get(urlPathEqualTo("/drift"))
             .willReturn(aResponse()
                 .withStatus(200)
                 .withHeader("Content-Type", "text/plain")
                 .withBody("hello world")));
     }
 
+    @Override
+    public void clean() {
+        graphWireMockServer.resetAll();
+    }
 }

@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 @Slf4j
 @Component
@@ -23,12 +22,12 @@ public class SidecarKnowledgeEngineGraph implements Ingestor, KnowledgeEngineGra
 
 
     @Override
-    public void index(UUID requestId) {
+    public void index(Long requestId) {
         sideCar.index(requestId);
     }
 
     @Override
-    public boolean isFinished(UUID requestId) {
+    public boolean isFinished(Long requestId) {
         Map<String, String> body = sideCar.progress(requestId);
         String status = body.get("status");
         return switch (status) {

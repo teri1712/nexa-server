@@ -1,7 +1,7 @@
 package com.decade.nexa.documents.integration;
 
 
-import com.decade.nexa.documents.application.GraphManagement;
+import com.decade.nexa.documents.adapters.IndexScheduler;
 import com.decade.nexa.documents.application.IngestionManagement;
 import com.decade.nexa.documents.domain.DocType;
 import com.decade.nexa.documents.domain.events.DocCreated;
@@ -22,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RequiredArgsConstructor
 public class KnowledgeEngineGraphTest extends DocumentModuleIntegrationTest {
 
-    final GraphManagement management;
+    final IndexScheduler scheduler;
     final IngestionManagement ingestion;
     final MockMvc mockMvc;
 
@@ -32,7 +32,12 @@ public class KnowledgeEngineGraphTest extends DocumentModuleIntegrationTest {
         doReturn(new ClassPathResource("/samples/sql.pdf")).when(fileApi).getResource("123");
         ingestion.on(new DocCreated("123", DocType.PDF, Instant.now()));
 
-        assertDoesNotThrow(management::indexing);
+        assertDoesNotThrow(() -> {
+            scheduler.onPrepare();
+            scheduler.onIndex();
+            scheduler.onCheck();
+            scheduler.onDeadline();
+        });
 
         mockMvc.perform(post("/knowledge/ask")
                 .content(MediaType.APPLICATION_JSON_VALUE)

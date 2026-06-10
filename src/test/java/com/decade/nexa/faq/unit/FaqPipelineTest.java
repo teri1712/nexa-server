@@ -2,7 +2,6 @@ package com.decade.nexa.faq.unit;
 
 import com.decade.nexa.faq.application.FAQManagement;
 import com.decade.nexa.faq.application.ports.out.FAQRepository;
-import com.decade.nexa.faq.application.ports.out.FaqClusterer;
 import com.decade.nexa.faq.application.ports.out.QueryRepository;
 import com.decade.nexa.faq.application.ports.out.Synthesizer;
 import com.decade.nexa.faq.domain.FAQ;
@@ -14,7 +13,6 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -35,34 +33,13 @@ public class FaqPipelineTest {
     Synthesizer synthesizer;
 
     @Mock
-    FaqClusterer clusterer;
-
-    @Mock
     QueryRepository queries;
-
-    @Mock
-    ApplicationEventPublisher publisher;
 
     @InjectMocks
     FAQManagement faqManagement;
 
     @Captor
     ArgumentCaptor<List<FAQ>> faqsCaptor;
-
-    @Test
-    void shouldCallClusterForTodayAndPublishFinishedEvent() {
-        LocalDate today = LocalDate.now();
-        when(clusterer.isFinish(eq(today)))
-            .thenReturn(true);
-
-        faqManagement.runFaqPipeline();
-
-        verify(clusterer)
-            .cluster(today);
-
-        verify(publisher)
-            .publishEvent(eq(new FaqClusteringFinished(today)));
-    }
 
     @Test
     void shouldLoadTodayFaqAndSaveNewOnesWithQuestionsNotNull() {
