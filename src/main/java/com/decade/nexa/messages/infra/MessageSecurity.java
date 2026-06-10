@@ -23,7 +23,7 @@ public class MessageSecurity {
         JwtService jwtService
     ) throws Exception {
         http
-            .securityMatcher("/messages/**", "/bot/**")
+            .securityMatcher("/messages/**", "/fill/**")
             .requestCache(Customizer.withDefaults())
             .securityContext(context ->
                 context.securityContextRepository(new RequestAttributeSecurityContextRepository())
@@ -37,8 +37,7 @@ public class MessageSecurity {
             )
             .addFilterAfter(new JwtTokenFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(authorize ->
-                authorize.requestMatchers("/messages/**").authenticated()
-                    .requestMatchers("/bot/**").permitAll()
+                authorize.anyRequest().authenticated()
             )
             .sessionManagement(session ->
                 session

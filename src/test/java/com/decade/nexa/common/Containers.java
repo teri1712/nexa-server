@@ -61,12 +61,21 @@ public class Containers {
     @Bean
     @Profile("ollama")
     OllamaContainer ollama() {
-        return new OllamaContainer("ollama/ollama:0.6.6")
+        OllamaContainer container = new OllamaContainer("ollama/ollama:0.6.6")
             .withNetwork(network)
             .withNetworkAliases("ollama")
             .withFileSystemBind("/opt/.ollama", "/root/.ollama", BindMode.READ_WRITE)
             .waitingFor(Wait.forHttp("/api/tags"))
             .withExposedPorts(11434);
+
+//        container.start();
+//        try {
+//            container.execInContainer("ollama", "pull", "qwen3:0.6b");
+//            container.execInContainer("ollama", "pull", "nomic-embed-text");
+//        } catch (Exception e) {
+//            log.error("Failed to pull models", e);
+//        }
+        return container;
     }
 
     @Bean

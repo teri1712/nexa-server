@@ -5,5 +5,5 @@ import reactor.core.publisher.Flux;
 import java.util.UUID;
 
 public interface Agent {
-    Flux<String> ask(String docId, UUID userId, String question);
+    Flux<String> generate(String docId, UUID userId, String question);
 }
