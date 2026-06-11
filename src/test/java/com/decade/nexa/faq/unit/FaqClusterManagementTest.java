@@ -4,6 +4,7 @@ import com.decade.nexa.faq.application.FaqClusterManagement;
 import com.decade.nexa.faq.application.ports.out.ClusterLogRepository;
 import com.decade.nexa.faq.application.ports.out.FaqClusterer;
 import com.decade.nexa.faq.domain.ClusterLog;
+import com.decade.nexa.faq.domain.LogStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,9 +14,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class FaqClusterManagementTest {
@@ -53,15 +56,17 @@ public class FaqClusterManagementTest {
     }
 
     @Test
-    void shouldCheckProgress() {
+    void shouldUpdateToCompleted() {
         LocalDate today = LocalDate.now();
         ClusterLog log = new ClusterLog(today);
-        when(logs.findByClusterDate(today)).thenReturn(Optional.of(log));
-        when(clusterer.isFinish(log.getRequestId())).thenReturn(true);
+        log.markAsRunning();
+
+        when(logs.findByClusterDate(eq(today))).thenReturn(Optional.of(log));
+        when(clusterer.isFinish(eq(log.getRequestId()))).thenReturn(true);
 
         management.check(today);
-
         verify(logs).save(log);
+        assertThat(log.getStatus()).isEqualTo(LogStatus.COMPLETED);
         // Note: markAsCompleted generates an event, but here we just verify save
     }
 }

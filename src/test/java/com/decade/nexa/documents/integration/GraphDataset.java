@@ -1,5 +1,6 @@
-package com.decade.nexa.common;
+package com.decade.nexa.documents.integration;
 
+import com.decade.nexa.common.TestDataset;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -36,8 +37,8 @@ public class GraphDataset implements TestDataset {
                 .withHeader("Content-Type", "application/json")
                 .withBody("{\"status\": \"" + "completed" + "\", \"message\": \"done\"}")));
 
-        // GET /drift (query method)
-        graphWireMockServer.stubFor(get(urlPathEqualTo("/drift"))
+        // GET /local (query method)
+        graphWireMockServer.stubFor(get(urlPathEqualTo("/local"))
             .willReturn(aResponse()
                 .withStatus(200)
                 .withHeader("Content-Type", "text/plain")

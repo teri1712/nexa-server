@@ -110,15 +110,10 @@ super:
     username: super_ultimate_supreme_admin
     password: vclvclvclvcl
 
-
 aws:
   s3:
     region: ap-southeast-1
-    bucket: decade-bucket
-    access:
-      id: decade
-      secret: decade
-    endpoint: http://localhost:4566
+
 springdoc:
   override-with-generic-response: false
 

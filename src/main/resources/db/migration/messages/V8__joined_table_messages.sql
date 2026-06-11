@@ -3,7 +3,7 @@ create table user_messages
     sequence_id bigint primary key,
     content     text not null,
     created_at  timestamptz,
-    user_id     uuid references user_member (id)
+    user_id     uuid
 );
 
 create table agent_messages
@@ -11,7 +11,7 @@ create table agent_messages
     sequence_id     bigint primary key,
     content         text,
     created_at      timestamptz,
-    user_id         uuid references user_member (id),
+    user_id         uuid,
     user_message_id bigint references user_messages (sequence_id)
 );
 

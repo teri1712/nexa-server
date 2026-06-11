@@ -1,7 +1,6 @@
 package com.decade.nexa.users.dto;
 
 import com.decade.nexa.users.adapter.validation.StrongPassword;
-import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -40,7 +39,5 @@ public class SignUpRequest {
     @NotNull
     private LocalDate dob;
 
-    @Nullable
-    private String avatar;
 
 }

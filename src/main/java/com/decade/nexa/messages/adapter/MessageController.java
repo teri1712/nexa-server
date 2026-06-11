@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/doc-messages/{docId}")
+@RequestMapping("/messages")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 public class MessageController {
@@ -32,7 +32,7 @@ public class MessageController {
     )
     @GetMapping
     public List<MessageDto> list(
-        @PathVariable String docId,
+        @RequestParam String docId,
         @RequestParam Long anchorSeq,
         @AuthenticationPrincipal(expression = "id") UUID userId) {
         return messageService.getMessages(docId, userId, anchorSeq);
@@ -47,7 +47,7 @@ public class MessageController {
         })
     @PostMapping
     public MessagePlacedDto post(
-        @PathVariable String docId,
+        @RequestParam String docId,
         @RequestParam String message,
         @AuthenticationPrincipal(expression = "id") UUID userId) {
         return messageService.addMessage(docId, userId, message);

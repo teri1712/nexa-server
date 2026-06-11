@@ -32,7 +32,7 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public MessagePlacedDto addMessage(String docId, UUID userId, String message) {
-        UserMessage userMessage = new UserMessage(message, userId, docId);
+        UserMessage userMessage = new UserMessage(docId, userId, message);
         messages.save(userMessage);
         AnswerMessage answerMessage = new AnswerMessage(userMessage, userId, docId);
         messages.save(answerMessage);

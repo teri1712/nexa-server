@@ -24,7 +24,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=builder /install /usr/local
 
 # Copy application code and config
-COPY graphrag.py .
+COPY graph_rag.py .
 COPY settings.yaml .
 
 # Create necessary directories
@@ -38,4 +38,4 @@ ENV PYTHONUNBUFFERED=1
 EXPOSE 8000
 
 # Start the application
-CMD ["uvicorn", "graphrag:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "graph_rag:app", "--host", "0.0.0.0", "--port", "8000"]

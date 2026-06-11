@@ -7,6 +7,7 @@ import com.decade.nexa.messages.domain.AnswerMessage;
 import com.decade.nexa.messages.domain.UserMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 
 import java.util.UUID;
@@ -18,6 +19,7 @@ public class FulfillmentServiceImpl implements FulfillmentService {
     private final Agent agent;
 
     @Override
+    @Transactional(readOnly = true)
     public Flux<String> fill(UUID userId, Long placeholderSequence) {
         AnswerMessage answerMessage = answers.findByUserIdAndSequenceId(userId, placeholderSequence)
             .orElseThrow();
@@ -27,7 +29,7 @@ public class FulfillmentServiceImpl implements FulfillmentService {
             return Flux.just(answerMessage.getContent());
         }
         String question = userMessage.getContent();
-        return agent.ask(answerMessage.getDocId(), userId, question)
+        return agent.generate(answerMessage.getDocId(), userId, question)
             .doOnNext(sb::append)
             .doOnComplete(() -> {
                 answers.updateContent(placeholderSequence, sb.toString());

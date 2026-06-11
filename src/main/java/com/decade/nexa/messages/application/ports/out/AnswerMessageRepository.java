@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface BotMessageRepository extends JpaRepository<AnswerMessage, Long> {
+public interface AnswerMessageRepository extends JpaRepository<AnswerMessage, Long> {
 
     @Transactional
     @Modifying

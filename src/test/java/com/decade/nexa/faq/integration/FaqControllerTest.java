@@ -21,7 +21,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RequiredArgsConstructor
-@ActiveProfiles({"test", "ollama"})
 @ComponentTest(datasets = {FaqDataset.class})
 public class FaqControllerTest {
 

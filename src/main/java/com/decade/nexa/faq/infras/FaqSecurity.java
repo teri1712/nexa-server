@@ -39,7 +39,7 @@ public class FaqSecurity {
             .addFilterAfter(new JwtTokenFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(authorize ->
                 authorize
-                    .requestMatchers(HttpMethod.POST, "/faqs/cluster").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.POST, "/faqs/cluster").authenticated()
                     .anyRequest().permitAll()
             )
             .sessionManagement(session ->

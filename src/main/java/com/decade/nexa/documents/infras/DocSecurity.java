@@ -40,7 +40,7 @@ public class DocSecurity {
             .authorizeHttpRequests(authorize ->
                 authorize
                     .requestMatchers(HttpMethod.POST, "/docs")
-                    .hasRole("ADMIN")
+                    .authenticated()
                     .anyRequest().permitAll()
             )
             .sessionManagement(session ->

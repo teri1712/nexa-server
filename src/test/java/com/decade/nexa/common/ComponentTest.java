@@ -17,7 +17,7 @@ import java.lang.annotation.*;
 @SpringBootTest
 @EnableScenarios
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
-@ActiveProfiles({"test", "ollama"})
+@ActiveProfiles({"test", "openai"})
 @Import({Containers.class, AIEvalutationConfig.class, DatasetImportSelector.class})
 @AutoConfigureMockMvc
 @TestExecutionListeners(

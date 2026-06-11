@@ -37,7 +37,7 @@ public class FileSecurity {
             )
             .addFilterAfter(new JwtTokenFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(authorize ->
-                authorize.requestMatchers("files/upload").hasRole("ADMIN")
+                authorize.requestMatchers("files/upload").authenticated()
                     .anyRequest().authenticated()
             )
             .sessionManagement(session ->
