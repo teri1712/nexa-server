@@ -5,6 +5,7 @@ import com.decade.nexa.documents.application.ports.out.Ingestor;
 import com.decade.nexa.documents.domain.DocType;
 import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.document.Document;
@@ -17,6 +18,7 @@ import reactor.core.publisher.Flux;
 
 import java.util.List;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class DocumentBotRag implements Ingestor, InitializingBean, DocumentBotApi {
@@ -45,6 +47,7 @@ public class DocumentBotRag implements Ingestor, InitializingBean, DocumentBotAp
             chunk.getMetadata().put("docId", docId);
         });
         vectorStore.add(chunks);
+        log.info("Ingest {} chunks for docId {}", chunks.size(), docId);
     }
 
 
@@ -54,7 +57,7 @@ public class DocumentBotRag implements Ingestor, InitializingBean, DocumentBotAp
             .defaultAdvisors(RetrievalAugmentationAdvisor.builder()
                 .documentRetriever(VectorStoreDocumentRetriever.builder()
                     .vectorStore(vectorStore)
-                    .similarityThreshold(0.7)
+                    .similarityThreshold(0.3)
                     .topK(5)
                     .build()
                 )

@@ -83,6 +83,7 @@ public class Containers {
     DynamicPropertyRegistrar awsProperties(MinIOContainer localStack) {
         return registry -> {
             registry.add("aws.s3.endpoint", localStack::getS3URL);
+            registry.add("aws.s3.bucket", () -> "test-bucket");
             registry.add("aws.s3.access.id", localStack::getUserName);
             registry.add("aws.s3.access.secret", localStack::getPassword);
         };
