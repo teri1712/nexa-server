@@ -43,7 +43,7 @@ public class IngestionManagementTest {
 
     @BeforeEach
     void setUp() {
-        ingestionManagement = new IngestionManagement(fileApi, List.of(readerResolver), List.of(ingestor), transformer);
+        ingestionManagement = new IngestionManagement(fileApi, List.of(readerResolver), List.of(ingestor), List.of(transformer));
     }
 
     @Test

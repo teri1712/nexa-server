@@ -4,6 +4,7 @@ import com.decade.nexa.documents.application.ports.out.Ingestor;
 import com.decade.nexa.documents.application.ports.out.ReaderResolver;
 import com.decade.nexa.documents.domain.events.DocCreated;
 import com.decade.nexa.files.apis.FileApi;
+import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -25,10 +26,8 @@ public class IngestionManagement {
     final FileApi fileApi;
     final List<ReaderResolver> readers;
     final List<Ingestor> ingestors;
-    final DocumentTransformer transformer;
+    final List<DocumentTransformer> transformers;
 
-    @Async
-    @EventListener(id = "ingest-management")
     public void on(DocCreated docCreated) {
         Resource file = fileApi.getResource(docCreated.id());
         List<Document> documents = null;
@@ -41,12 +40,31 @@ public class IngestionManagement {
         }
         if (documents == null)
             return;
+        log.info("Documents read: {}", documents.size());
 
-        val proccessed = transformer.apply(documents);
-        log.info("Documents processed: {}", proccessed.size());
-        log.info("Documents propagating to {} ingestors", ingestors.size());
-        ingestors.forEach(ingestor ->
-            ingestor.ingest(docCreated.id(), docCreated.contentType(), proccessed)
-        );
+        for (DocumentTransformer transformer : transformers)
+            documents = transformer.apply(documents);
+
+        log.info("Documents transformed: {}", documents.size());
+
+        for (Ingestor ingestor : ingestors)
+            ingestor.ingest(docCreated.id(), docCreated.contentType(), documents);
+        log.info("Documents propagated to {} ingestors", ingestors.size());
+    }
+
+    @Async
+    @Observed(name = "ingestion", lowCardinalityKeyValues = {"thread", "platform"})
+    @EventListener(id = "ingest-management-platform",
+        condition = "@environment.getProperty('spring.threads.virtual.enabled', 'false') == 'false'")
+    void platform(DocCreated docCreated) {
+        on(docCreated);
+    }
+
+    @Async
+    @Observed(name = "ingestion", lowCardinalityKeyValues = {"thread", "virtual"})
+    @EventListener(id = "ingest-management-virtual",
+        condition = "@environment.getProperty('spring.threads.virtual.enabled', 'false') == 'true'")
+    void virtual(DocCreated docCreated) {
+        on(docCreated);
     }
 }

@@ -33,18 +33,18 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
-  redis:
-    image: redis/redis-stack:latest
-    ports:
-      - '6379:6379'
-      - '8001:8001'
-    healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
-      interval: 5s
-      timeout: 3s
-      retries: 20
-      start_period: 5s
+  #
+  #  redis:
+  #    image: redis/redis-stack:latest
+  #    ports:
+  #      - '6379:6379'
+  #      - '8001:8001'
+  #    healthcheck:
+  #      test: [ "CMD", "redis-cli", "ping" ]
+  #      interval: 5s
+  #      timeout: 3s
+  #      retries: 20
+  #      start_period: 5s
 
   s3:
     image: minio/minio:RELEASE.2023-09-04T19-57-37Z
@@ -71,18 +71,18 @@ services:
     volumes:
       - ./compose/s3/init-minio.sh:/init-minio.sh
     entrypoint: /bin/sh /init-minio.sh
-
-  ollama:
-    image: ollama/ollama:0.6.6
-    ports:
-      - "11434:11434"
-    volumes:
-      - /opt/.ollama:/root/.ollama
-    healthcheck:
-      test: [ "CMD", "ollama", "list" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+  #
+  #  ollama:
+  #    image: ollama/ollama:0.6.6
+  #    ports:
+  #      - "11434:11434"
+  #    volumes:
+  #      - /opt/.ollama:/root/.ollama
+  #    healthcheck:
+  #      test: [ "CMD", "ollama", "list" ]
+  #      interval: 10s
+  #      timeout: 5s
+  #      retries: 5
   prometheus:
     image: prom/prometheus:v2.51.0
     ports:

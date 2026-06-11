@@ -41,13 +41,13 @@ public class DocumentBotRag implements Ingestor, InitializingBean, DocumentBotAp
     ChatClient chatClient;
 
     @Override
-    @Observed(name = "ingest.document")
+    @Observed(name = "bot.ingest")
     public void ingest(String docId, DocType docType, List<Document> chunks) {
         chunks.forEach(chunk -> {
             chunk.getMetadata().put("docId", docId);
         });
         vectorStore.add(chunks);
-        log.info("Ingest {} chunks for docId {}", chunks.size(), docId);
+        log.info("Ingested {} chunks for docId {}", chunks.size(), docId);
     }
 
 

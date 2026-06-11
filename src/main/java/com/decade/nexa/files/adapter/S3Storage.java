@@ -17,6 +17,7 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
 
 import java.time.Duration;
 import java.util.Map;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -28,11 +29,8 @@ public class S3Storage implements StoragePathGenerator, FileStorage {
     @Value("${aws.s3.bucket}")
     private String bucket;
 
-    @Value("${aws.s3.endpoint}")
-    private String s3Endpoint;
-
     private String generateKey(String username, String filename) {
-        return username + "_" + filename;
+        return username + "_" + UUID.randomUUID() + "_" + filename;
     }
 
     @Override
