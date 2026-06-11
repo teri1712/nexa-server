@@ -41,3 +41,12 @@ jwt:
 logging:
   level:
     root: INFO
+
+
+aws:
+  s3:
+    bucket: decade-bucket
+    access:
+      id: decadedecade
+      secret: decadedecade
+    endpoint: http://localhost:9000

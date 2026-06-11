@@ -9,14 +9,12 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.DynamicPropertyRegistrar;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.MinIOContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testcontainers.utility.DockerImageName;
-
-import static org.testcontainers.containers.localstack.LocalStackContainer.Service.S3;
 
 @Slf4j
 @TestConfiguration
@@ -65,21 +63,28 @@ public class Containers {
 //            .withExposedPorts(11434);
 //        return container;
 //    }
+//
+//    @Bean
+//    LocalStackContainer localStackContainer() {
+//        return new LocalStackContainer(DockerImageName.parse("localstack/localstack:3.0"))
+//            .withServices(LocalStackContainer.Service.S3);
+//    }
 
     @Bean
-    LocalStackContainer localStackContainer() {
-        return new LocalStackContainer(DockerImageName.parse("localstack/localstack:3.0"))
-            .withServices(LocalStackContainer.Service.S3);
+    MinIOContainer minioContainer() {
+        return new MinIOContainer("minio/minio:RELEASE.2023-09-04T19-57-37Z")
+            .withExposedPorts(9000)
+            .withEnv("MINIO_ROOT_USER", "decadedecade")
+            .withEnv("MINIO_ROOT_PASSWORD", "decadedecade");
     }
 
 
     @Bean
-    DynamicPropertyRegistrar awsProperties(LocalStackContainer localStack) {
+    DynamicPropertyRegistrar awsProperties(MinIOContainer localStack) {
         return registry -> {
-            registry.add("aws.s3.endpoint", () -> localStack.getEndpointOverride(S3).toString());
-            registry.add("aws.s3.access.id", localStack::getAccessKey);
-            registry.add("aws.s3.access.secret", localStack::getSecretKey);
-            registry.add("aws.s3.region", localStack::getRegion);
+            registry.add("aws.s3.endpoint", localStack::getS3URL);
+            registry.add("aws.s3.access.id", localStack::getUserName);
+            registry.add("aws.s3.access.secret", localStack::getPassword);
         };
     }
 

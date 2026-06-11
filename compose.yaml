@@ -47,18 +47,30 @@ services:
       start_period: 5s
 
   s3:
-    image: localstack/localstack:3.0
+    image: minio/minio:RELEASE.2023-09-04T19-57-37Z
+    restart: always
     ports:
-      - "4566:4566"
+      - "9000:9000"
+      - "9001:9001"
     environment:
-      SERVICES: s3
-      AWS_DEFAULT_REGION: ap-southeast-1
+      MINIO_ROOT_USER: decadedecade
+      MINIO_ROOT_PASSWORD: decadedecade
+      MINIO_API_CORS_ALLOW_ORIGIN: "http://localhost:4200"
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  s3-init:
+    image: minio/mc
+    depends_on:
+      s3:
+        condition: service_healthy
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./compose/s3:/etc/localstack/init/ready.d
-    cpus: 0.5
-    cpu_count: 3
-    mem_limit: 500m
+      - ./compose/s3/init-minio.sh:/init-minio.sh
+    entrypoint: /bin/sh /init-minio.sh
 
   ollama:
     image: ollama/ollama:0.6.6
