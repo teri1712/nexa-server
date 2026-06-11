@@ -124,11 +124,8 @@ public class UserSecurity extends GlobalAuthenticationConfigurerAdapter {
             .authorizeHttpRequests(authorize ->
                 authorize
                     .requestMatchers(HttpMethod.POST, "/login").permitAll()
-                    .requestMatchers("/tokens/**").permitAll()
-                    .requestMatchers("/user-login").permitAll()
                     .requestMatchers("/profiles/me/**").authenticated()
-                    .requestMatchers("/profiles/me/password").hasRole("ADMIN")
-                    .requestMatchers("/admins/**").hasRole("ADMIN")
+                    .requestMatchers("/admins/**").authenticated()
                     .anyRequest().authenticated()
             )
             .sessionManagement(session ->

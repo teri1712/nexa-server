@@ -7,17 +7,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.DynamicPropertyRegistrar;
-import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
-import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
-import org.testcontainers.ollama.OllamaContainer;
 import org.testcontainers.utility.DockerImageName;
 
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.S3;
@@ -56,19 +52,19 @@ public class Containers {
             .withEnv("discovery.type", "single-node")
             .withEnv("xpack.security.enabled", "false");
     }
-
-    @ServiceConnection
-    @Bean
-    @Profile("ollama")
-    OllamaContainer ollama() {
-        OllamaContainer container = new OllamaContainer("ollama/ollama:0.6.6")
-            .withNetwork(network)
-            .withNetworkAliases("ollama")
-            .withFileSystemBind("/opt/.ollama", "/root/.ollama", BindMode.READ_WRITE)
-            .waitingFor(Wait.forHttp("/api/tags"))
-            .withExposedPorts(11434);
-        return container;
-    }
+//
+//    @ServiceConnection
+//    @Bean
+//    @Profile("ollama")
+//    OllamaContainer ollama() {
+//        OllamaContainer container = new OllamaContainer("ollama/ollama:0.6.6")
+//            .withNetwork(network)
+//            .withNetworkAliases("ollama")
+//            .withFileSystemBind("/opt/.ollama", "/root/.ollama", BindMode.READ_WRITE)
+//            .waitingFor(Wait.forHttp("/api/tags"))
+//            .withExposedPorts(11434);
+//        return container;
+//    }
 
     @Bean
     LocalStackContainer localStackContainer() {
@@ -106,6 +102,11 @@ public class Containers {
         return new WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort());
     }
 
+    @Bean(initMethod = "start", destroyMethod = "stop")
+    public WireMockServer openAiWireMockServer() {
+        return new WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort());
+    }
+
     @Bean
     DynamicPropertyRegistrar faqSideCarProperties(GenericContainer<?> faqSideCarContainer) {
         return registry -> {
@@ -120,6 +121,15 @@ public class Containers {
         return registry -> {
             registry.add("graph.sidecar.url", () -> "http://localhost:" + graphWireMockServer.port());
             log.info("graph.sidecar.url: {}", "http://localhost:" + graphWireMockServer.port());
+        };
+    }
+
+    @Bean
+    DynamicPropertyRegistrar openAiProperties(WireMockServer openAiWireMockServer) {
+        return registry -> {
+            registry.add("spring.ai.openai.base-url", () -> "http://localhost:" + openAiWireMockServer.port());
+            registry.add("spring.ai.openai.api-key", () -> "test-key");
+            log.info("spring.ai.openai.base-url: {}", "http://localhost:" + openAiWireMockServer.port());
         };
     }
 

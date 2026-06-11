@@ -1,6 +1,7 @@
 package com.decade.nexa.messages.integration;
 
 import com.decade.nexa.common.ComponentTest;
+import com.decade.nexa.common.OpenAiDataset;
 import com.decade.nexa.common.jwt.WithJwtUser;
 import com.decade.nexa.messages.dto.MessagePlacedDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,7 +14,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 
-@ComponentTest(datasets = MessageDataset.class)
+@ComponentTest(datasets = {MessageDataset.class, OpenAiDataset.class})
 @RequiredArgsConstructor
 public class FulfillmentControllerTest {
 

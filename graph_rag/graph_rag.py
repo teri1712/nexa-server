@@ -95,7 +95,22 @@ async def get_index_progress(id: str):
 
 def indexing_worker(root_dir, run_id, logs_dir):
     """Worker process for indexing to avoid signal handler issues in threads."""
+    status_file = os.path.join(logs_dir, f"{run_id}.json")
+
+    def update_worker_status(updates):
+        data = {}
+        if os.path.exists(status_file):
+            try:
+                with open(status_file, "r") as f:
+                    data = json.load(f)
+            except:
+                pass
+        data.update(updates)
+        with open(status_file, "w") as f:
+            json.dump(data, f)
+
     try:
+        logger.info(f"Worker started for RunID: {run_id}")
         # Re-import inside worker to ensure clean state
         import graphrag.cli.index as index_cli_module
         from graphrag.config.enums import IndexingMethod
@@ -109,38 +124,32 @@ def indexing_worker(root_dir, run_id, logs_dir):
             dry_run=False,
             skip_validation=False
         )
-
-        status_file = os.path.join(logs_dir, f"{run_id}.json")
-        try:
-            with open(status_file, "r") as f:
-                data = json.load(f)
-        except:
-            data = {}
-
-        data.update({
+        
+        logger.info(f"Indexing function returned for RunID: {run_id}")
+        update_worker_status({
             "status": "completed",
             "end_time": datetime.now().isoformat(),
             "message": "Indexing completed successfully."
         })
 
-        with open(status_file, "w") as f:
-            json.dump(data, f)
-
-    except Exception as e:
-        status_file = os.path.join(logs_dir, f"{run_id}.json")
-        try:
-            with open(status_file, "r") as f:
-                data = json.load(f)
-        except:
-            data = {}
-
-        data.update({
-            "status": "failed",
-            "end_time": datetime.now().isoformat(),
-            "message": str(e)
-        })
-        with open(status_file, "w") as f:
-            json.dump(data, f)
+    except BaseException as e:
+        if isinstance(e, SystemExit) and e.code == 0:
+            logger.info(f"Indexing worker exited successfully (SystemExit 0) for RunID: {run_id}")
+            update_worker_status({
+                "status": "completed",
+                "end_time": datetime.now().isoformat(),
+                "message": "Indexing completed successfully (via exit)."
+            })
+        else:
+            logger.error(f"Indexing worker encountered an error/exit: {str(e)}")
+            error_msg = str(e) if str(e) else "Process exited or encountered a critical error."
+            update_worker_status({
+                "status": "failed",
+                "end_time": datetime.now().isoformat(),
+                "message": error_msg
+            })
+    finally:
+        logger.info(f"Worker process finishing for RunID: {run_id}")
 
 
 async def run_indexing_task(run_id: str):

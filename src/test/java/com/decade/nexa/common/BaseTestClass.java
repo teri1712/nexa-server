@@ -20,7 +20,7 @@ import java.util.List;
 @SpringBootTest
 @EnableScenarios
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
-@ActiveProfiles({"test", "ollama"})
+@ActiveProfiles({"test", "openai"})
 @AutoConfigureMockMvc
 public abstract class BaseTestClass {
 

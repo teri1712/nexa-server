@@ -147,7 +147,6 @@ services:
       - "8002:8000"
     volumes:
       - ./graph_rag/input:/app/input
-      - ./graph_rag/output:/app/output
       - ./graph_rag/config:/app/config
     environment:
       - GRAPHRAG_API_BASE=https://api.shopaikey.com/v1
