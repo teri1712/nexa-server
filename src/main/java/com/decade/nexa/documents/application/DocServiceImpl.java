@@ -45,10 +45,10 @@ public class DocServiceImpl implements SearchService, DocService {
                         .match(match -> match.field("title").query(query).boost(2.0f))
                     )
                     .should(should -> should
-                        .match(match -> match.field("filename").query(query).boost(2.0f))
-                    )
-                    .should(should -> should
                         .match(match -> match.field("description").query(query).boost(1.0f))
+                    )
+                    .filter(should -> should
+                        .match(match -> match.field("filename").query(query).boost(2.0f))
                     )
                     .filter(must -> must
                         .term(term -> term.field("content_type").value(filter.type().name()))

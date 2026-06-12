@@ -9,6 +9,7 @@ import com.decade.nexa.faq.domain.FaqClusteringFinished;
 import com.decade.nexa.faq.domain.UserQuery;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.event.EventListener;
 import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Service;
 
@@ -44,7 +45,7 @@ public class FAQManagement {
         faqs.saveAll(clusters);
     }
 
-    @ApplicationModuleListener
+    @EventListener
     void on(UserSearched event) {
         queries.save(new UserQuery(null, event.query(), LocalDate.now()));
     }
