@@ -127,7 +127,7 @@ def indexing_worker(root_dir, run_id, logs_dir):
             dry_run=False,
             skip_validation=False
         )
-        
+
         logger.info(f"Indexing function returned for RunID: {run_id}")
         update_worker_status({
             "status": "completed",
@@ -190,7 +190,7 @@ async def run_query_task(query: str, method: str):
                 root_dir=Path(GRAPHRAG_ROOT),
                 community_level=2,
                 dynamic_community_selection=False,
-                response_type="plain text without any data references or citations",
+                response_type="Multiple Paragraphs",
                 streaming=False,
                 query=query,
                 verbose=True
@@ -200,7 +200,7 @@ async def run_query_task(query: str, method: str):
                 data_dir=None,
                 root_dir=Path(GRAPHRAG_ROOT),
                 community_level=2,
-                response_type="plain text without any data references or citations",
+                response_type="Multiple Paragraphs",
                 streaming=False,
                 query=query,
                 verbose=True
@@ -210,7 +210,7 @@ async def run_query_task(query: str, method: str):
                 data_dir=None,
                 root_dir=Path(GRAPHRAG_ROOT),
                 community_level=2,
-                response_type="plain text without any data references or citations",
+                response_type="Multiple Paragraphs",
                 streaming=False,
                 query=query,
                 verbose=True

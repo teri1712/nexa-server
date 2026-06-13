@@ -1,0 +1,330 @@
+[
+  {
+    "schema": {
+      "refId": "A",
+      "meta": {
+        "type": "timeseries-multi",
+        "typeVersion": [
+          0,
+          1
+        ],
+        "custom": {
+          "resultType": "matrix"
+        },
+        "executedQueryString": "Expr: ingestion_active_seconds_sum\nStep: 15s",
+        "preferredVisualisationType": "graph"
+      },
+      "fields": [
+        {
+          "name": "Time",
+          "type": "time",
+          "typeInfo": {
+            "frame": "time.Time"
+          },
+          "config": {
+            "interval": 15000
+          }
+        },
+        {
+          "name": "ingestion_active_seconds_sum",
+          "type": "number",
+          "typeInfo": {
+            "frame": "float64"
+          },
+          "labels": {
+            "__name__": "ingestion_active_seconds_sum",
+            "application": "nexa",
+            "class": "com.decade.nexa.documents.application.IngestionManagement",
+            "instance": "host.docker.internal:8081",
+            "job": "spring-boot-app",
+            "method": "platform",
+            "thread": "platform"
+          },
+          "config": {
+            "displayNameFromDS": "{__name__=\"ingestion_active_seconds_sum\", application=\"nexa\", class=\"com.decade.nexa.documents.application.IngestionManagement\", instance=\"host.docker.internal:8081\", job=\"spring-boot-app\", method=\"platform\", thread=\"platform\"}"
+          }
+        }
+      ]
+    },
+    "data": {
+      "values": [
+        [
+          1781261820000,
+          1781261835000,
+          1781261850000,
+          1781261865000,
+          1781261880000,
+          1781261895000,
+          1781261910000,
+          1781261925000,
+          1781261940000,
+          1781261955000
+        ],
+        [
+          9.450434146,
+          19.46968344,
+          39.455913922,
+          49.453219335,
+          69.465666868,
+          79.443864135,
+          99.439455781,
+          109.438690299,
+          0,
+          0
+        ]
+      ]
+    }
+  },
+  {
+    "schema": {
+      "refId": "A",
+      "meta": {
+        "type": "timeseries-multi",
+        "typeVersion": [
+          0,
+          1
+        ],
+        "custom": {
+          "resultType": "matrix"
+        },
+        "preferredVisualisationType": "graph"
+      },
+      "fields": [
+        {
+          "name": "Time",
+          "type": "time",
+          "typeInfo": {
+            "frame": "time.Time"
+          },
+          "config": {
+            "interval": 15000
+          }
+        },
+        {
+          "name": "ingestion_active_seconds_sum",
+          "type": "number",
+          "typeInfo": {
+            "frame": "float64"
+          },
+          "labels": {
+            "__name__": "ingestion_active_seconds_sum",
+            "application": "nexa",
+            "class": "com.decade.nexa.documents.application.IngestionManagement",
+            "instance": "host.docker.internal:8081",
+            "job": "spring-boot-app",
+            "method": "virtual",
+            "thread": "virtual"
+          },
+          "config": {
+            "displayNameFromDS": "{__name__=\"ingestion_active_seconds_sum\", application=\"nexa\", class=\"com.decade.nexa.documents.application.IngestionManagement\", instance=\"host.docker.internal:8081\", job=\"spring-boot-app\", method=\"virtual\", thread=\"virtual\"}"
+          }
+        }
+      ]
+    },
+    "data": {
+      "values": [
+        [
+          1781262000000,
+          1781262015000,
+          1781262030000,
+          1781262045000,
+          1781262060000,
+          1781262075000,
+          1781262090000,
+          1781262105000,
+          1781262120000,
+          1781262135000,
+          1781262150000,
+          1781262165000,
+          1781262180000,
+          1781262195000,
+          1781262210000,
+          1781262225000,
+          1781262240000,
+          1781262255000,
+          1781262270000,
+          1781262285000,
+          1781262300000,
+          1781262315000,
+          1781262330000,
+          1781262345000,
+          1781262360000,
+          1781262375000,
+          1781262390000,
+          1781262405000,
+          1781262420000,
+          1781262435000,
+          1781262450000,
+          1781262465000,
+          1781262480000,
+          1781262495000,
+          1781262510000,
+          1781262525000,
+          1781262540000,
+          1781262555000,
+          1781262570000,
+          1781262585000,
+          1781262600000,
+          1781262615000,
+          1781262630000,
+          1781262645000
+        ],
+        [
+          2.507993638,
+          12.501619161,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    }
+  },
+  {
+    "schema": {
+      "refId": "A-Instant",
+      "meta": {
+        "type": "numeric-multi",
+        "typeVersion": [
+          0,
+          1
+        ],
+        "custom": {
+          "resultType": "vector"
+        },
+        "executedQueryString": "Expr: ingestion_active_seconds_sum\nStep: 15s",
+        "preferredVisualisationType": "rawPrometheus"
+      },
+      "fields": [
+        {
+          "name": "Time",
+          "type": "time",
+          "config": {}
+        },
+        {
+          "name": "__name__",
+          "config": {
+            "filterable": true
+          },
+          "type": "string"
+        },
+        {
+          "name": "application",
+          "config": {
+            "filterable": true
+          },
+          "type": "string"
+        },
+        {
+          "name": "class",
+          "config": {
+            "filterable": true
+          },
+          "type": "string"
+        },
+        {
+          "name": "instance",
+          "config": {
+            "filterable": true
+          },
+          "type": "string"
+        },
+        {
+          "name": "job",
+          "config": {
+            "filterable": true
+          },
+          "type": "string"
+        },
+        {
+          "name": "method",
+          "config": {
+            "filterable": true
+          },
+          "type": "string"
+        },
+        {
+          "name": "thread",
+          "config": {
+            "filterable": true
+          },
+          "type": "string"
+        },
+        {
+          "name": "Value",
+          "type": "number",
+          "config": {}
+        }
+      ]
+    },
+    "data": {
+      "values": [
+        [
+          1781262653598
+        ],
+        [
+          "ingestion_active_seconds_sum"
+        ],
+        [
+          "nexa"
+        ],
+        [
+          "com.decade.nexa.documents.application.IngestionManagement"
+        ],
+        [
+          "host.docker.internal:8081"
+        ],
+        [
+          "spring-boot-app"
+        ],
+        [
+          "virtual"
+        ],
+        [
+          "virtual"
+        ],
+        [
+          0
+        ]
+      ]
+    }
+  }
+]

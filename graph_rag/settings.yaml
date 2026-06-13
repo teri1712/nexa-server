@@ -26,3 +26,9 @@ embed_text:
 
 extract_graph:
   entity_types: [ animal, object, person, organization, location, event, concept ]
+
+chunking:
+  prepend_metadata: [ title ]
+
+local_search:
+  prompt: "prompts/local_search_system_prompt.txt"

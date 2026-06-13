@@ -33,7 +33,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-  #
+
   #  redis:
   #    image: redis/redis-stack:latest
   #    ports:
@@ -71,7 +71,7 @@ services:
     volumes:
       - ./compose/s3/init-minio.sh:/init-minio.sh
     entrypoint: /bin/sh /init-minio.sh
-  #
+
   #  ollama:
   #    image: ollama/ollama:0.6.6
   #    ports:
@@ -159,6 +159,7 @@ services:
       - "8002:8000"
     volumes:
       - ./graph_rag/input:/app/input
+      - ./graph_rag/prompts:/app/prompts
       - ./graph_rag/config:/app/config
     environment:
       - GRAPHRAG_API_BASE=https://api.shopaikey.com/v1

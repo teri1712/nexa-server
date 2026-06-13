@@ -66,7 +66,7 @@ public class DocServiceImpl implements SearchService, DocService {
         if (filter.lastDoc() != null) {
             String lastId = filter.lastDoc().id();
             float lastScore = filter.lastDoc().score();
-            buidler = buidler.withSearchAfter(List.of(lastId, lastScore));
+            buidler = buidler.withSearchAfter(List.of(lastScore, lastId));
         }
         SearchHits<Documentation> hits = es.search(buidler.build(), Documentation.class);
         List<DocumentItemResponse> docs = hits.stream().map(hit -> {
