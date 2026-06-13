@@ -15,6 +15,8 @@ import reactor.core.publisher.Flux;
 
 import java.util.UUID;
 
+import static org.springframework.ai.chat.memory.ChatMemory.CONVERSATION_ID;
+
 @Component
 @RequiredArgsConstructor
 public class ChatClientAgent implements Agent, InitializingBean {
@@ -29,7 +31,9 @@ public class ChatClientAgent implements Agent, InitializingBean {
 
     @Override
     public Flux<String> generate(String docId, UUID userId, String question) {
-        return botApi.generate(docId, question, longTermAdvisor, shortTermAdvisor);
+        return botApi.generate(docId, question,
+            advisor -> advisor.param(CONVERSATION_ID, userId.toString()),
+            longTermAdvisor, shortTermAdvisor);
     }
 
     @Override

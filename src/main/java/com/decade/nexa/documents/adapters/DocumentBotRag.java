@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 @Slf4j
 @Component
@@ -66,7 +67,7 @@ public class DocumentBotRag implements Ingestor, InitializingBean, DocumentBotAp
     }
 
     @Override
-    public Flux<String> generate(String docId, String question, Advisor... advisors) {
+    public Flux<String> generate(String docId, String question, Consumer<ChatClient.AdvisorSpec> advisorSpec, Advisor... advisors) {
         return chatClient.prompt()
             .system(PERSONA)
             .user(question)
