@@ -48,7 +48,7 @@ public class Documentation extends AbstractAggregateRoot<Documentation> {
         this.fileKey = fileKey;
         this.title = title;
         this.createdAt = Instant.now();
-        registerEvent(new DocCreated(id, filename, contentType, createdAt));
+        registerEvent(new DocCreated(id, fileKey, filename, contentType, createdAt));
     }
 
 }

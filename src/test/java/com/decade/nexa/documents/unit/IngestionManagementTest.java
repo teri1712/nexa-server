@@ -63,7 +63,7 @@ public class IngestionManagementTest {
 
         when(transformer.apply(eq(List.of(document1)))).thenReturn(List.of(document2));
 
-        var event = new DocCreated("123", "123", DocType.PDF, today);
+        var event = new DocCreated("123", "123", "123", DocType.PDF, today);
         ingestionManagement.on(event);
 
         verify(fileApi).getResource(eq("123"));
