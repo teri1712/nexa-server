@@ -24,7 +24,7 @@ public class FaqSecurity {
         JwtService jwtService
     ) throws Exception {
         http
-            .securityMatcher("/faqs/**", "/cluster-logs/**")
+            .securityMatcher("/faqs/**")
             .requestCache(Customizer.withDefaults())
             .securityContext(context ->
                 context.securityContextRepository(new RequestAttributeSecurityContextRepository())
@@ -40,7 +40,6 @@ public class FaqSecurity {
             .authorizeHttpRequests(authorize ->
                 authorize
                     .requestMatchers(HttpMethod.GET, "/faqs").permitAll()
-                    .requestMatchers("/cluster-logs/**").hasRole("ADMIN")
                     .anyRequest().authenticated()
             )
             .sessionManagement(session ->

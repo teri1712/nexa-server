@@ -24,7 +24,7 @@ public class DocSecurity {
         JwtService jwtService
     ) throws Exception {
         http
-            .securityMatcher("/docs/**", "/knowledge/**")
+            .securityMatcher("/docs/**", "/knowledge/**", "/index-logs/**")
             .requestCache(Customizer.withDefaults())
             .securityContext(context ->
                 context.securityContextRepository(new RequestAttributeSecurityContextRepository())
@@ -39,8 +39,8 @@ public class DocSecurity {
             .addFilterAfter(new JwtTokenFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(authorize ->
                 authorize
-                    .requestMatchers(HttpMethod.POST, "/docs")
-                    .authenticated()
+                    .requestMatchers(HttpMethod.POST, "/docs").hasRole("ADMIN")
+                    .requestMatchers("/cluster-logs/**").hasRole("ADMIN")
                     .anyRequest().permitAll()
             )
             .sessionManagement(session ->

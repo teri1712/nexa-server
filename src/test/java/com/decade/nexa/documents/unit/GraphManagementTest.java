@@ -1,6 +1,6 @@
 package com.decade.nexa.documents.unit;
 
-import com.decade.nexa.documents.application.GraphManagement;
+import com.decade.nexa.documents.application.LogManagement;
 import com.decade.nexa.documents.application.ports.out.KnowledgeEngineGraph;
 import com.decade.nexa.documents.application.ports.out.LogRepository;
 import com.decade.nexa.documents.domain.IndexLog;
@@ -31,7 +31,7 @@ public class GraphManagementTest {
     LogRepository logs;
 
     @InjectMocks
-    GraphManagement graphManagement;
+    LogManagement graphManagement;
 
 
     @Test
