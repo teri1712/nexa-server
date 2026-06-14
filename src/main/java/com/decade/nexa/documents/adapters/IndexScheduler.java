@@ -1,6 +1,6 @@
 package com.decade.nexa.documents.adapters;
 
-import com.decade.nexa.documents.application.GraphManagement;
+import com.decade.nexa.documents.application.LogManagement;
 import lombok.RequiredArgsConstructor;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @Component
 @RequiredArgsConstructor
 public class IndexScheduler {
-    final GraphManagement management;
+    final LogManagement management;
 
     @Scheduled(cron = "${nexa.graph.start}")
     @SchedulerLock(name = "graph-creating", lockAtLeastFor = "30s", lockAtMostFor = "1m")

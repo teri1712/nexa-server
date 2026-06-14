@@ -1,9 +1,10 @@
-package com.decade.nexa.faq.application;
+package com.decade.nexa.documents.application;
 
-import com.decade.nexa.faq.application.ports.out.ClusterLogRepository;
-import com.decade.nexa.faq.application.ports.out.FaqClusterer;
-import com.decade.nexa.faq.domain.ClusterLog;
-import com.decade.nexa.faq.domain.LogStatus;
+import com.decade.nexa.documents.application.ports.out.KnowledgeEngineGraph;
+import com.decade.nexa.documents.application.ports.out.LogRepository;
+import com.decade.nexa.documents.domain.IndexLog;
+import com.decade.nexa.documents.domain.LogIndexStartupPolicy;
+import com.decade.nexa.documents.domain.LogStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -21,45 +22,46 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class FaqClusterManagement {
-    final FaqClusterer clusterer;
-    final ClusterLogRepository logs;
+public class LogManagement {
+    final KnowledgeEngineGraph graph;
+    final LogRepository logs;
+    final LogIndexStartupPolicy startupPolicy;
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public ClusterLog prepare(LocalDate date) {
-        log.info("Preparing clustering for {}", date);
-        ClusterLog log = new ClusterLog(date);
+    public void prepare(LocalDate date) {
+        log.info("Preparing indexing for {}", date);
+        IndexLog log = new IndexLog(date);
+        startupPolicy.apply(log);
         logs.save(log);
-        return log;
     }
 
-    public void cluster(LocalDate date) {
-        log.info("Clustering for {}", date);
-        logs.findByClusterDate(date).ifPresent(log -> {
-            clusterer.cluster(log.getRequestId(), date);
+    public void index(LocalDate date) {
+        log.info("Indexing for {}", date);
+        logs.findByIndexDate(date).ifPresent(log -> {
+            graph.index(log.getRequestId());
             log.markAsRunning();
             logs.save(log);
         });
     }
 
-    public Page<ClusterLog> list(Pageable pageable) {
-        Sort sort = Sort.by(Sort.Direction.DESC, "clusterDate");
+    public Page<IndexLog> list(Pageable pageable) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "indexDate");
         return logs.findAll(PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort));
     }
 
-    public ClusterLog find(LocalDate date) {
-        return logs.findByClusterDate(date).orElseThrow();
+    public IndexLog find(LocalDate date) {
+        return logs.findByIndexDate(date).orElseThrow();
     }
 
     public boolean check(LocalDate date) {
-        Optional<ClusterLog> logOptional = logs.findByClusterDate(date);
+        log.info("Checking indexing for {}", date);
+        Optional<IndexLog> logOptional = logs.findByIndexDate(date);
         if (logOptional.isEmpty()) {
             return false;
         } else {
-            log.info("Checking clustering for {}", date);
             var log = logOptional.get();
             if (log.getStatus() == LogStatus.RUNNING
-                && clusterer.isFinish(log.getRequestId())) {
+                && graph.isFinished(log.getRequestId())) {
                 log.markAsCompleted();
                 logs.save(log);
                 return true;
@@ -70,9 +72,9 @@ public class FaqClusterManagement {
 
     public void deadline(LocalDate date) {
         log.info("Deadline for {}", date);
-        logs.findByClusterDate(date).ifPresent(log -> {
+        logs.findByIndexDate(date).ifPresent(log -> {
             if (log.getStatus() != LogStatus.COMPLETED) {
-                log.markAsFailed("Clustering took too long.");
+                log.markAsFailed("Indexing took too long.");
                 logs.save(log);
             }
         });

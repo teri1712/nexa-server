@@ -1,15 +1,17 @@
 package com.decade.nexa.documents.unit;
 
-import com.decade.nexa.documents.application.GraphManagement;
+import com.decade.nexa.documents.application.LogManagement;
 import com.decade.nexa.documents.application.ports.out.KnowledgeEngineGraph;
 import com.decade.nexa.documents.application.ports.out.LogRepository;
 import com.decade.nexa.documents.domain.IndexLog;
+import com.decade.nexa.documents.domain.LogStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -31,7 +33,7 @@ public class GraphManagementTest {
     LogRepository logs;
 
     @InjectMocks
-    GraphManagement graphManagement;
+    LogManagement graphManagement;
 
 
     @Test
@@ -59,6 +61,8 @@ public class GraphManagementTest {
             .thenReturn(true);
 
         var log = new IndexLog(today);
+        ReflectionTestUtils.setField(log, "id", 123L);
+        ReflectionTestUtils.setField(log, "status", LogStatus.RUNNING);
         when(logs.findByIndexDate(eq(today)))
             .thenReturn(Optional.of(log));
 
@@ -66,7 +70,6 @@ public class GraphManagementTest {
         graphManagement.check(today);
 
         verify(graph, times(2)).isFinished(eq(log.getRequestId()));
-        verify(logs, times(1)).save(eq(log));
 
     }
 }

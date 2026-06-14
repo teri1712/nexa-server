@@ -60,7 +60,7 @@ spring:
 
   threads:
     virtual:
-      enabled: true
+      enabled: false
   aop:
     proxy-target-class: true
 server:
@@ -133,3 +133,4 @@ nexa:
     index: "0 1 1 * * *"
     check-interval: "0 1-59 1 * * *"
     deadline: "0 0 2 * * *"
+

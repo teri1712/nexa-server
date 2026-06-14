@@ -56,8 +56,11 @@ async def upload_file(file: UploadFile = File(...)):
     try:
         file_path = os.path.join(INPUT_DIR, file.filename)
         with open(file_path, "wb") as buffer:
-            content = await file.read()
-            buffer.write(content)
+            while True:
+                chunk = await file.read(1024 * 1024)  # 1MB chunks
+                if not chunk:
+                    break
+                buffer.write(chunk)
         logger.info(f"File saved: {file_path}")
         return {"filename": file.filename, "status": "saved"}
     except Exception as e:
