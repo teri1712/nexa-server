@@ -11,15 +11,15 @@ If you don't know the answer, just say so. Do not make anything up.
 
 Points supported by data should list their data references using numeric markers like [1], [2], etc.
 
-At the end of the response, include a "Sources" section that lists the "title" of the mentioned documents corresponding to these markers.
+At the end of the response, include a "Sources" section that lists the "title" of the mentioned documents (if document title is not a txt file, please do not include this as source), corresponding to these markers. The title of document must be bracketed by a @<>.
 
 For example:
 
 "Person X is the owner of Company Y and subject to many allegations of wrongdoing [1, 2]."
 
 ---Sources---
-1. <Title of Document 1>
-2. <Title of Document 2>
+1. @<Title of Document 1>
+2. @<Title of Document 2>
 
 Do not include information where the supporting evidence for it is not provided.
 

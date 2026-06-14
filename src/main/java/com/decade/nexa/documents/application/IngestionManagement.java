@@ -29,7 +29,7 @@ public class IngestionManagement {
     final List<DocumentTransformer> transformers;
 
     public void on(DocCreated docCreated) {
-        Resource file = fileApi.getResource(docCreated.id());
+        Resource file = fileApi.getResource(docCreated.fileKey());
         List<Document> documents = null;
         for (ReaderResolver reader : readers) {
             val docReader = reader.resolve(docCreated.contentType(), file);
@@ -48,7 +48,7 @@ public class IngestionManagement {
         log.info("Documents transformed: {}", documents.size());
 
         for (Ingestor ingestor : ingestors)
-            ingestor.ingest(docCreated.id(), docCreated.contentType(), documents);
+            ingestor.ingest(docCreated.id(), docCreated.filename(), docCreated.contentType(), documents);
         log.info("Documents propagated to {} ingestors", ingestors.size());
     }
 

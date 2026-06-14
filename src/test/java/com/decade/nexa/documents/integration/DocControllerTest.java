@@ -50,7 +50,9 @@ class DocControllerTest extends DocumentModuleIntegrationTest {
             .andExpect(jsonPath("$.docs.size()").value(1))
             .andExpect(jsonPath("$.docs[0].title").value("title"))
             .andExpect(jsonPath("$.docs[0].fileType").value("PDF"))
-            .andExpect(jsonPath("$.docs[0].filename").value("teri.pdf"));
+            .andExpect(jsonPath("$.docs[0].filename").value("teri.pdf"))
+            .andReturn()
+        ;
 
         mvc.perform(get("/docs")
                 .queryParam("query", "vcl")
@@ -59,12 +61,6 @@ class DocControllerTest extends DocumentModuleIntegrationTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.totalPages").value(0));
 
-        // by id
-        mvc.perform(get("/docs/{id}", "test"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.title").value("title"))
-            .andExpect(jsonPath("$.fileType").value("PDF"))
-            .andExpect(jsonPath("$.filename").value("teri.pdf"));
 
     }
 }

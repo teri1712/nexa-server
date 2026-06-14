@@ -63,12 +63,12 @@ public class IngestionManagementTest {
 
         when(transformer.apply(eq(List.of(document1)))).thenReturn(List.of(document2));
 
-        var event = new DocCreated("123", DocType.PDF, today);
+        var event = new DocCreated("123", "123", "123", DocType.PDF, today);
         ingestionManagement.on(event);
 
         verify(fileApi).getResource(eq("123"));
         verify(readerResolver).resolve(eq(DocType.PDF), any());
         verify(transformer).apply(eq(List.of(document1)));
-        verify(ingestor).ingest(eq("123"), eq(DocType.PDF), eq(List.of(document2)));
+        verify(ingestor).ingest(eq("123"), eq("123"), eq(DocType.PDF), eq(List.of(document2)));
     }
 }

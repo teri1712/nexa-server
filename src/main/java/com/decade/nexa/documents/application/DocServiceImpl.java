@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -87,14 +88,14 @@ public class DocServiceImpl implements SearchService, DocService {
     @Override
     public DocumentResponse add(CreateDocumentRequest request) throws FileIntegrityException {
         fileApi.getFile(request.fileKey(), request.eTag());
-        Documentation documentation = new Documentation(request.fileKey(), request.filename(), request.title(), request.description(), request.type());
+        Documentation documentation = new Documentation(UUID.randomUUID().toString(), request.fileKey(), request.filename(), request.title(), request.description(), request.type());
         docs.save(documentation);
 
         return DocumentResponse.builder()
             .id(documentation.getId())
             .title(documentation.getTitle())
             .filename(documentation.getFilename())
-            .fileKey(documentation.getId())
+            .fileKey(documentation.getFileKey())
             .description(documentation.getDescription())
             .fileType(documentation.getContentType())
             .createdAt(documentation.getCreatedAt())
@@ -108,7 +109,7 @@ public class DocServiceImpl implements SearchService, DocService {
                 .id(documentation.getId())
                 .title(documentation.getTitle())
                 .filename(documentation.getFilename())
-                .fileKey(documentation.getId())
+                .fileKey(documentation.getFileKey())
                 .description(documentation.getDescription())
                 .fileType(documentation.getContentType())
                 .createdAt(documentation.getCreatedAt())

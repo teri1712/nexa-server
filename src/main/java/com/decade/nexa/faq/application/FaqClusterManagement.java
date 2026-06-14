@@ -3,7 +3,6 @@ package com.decade.nexa.faq.application;
 import com.decade.nexa.faq.application.ports.out.ClusterLogRepository;
 import com.decade.nexa.faq.application.ports.out.FaqClusterer;
 import com.decade.nexa.faq.domain.ClusterLog;
-import com.decade.nexa.faq.domain.LogClusterStartupPolicy;
 import com.decade.nexa.faq.domain.LogStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,13 +24,11 @@ import java.util.Optional;
 public class FaqClusterManagement {
     final FaqClusterer clusterer;
     final ClusterLogRepository logs;
-    final LogClusterStartupPolicy startupPolicy;
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public ClusterLog prepare(LocalDate date) {
         log.info("Preparing clustering for {}", date);
         ClusterLog log = new ClusterLog(date);
-        startupPolicy.apply(log);
         logs.save(log);
         return log;
     }

@@ -46,13 +46,13 @@ public class SidecarKnowledgeEngineGraph implements Ingestor, KnowledgeEngineGra
     }
 
     @Override
-    public void ingest(String docId, DocType docType, List<Document> chunks) {
+    public void ingest(String docId, String name, DocType docType, List<Document> chunks) {
         log.info("Updating knowledge graph with {} chunks.", chunks.size());
         String txt = String.join("\n", chunks.stream().map(Document::getText).toList());
         sideCar.upload(new ByteArrayResource(txt.getBytes(StandardCharsets.UTF_8)) {
             @Override
             public String getFilename() {
-                return docId + ".txt";
+                return docId + "." + name + ".txt";
             }
         });
         log.info("Knowledge graph updated.");
