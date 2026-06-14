@@ -43,9 +43,10 @@ public class DocumentBotRag implements Ingestor, InitializingBean, DocumentBotAp
 
     @Override
     @Observed(name = "ingest.document")
-    public void ingest(String docId, DocType docType, List<Document> chunks) {
+    public void ingest(String docId, String name, DocType docType, List<Document> chunks) {
         chunks.forEach(chunk -> {
             chunk.getMetadata().put("docId", docId);
+            chunk.getMetadata().put("docName", name);
         });
         vectorStore.add(chunks);
         log.info("Ingest {} chunks for docId {}", chunks.size(), docId);

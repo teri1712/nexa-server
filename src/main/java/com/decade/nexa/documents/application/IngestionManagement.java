@@ -46,7 +46,7 @@ public class IngestionManagement {
         log.info("Documents processed: {}", proccessed.size());
         log.info("Documents propagating to {} ingestors", ingestors.size());
         ingestors.forEach(ingestor ->
-            ingestor.ingest(docCreated.id(), docCreated.contentType(), proccessed)
+            ingestor.ingest(docCreated.id(), docCreated.filename(), docCreated.contentType(), proccessed)
         );
     }
 }
