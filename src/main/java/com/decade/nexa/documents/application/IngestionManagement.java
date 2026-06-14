@@ -30,7 +30,7 @@ public class IngestionManagement {
     @Async
     @EventListener(id = "ingest-management")
     public void on(DocCreated docCreated) {
-        Resource file = fileApi.getResource(docCreated.id());
+        Resource file = fileApi.getResource(docCreated.fileKey());
         List<Document> documents = null;
         for (ReaderResolver reader : readers) {
             val docReader = reader.resolve(docCreated.contentType(), file);
