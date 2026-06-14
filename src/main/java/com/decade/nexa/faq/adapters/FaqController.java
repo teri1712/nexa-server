@@ -1,7 +1,6 @@
 package com.decade.nexa.faq.adapters;
 
 import com.decade.nexa.faq.FaqResponse;
-import com.decade.nexa.faq.application.FaqClusterManagement;
 import com.decade.nexa.faq.application.query.FaqService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +13,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FaqController {
     final FaqService faqService;
-    final FaqClusterManagement management;
 
     @Operation(summary = "Get today FAQ list")
     @GetMapping("/faqs")

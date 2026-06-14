@@ -29,6 +29,7 @@ public class FaqClusterManagement {
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public ClusterLog prepare(LocalDate date) {
+        log.info("Preparing clustering for {}", date);
         ClusterLog log = new ClusterLog(date);
         startupPolicy.apply(log);
         logs.save(log);
@@ -36,6 +37,7 @@ public class FaqClusterManagement {
     }
 
     public void cluster(LocalDate date) {
+        log.info("Clustering for {}", date);
         logs.findByClusterDate(date).ifPresent(log -> {
             clusterer.cluster(log.getRequestId(), date);
             log.markAsRunning();
@@ -57,6 +59,7 @@ public class FaqClusterManagement {
         if (logOptional.isEmpty()) {
             return false;
         } else {
+            log.info("Checking clustering for {}", date);
             var log = logOptional.get();
             if (log.getStatus() == LogStatus.RUNNING
                 && clusterer.isFinish(log.getRequestId())) {
@@ -69,6 +72,7 @@ public class FaqClusterManagement {
     }
 
     public void deadline(LocalDate date) {
+        log.info("Deadline for {}", date);
         logs.findByClusterDate(date).ifPresent(log -> {
             if (log.getStatus() != LogStatus.COMPLETED) {
                 log.markAsFailed("Clustering took too long.");
