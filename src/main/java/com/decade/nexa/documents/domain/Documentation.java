@@ -23,6 +23,9 @@ public class Documentation extends AbstractAggregateRoot<Documentation> {
     @Field(type = FieldType.Keyword)
     private String id;
 
+    @Field(type = FieldType.Keyword)
+    private String fileKey;
+
     @Field(type = FieldType.Text)
     private String filename;
 
@@ -37,14 +40,15 @@ public class Documentation extends AbstractAggregateRoot<Documentation> {
     @Field(name = "created_at", type = FieldType.Date)
     private Instant createdAt;
 
-    public Documentation(String id, String filename, String title, String description, DocType contentType) {
+    public Documentation(String id, String fileKey, String filename, String title, String description, DocType contentType) {
         this.contentType = contentType;
         this.description = description;
         this.filename = filename;
         this.id = id;
+        this.fileKey = fileKey;
         this.title = title;
         this.createdAt = Instant.now();
-        registerEvent(new DocCreated(id, contentType, createdAt));
+        registerEvent(new DocCreated(id, filename, contentType, createdAt));
     }
 
 }
