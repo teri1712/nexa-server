@@ -24,6 +24,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.server.resource.web.HeaderBearerTokenResolver;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
@@ -110,6 +111,10 @@ public class UserSecurity extends GlobalAuthenticationConfigurerAdapter {
                     .loginPage("/login")
                     .permitAll()
             )
+            .oauth2ResourceServer(oauth2 -> {
+                oauth2.bearerTokenResolver(new HeaderBearerTokenResolver("Oauth2-Token"));
+                oauth2.jwt(Customizer.withDefaults());
+            })
             .httpBasic(Customizer.withDefaults())
             .exceptionHandling(exceptionHandling ->
                 exceptionHandling.accessDeniedPage(null)

@@ -1,4 +1,4 @@
-package com.decade.nexa.users;
+package com.decade.nexa.users.integration;
 
 import com.decade.nexa.common.TestDataset;
 import com.decade.nexa.users.application.ports.out.UserRepository;
@@ -10,7 +10,7 @@ import java.util.Set;
 
 @RequiredArgsConstructor
 @TestComponent
-public class UserCleanUp implements TestDataset {
+public class UserDataset implements TestDataset {
 
     private final UserRepository users;
 
