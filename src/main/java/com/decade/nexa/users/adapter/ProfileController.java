@@ -3,7 +3,6 @@ package com.decade.nexa.users.adapter;
 import com.decade.nexa.users.adapter.validation.StrongPassword;
 import com.decade.nexa.users.application.ports.in.ProfileService;
 import com.decade.nexa.users.domain.WrongPasswordException;
-import com.decade.nexa.users.dto.ProfileRequest;
 import com.decade.nexa.users.dto.ProfileResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -11,7 +10,6 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -53,17 +51,6 @@ public class ProfileController {
         return profileService.findByUsername(principal.getName());
     }
 
-    @PatchMapping
-    @Operation(description = "Change user profile",
-        responses = {
-            @ApiResponse(responseCode = "200", description = "User profile after update")
-        })
-    ProfileResponse changeProfile(
-        @RequestBody @Valid ProfileRequest profile,
-        @AuthenticationPrincipal(expression = "id") UUID id
-    ) {
-        return profileService.changeProfile(id, profile);
-    }
 
     @PostMapping("/password")
     @Operation(summary = "Change password", description = "Intended for admin",
@@ -91,6 +78,6 @@ public class ProfileController {
         @RequestParam(value = "password", required = false) String password,
         @StrongPassword @RequestParam("new_password") String newPassword
     ) throws WrongPasswordException {
-        return profileService.changePassword(id, newPassword, password);
+        return profileService.changeAdminPassword(id, newPassword, password);
     }
 }

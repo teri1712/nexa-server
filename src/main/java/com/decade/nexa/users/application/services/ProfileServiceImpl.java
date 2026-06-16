@@ -4,7 +4,6 @@ import com.decade.nexa.users.application.ports.in.ProfileService;
 import com.decade.nexa.users.application.ports.out.AdminRepository;
 import com.decade.nexa.users.application.ports.out.UserRepository;
 import com.decade.nexa.users.domain.*;
-import com.decade.nexa.users.dto.ProfileRequest;
 import com.decade.nexa.users.dto.ProfileResponse;
 import com.decade.nexa.users.dto.SignUpRequest;
 import com.decade.nexa.users.dto.mapper.UserMapper;
@@ -33,7 +32,7 @@ public class ProfileServiceImpl implements ProfileService {
 
 
     @Override
-    public ProfileResponse create(SignUpRequest signUpRequest, UUID caller) throws NeedAParentAdminException, UserAlreadyExistException {
+    public ProfileResponse createAdmin(SignUpRequest signUpRequest, UUID caller) throws NeedAParentAdminException, UserAlreadyExistException {
 
         String username = signUpRequest.getUsername();
         String password = signUpRequest.getPassword();
@@ -42,9 +41,6 @@ public class ProfileServiceImpl implements ProfileService {
         LocalDate dob = signUpRequest.getDob();
         Optional<Admin> callerAdmin = admins.findById(caller);
 
-        if (users.findByUsername(username).isPresent()) {
-            throw new UserAlreadyExistException(username, null);
-        }
         Admin admin = userFactory.createAdmin(username, password, name, dob, gender, callerAdmin);
         try {
             admins.saveAndFlush(admin);
@@ -56,20 +52,20 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public ProfileResponse changeProfile(UUID id, ProfileRequest profileRequest) {
-        Admin admin = admins.findById(id).orElseThrow();
-        if (profileRequest.getName() != null)
-            admin.changeName(profileRequest.getName());
-        if (profileRequest.getDob() != null)
-            admin.changeDob(profileRequest.getDob());
-        if (profileRequest.getGender() != null)
-            admin.changeGender(profileRequest.getGender());
-        return userMapper.map(admin);
+    public ProfileResponse createUser(String username, String name) throws UserAlreadyExistException {
+        if (users.findByUsername(username).isPresent())
+            throw new UserAlreadyExistException(username, null);
+        User user = userFactory.createUser(username, name);
+        try {
+            users.saveAndFlush(user);
+            return userMapper.map(user);
+        } catch (DataIntegrityViolationException ex) {
+            throw new UserAlreadyExistException(username, ex);
+        }
     }
 
-
     @Override
-    public ProfileResponse changePassword(UUID id, String newPassword, String password) throws WrongPasswordException {
+    public ProfileResponse changeAdminPassword(UUID id, String newPassword, String password) throws WrongPasswordException {
         Admin admin = admins.findById(id).orElseThrow();
 
         passwordPolicy.change(admin, password, newPassword);

@@ -16,8 +16,8 @@ import java.io.IOException;
 @AllArgsConstructor
 public class LoginSuccessStrategy implements AuthenticationSuccessHandler {
 
-    private final SessionService sessionService;
-    private final ObjectMapper objectMapper;
+    final SessionService sessionService;
+    final ObjectMapper objectMapper;
 
     @Override
     public void onAuthenticationSuccess(

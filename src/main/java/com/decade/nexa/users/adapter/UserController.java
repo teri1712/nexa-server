@@ -88,7 +88,7 @@ public class UserController {
         @RequestBody @Valid SignUpRequest signUpRequest,
         @AuthenticationPrincipal(expression = "id") UUID caller)
         throws NeedAParentAdminException, UserAlreadyExistException {
-        return profileService.create(signUpRequest, caller);
+        return profileService.createAdmin(signUpRequest, caller);
     }
 
 

@@ -22,9 +22,9 @@ public class UserFactory {
     @Value("${super.admin.password}")
     private String superPassword;
 
-    public User createUser(String username, String password, String name, LocalDate dob, Float gender) {
-        password = passwordEncoder.encode(password);
-        return new User(UUID.randomUUID(), username, password, name, dob, gender);
+    public User createUser(String username, String name) {
+        String password = passwordEncoder.encode(UUID.randomUUID().toString());
+        return new User(UUID.randomUUID(), username, password, name, LocalDate.now(), 1.0f);
     }
 
     public Admin createAdmin(String username, String password, String name, LocalDate dob, Float gender, Optional<Admin> createdBy) throws NeedAParentAdminException {
