@@ -80,7 +80,7 @@ Check out the MVP in action:
 
 4. **Run the Application**:
    ```bash
-   ./mvnw spring-boot:run
+   ./mvnw spring-boot:run -Dspring-boot.run.arguments="--spring.profiles.active=dev,openai"
    ```
    The API will be available at `http://localhost:8080`, and the Swagger UI at `http://localhost:8080/swagger-ui.html`.
 
