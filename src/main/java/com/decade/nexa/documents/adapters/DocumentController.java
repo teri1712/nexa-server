@@ -68,6 +68,12 @@ public class DocumentController {
         return docService.add(request);
     }
 
+    @DeleteMapping("/{docId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void add(@PathVariable String docId) throws FileIntegrityException {
+        docService.delete(docId);
+    }
+
     @Operation(description = "Find a document by id", responses = {
         @ApiResponse(responseCode = "200", description = "The document"),
         @ApiResponse(responseCode = "404", description = "Document not found", content = @Content(

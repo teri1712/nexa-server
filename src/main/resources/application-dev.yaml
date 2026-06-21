@@ -7,10 +7,6 @@ spring:
     url: jdbc:postgresql://localhost:5432/nexa
     username: root
     password: root
-  data:
-    redis:
-      host: localhost
-      port: 6379
 
   elasticsearch:
     uris: http://localhost:9200
@@ -21,17 +17,6 @@ management:
   otlp:
     tracing:
       endpoint: http://localhost:4318/v1/traces
-
-
-faq:
-  sidecar:
-    url: http://localhost:8000
-
-graph:
-  sidecar:
-    url: http://localhost:8002
-  poll:
-    interval: 1m
 
 jwt:
   duration: 30m
@@ -50,3 +35,8 @@ aws:
       id: decadedecade
       secret: decadedecade
     endpoint: http://localhost:9000
+
+
+frontend:
+  host:
+    address: http://localhost:4200

@@ -40,6 +40,5 @@ COPY faq_clustering.py .
 # Ensure logs are visible in docker
 ENV PYTHONUNBUFFERED=1
 
-EXPOSE 8000
+ENTRYPOINT []
 
-ENTRYPOINT ["uvicorn", "faq_clustering:app", "--host", "0.0.0.0", "--port", "8000"]

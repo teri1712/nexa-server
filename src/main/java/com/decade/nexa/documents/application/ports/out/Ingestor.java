@@ -9,4 +9,7 @@ import java.util.List;
 public interface Ingestor {
     @Async
     void ingest(String docId, String name, DocType docType, List<Document> chunks);
+
+    @Async
+    void egest(String docId, String name);
 }

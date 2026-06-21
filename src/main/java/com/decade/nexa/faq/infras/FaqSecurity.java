@@ -40,7 +40,7 @@ public class FaqSecurity {
             .authorizeHttpRequests(authorize ->
                 authorize
                     .requestMatchers(HttpMethod.GET, "/faqs").permitAll()
-                    .anyRequest().authenticated()
+                    .anyRequest().hasRole("ADMIN")
             )
             .sessionManagement(session ->
                 session

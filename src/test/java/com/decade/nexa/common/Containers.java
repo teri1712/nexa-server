@@ -2,19 +2,15 @@ package com.decade.nexa.common;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
-import com.redis.testcontainers.RedisContainer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.DynamicPropertyRegistrar;
-import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.MinIOContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
-import org.testcontainers.utility.DockerImageName;
 
 @Slf4j
 @TestConfiguration
@@ -32,13 +28,6 @@ public class Containers {
             .withPassword("secret")
             .withNetworkAliases("postgres")
             .withNetwork(network);
-    }
-
-    @Bean
-    @ServiceConnection
-    RedisContainer redis() {
-        return new RedisContainer(DockerImageName.parse("redis:6.2.6"))
-            .withExposedPorts(6379);
     }
 
     @Bean
@@ -74,34 +63,36 @@ public class Containers {
     MinIOContainer minioContainer() {
         return new MinIOContainer("minio/minio:RELEASE.2023-09-04T19-57-37Z")
             .withExposedPorts(9000)
-            .withEnv("MINIO_ROOT_USER", "decadedecade")
-            .withEnv("MINIO_ROOT_PASSWORD", "decadedecade");
+            .withUserName("decadedecade")
+            .withPassword("decadedecade");
     }
 
 
     @Bean
-    DynamicPropertyRegistrar awsProperties(MinIOContainer localStack) {
+    DynamicPropertyRegistrar awsProperties(MinIOContainer minIO) {
         return registry -> {
-            registry.add("aws.s3.endpoint", localStack::getS3URL);
+            registry.add("aws.s3.endpoint", minIO::getS3URL);
             registry.add("aws.s3.bucket", () -> "test-bucket");
-            registry.add("aws.s3.access.id", localStack::getUserName);
-            registry.add("aws.s3.access.secret", localStack::getPassword);
+            registry.add("aws.s3.access.id", minIO::getUserName);
+            registry.add("aws.s3.access.secret", minIO::getPassword);
         };
     }
-
-    @Bean
-    GenericContainer<?> faqSideCarContainer() {
-        return new GenericContainer<>("teri1712/faq_sidecar:latest")
-            .withNetwork(network)
-            .withLogConsumer(new Slf4jLogConsumer(log))
-            .withExposedPorts(8000)
-            .withEnv("DB_USER", "myuser")
-            .withEnv("DB_PASSWORD", "secret")
-            .withEnv("DB_HOST", "postgres")
-            .withEnv("DB_PORT", "5432")
-            .withEnv("DB_NAME", "mydatabase")
-            .withEnv("NUM_CLUSTERS", "3");
-    }
+//
+//    @Bean
+//    GenericContainer<?> faqSideCarContainer() {
+//        return new GenericContainer<>("teri1712/faq_sidecar:latest")
+//            .withNetwork(network)
+//            .withLogConsumer(new Slf4jLogConsumer(log))
+//            .withExposedPorts(8000)
+//            .withCommand("python3", "-c", "print('started'); import time; time.sleep(3600)")
+//            .waitingFor(org.testcontainers.containers.wait.strategy.Wait.forLogMessage(".*started.*\\n", 1))
+//            .withEnv("DB_USER", "myuser")
+//            .withEnv("DB_PASSWORD", "secret")
+//            .withEnv("DB_HOST", "postgres")
+//            .withEnv("DB_PORT", "5432")
+//            .withEnv("DB_NAME", "mydatabase")
+//            .withEnv("NUM_CLUSTERS", "3");
+//    }
 
     @Bean(initMethod = "start", destroyMethod = "stop")
     public WireMockServer graphWireMockServer() {
@@ -112,14 +103,14 @@ public class Containers {
     public WireMockServer openAiWireMockServer() {
         return new WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort());
     }
-
-    @Bean
-    DynamicPropertyRegistrar faqSideCarProperties(GenericContainer<?> faqSideCarContainer) {
-        return registry -> {
-            registry.add("faq.sidecar.url", () -> "http://localhost:" + faqSideCarContainer.getMappedPort(8000));
-            log.info("faq.sidecar.url: {}", "http://localhost:" + faqSideCarContainer.getMappedPort(8000));
-        };
-    }
+//
+//    @Bean
+//    DynamicPropertyRegistrar faqSideCarProperties(GenericContainer<?> faqSideCarContainer) {
+//        return registry -> {
+//            registry.add("faq.sidecar.url", () -> "http://localhost:" + faqSideCarContainer.getMappedPort(8000));
+//            log.info("faq.sidecar.url: {}", "http://localhost:" + faqSideCarContainer.getMappedPort(8000));
+//        };
+//    }
 
 
     @Bean

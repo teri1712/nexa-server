@@ -3,6 +3,7 @@ package com.decade.nexa.documents.application;
 import com.decade.nexa.documents.application.ports.in.SearchService;
 import com.decade.nexa.documents.application.ports.out.DocumentRepository;
 import com.decade.nexa.documents.domain.Documentation;
+import com.decade.nexa.documents.domain.events.DocDeleted;
 import com.decade.nexa.documents.domain.events.UserSearched;
 import com.decade.nexa.documents.dto.*;
 import com.decade.nexa.files.apis.FileApi;
@@ -31,6 +32,7 @@ public class DocServiceImpl implements SearchService, DocService {
     private final FileApi fileApi;
     private final DocumentRepository docs;
     private final ApplicationEventPublisher publisher;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
 
     @Override
@@ -100,6 +102,13 @@ public class DocServiceImpl implements SearchService, DocService {
             .fileType(documentation.getContentType())
             .createdAt(documentation.getCreatedAt())
             .build();
+    }
+
+    @Override
+    public void delete(String id) {
+        Documentation documentation = docs.findById(id).orElseThrow();
+        applicationEventPublisher.publishEvent(new DocDeleted(documentation.getId(), documentation.getFileKey(), documentation.getFilename()));
+        docs.delete(documentation);
     }
 
     @Override

@@ -130,34 +130,33 @@ services:
   faq:
     build:
       tags:
-        - teri1712/faq_sidecar:latest
+        - teri1712/faq_cluster:latest
       context: ./faq
-    ports:
-      - "8000:8000"
+    entrypoint: [ "python3", 'faq_clustering.py' ]
+    command: [ "--num-clusters", "3", "--num-representatives", "20" ]
+    profiles:
+      - faq-manual
     environment:
       DB_USER: root
       DB_PASSWORD: root
       DB_HOST: postgres
       DB_PORT: 5432
       DB_NAME: nexa
-      NUM_CLUSTERS: 3
     depends_on:
       postgres:
         condition: service_healthy
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+
 
   graphrag-sidecar:
     build:
       tags:
-        - teri1712/sidecar-graphrag:latest
+        - teri1712/graphrag_sidecar:latest
       context: graph_rag
+      dockerfile: sidecar/Dockerfile
     ports:
-      - "8002:8000"
+      - "8000:8000"
     volumes:
+      - graphrag:/app/output
       - ./graph_rag/input:/app/input
       - ./graph_rag/prompts:/app/prompts
       - ./graph_rag/config:/app/config
@@ -170,3 +169,24 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  graphrag-index:
+    build:
+      tags:
+        - teri1712/graphrag_index:latest
+      context: graph_rag
+      dockerfile: index/Dockerfile
+    volumes:
+      - graphrag:/app/output
+      - ./graph_rag/input:/app/input
+      - ./graph_rag/prompts:/app/prompts
+      - ./graph_rag/config:/app/config
+    environment:
+      - GRAPHRAG_API_BASE=https://api.shopaikey.com/v1
+      - GRAPHRAG_API_KEY=${ULTIMATE_API_KEY}
+      - GRAPHRAG_ROOT=/app
+    profiles:
+      - index-manual
+
+volumes:
+  graphrag:

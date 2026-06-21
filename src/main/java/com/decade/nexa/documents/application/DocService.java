@@ -8,5 +8,7 @@ public interface DocService {
 
     DocumentResponse add(CreateDocumentRequest request) throws FileIntegrityException;
 
+    void delete(String id);
+
     DocumentResponse find(String id);
 }
