@@ -29,6 +29,7 @@ public class IngestionManagement {
     final List<Ingestor> ingestors;
     final List<DocumentTransformer> transformers;
 
+    @EventListener
     public void on(DocDeleted docDeleted) {
         ingestors.forEach(ingestor -> {
             ingestor.egest(docDeleted.id(), docDeleted.filename());
