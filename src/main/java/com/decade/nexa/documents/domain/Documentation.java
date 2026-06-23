@@ -40,13 +40,17 @@ public class Documentation extends AbstractAggregateRoot<Documentation> {
     @Field(name = "created_at", type = FieldType.Date)
     private Instant createdAt;
 
-    public Documentation(String id, String fileKey, String filename, String title, String description, DocType contentType) {
+    @Field(name = "title_vector", type = FieldType.Dense_Vector, dims = 768, index = true)
+    private float[] titleVector;
+
+    public Documentation(String id, String fileKey, String filename, String title, String description, DocType contentType, float[] titleVector) {
         this.contentType = contentType;
         this.description = description;
         this.filename = filename;
         this.id = id;
         this.fileKey = fileKey;
         this.title = title;
+        this.titleVector = titleVector;
         this.createdAt = Instant.now();
         registerEvent(new DocCreated(id, fileKey, filename, contentType, createdAt));
     }

@@ -3,6 +3,7 @@ package com.decade.nexa.documents.application;
 import com.decade.nexa.documents.application.ports.out.Ingestor;
 import com.decade.nexa.documents.application.ports.out.ReaderResolver;
 import com.decade.nexa.documents.domain.events.DocCreated;
+import com.decade.nexa.documents.domain.events.DocDeleted;
 import com.decade.nexa.files.apis.FileApi;
 import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,13 @@ public class IngestionManagement {
     final List<ReaderResolver> readers;
     final List<Ingestor> ingestors;
     final List<DocumentTransformer> transformers;
+
+    @EventListener
+    public void on(DocDeleted docDeleted) {
+        ingestors.forEach(ingestor -> {
+            ingestor.egest(docDeleted.id(), docDeleted.filename());
+        });
+    }
 
     public void on(DocCreated docCreated) {
         Resource file = fileApi.getResource(docCreated.fileKey());

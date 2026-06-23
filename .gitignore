@@ -35,3 +35,6 @@ build/
 /graph_rag/output
 
 .gemini/settings.json
+
+
+**/*-secrets.yaml

@@ -66,10 +66,6 @@ spring:
 server:
   port: 8080
 
-frontend:
-  host:
-    address: http://localhost:4200
-
 management:
   server:
     port: 8081
@@ -124,13 +120,9 @@ logging:
 
 nexa:
   faq:
-    start: "0 0 1 * * *"
-    cluster: "0 1 1 * * *"
-    check-interval: "0 1-59 1 * * *"
-    deadline: "0 0 2 * * *"
-  graph:
-    start: "0 0 1 * * *"
-    index: "0 1 1 * * *"
-    check-interval: "0 1-59 1 * * *"
     deadline: "0 0 2 * * *"
 
+
+graph:
+  sidecar:
+    url: http://localhost:8000

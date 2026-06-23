@@ -52,6 +52,11 @@ public class DocumentBotRag implements Ingestor, InitializingBean, DocumentBotAp
         log.info("Ingested {} chunks for docId {}", chunks.size(), docId);
     }
 
+    @Override
+    public void egest(String docId, String name) {
+        vectorStore.delete("docId == '%s'".formatted(docId));
+    }
+
 
     @Override
     public void afterPropertiesSet() throws Exception {

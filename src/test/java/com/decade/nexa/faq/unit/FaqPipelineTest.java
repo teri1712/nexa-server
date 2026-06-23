@@ -13,6 +13,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -34,6 +35,9 @@ public class FaqPipelineTest {
 
     @Mock
     QueryRepository queries;
+
+    @Mock
+    ApplicationEventPublisher publisher;
 
     @InjectMocks
     FAQManagement faqManagement;
@@ -80,10 +84,9 @@ public class FaqPipelineTest {
 
         when(synthesizer.synthesize(eq(todayFaqList))).thenReturn(synthesizedQuestions);
 
-        faqManagement.on(new FaqClusteringFinished(today));
+        faqManagement.cluster();
 
-        verify(faqs).findByCreatedAt(today);
-        verify(synthesizer).synthesize(todayFaqList);
+        verify(publisher).publishEvent(eq(new FaqClusteringFinished(today)));
         verify(faqs).saveAll(faqsCaptor.capture());
 
         List<FAQ> savedFaqs = faqsCaptor.getValue();

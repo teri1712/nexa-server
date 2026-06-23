@@ -30,19 +30,17 @@ public class GraphDataset implements TestDataset {
                 .withHeader("Content-Type", "application/json")
                 .withBody("{\"status\": \"saved\"}")));
 
-        // GET /index/{id}/progress
-        graphWireMockServer.stubFor(get(urlPathMatching("/index/[^/]+/progress"))
-            .willReturn(aResponse()
-                .withStatus(200)
-                .withHeader("Content-Type", "application/json")
-                .withBody("{\"status\": \"" + "completed" + "\", \"message\": \"done\"}")));
-
         // GET /local (query method)
         graphWireMockServer.stubFor(get(urlPathEqualTo("/local"))
             .willReturn(aResponse()
                 .withStatus(200)
                 .withHeader("Content-Type", "text/plain")
                 .withBody("hello world")));
+
+        // DELETE /files/{filename}
+        graphWireMockServer.stubFor(delete(urlPathMatching("/files/[^/]+"))
+            .willReturn(aResponse()
+                .withStatus(200)));
     }
 
     @Override

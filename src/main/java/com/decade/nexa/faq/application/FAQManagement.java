@@ -9,8 +9,9 @@ import com.decade.nexa.faq.domain.FaqClusteringFinished;
 import com.decade.nexa.faq.domain.UserQuery;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
-import org.springframework.modulith.events.ApplicationModuleListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -23,12 +24,12 @@ public class FAQManagement {
 
     final FAQRepository faqs;
     final QueryRepository queries;
-    private final Synthesizer synthesizer;
+    final Synthesizer synthesizer;
+    final ApplicationEventPublisher publisher;
 
-
-    @ApplicationModuleListener
-    public void on(FaqClusteringFinished event) {
-        LocalDate date = event.date();
+    @Async
+    public void cluster() {
+        LocalDate date = LocalDate.now();
         List<FAQ> clusters = faqs.findByCreatedAt(date);
 
         if (clusters.isEmpty()) {
@@ -43,6 +44,8 @@ public class FAQManagement {
             faq.setQuestion(synthesized.get(i));
         }
         faqs.saveAll(clusters);
+
+        publisher.publishEvent(new FaqClusteringFinished(date));
     }
 
     @EventListener

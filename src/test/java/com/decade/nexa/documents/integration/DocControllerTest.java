@@ -11,6 +11,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.Mockito.doReturn;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -62,5 +63,47 @@ class DocControllerTest extends DocumentModuleIntegrationTest {
             .andExpect(jsonPath("$.totalPages").value(0));
 
 
+    }
+
+    @Test
+    @WithMockUser(username = "teri", roles = "ADMIN")
+    void givenFileNotExist_whenCallingDelete_mustReturn404() throws Exception {
+        mvc.perform(delete("/docs/non-existent-doc-id"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(username = "teri", roles = "ADMIN")
+    void givenFileExists_whenCallingDeleteWithCorrectDocId_thenFileMustBeDeleted() throws Exception {
+        // 1. Mock file API
+        doReturn(new FileMetadata("seed-file.pdf", "pdf"))
+            .when(fileApi).getFile("seed-key", "seed-etag");
+
+        // 2. Seed file via POST /docs API
+        String responseContent = mvc.perform(post("/docs")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(new CreateDocumentRequest(
+                    "seed-file.pdf",
+                    "seed-etag",
+                    "seed-key",
+                    "seed-title",
+                    "seed-description",
+                    DocType.PDF)))
+            )
+            .andExpect(status().isAccepted())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+        // 3. Extract the generated docId
+        String docId = new ObjectMapper().readTree(responseContent).get("id").asText();
+
+        // 4. Call delete with the correct docId
+        mvc.perform(delete("/docs/" + docId))
+            .andExpect(status().isNoContent());
+
+        // 5. Validate the file is deleted via GET /docs/{docId} (should return 404)
+        mvc.perform(get("/docs/" + docId))
+            .andExpect(status().isNotFound());
     }
 }

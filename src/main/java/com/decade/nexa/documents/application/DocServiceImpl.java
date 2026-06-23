@@ -1,14 +1,19 @@
 package com.decade.nexa.documents.application;
 
+import co.elastic.clients.elasticsearch._types.KnnSearch;
+import com.decade.nexa.documents.api.DocInfo;
+import com.decade.nexa.documents.api.DocumentApi;
 import com.decade.nexa.documents.application.ports.in.SearchService;
 import com.decade.nexa.documents.application.ports.out.DocumentRepository;
 import com.decade.nexa.documents.domain.Documentation;
+import com.decade.nexa.documents.domain.events.DocDeleted;
 import com.decade.nexa.documents.domain.events.UserSearched;
 import com.decade.nexa.documents.dto.*;
 import com.decade.nexa.files.apis.FileApi;
 import com.decade.nexa.files.apis.FileIntegrityException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -19,24 +24,33 @@ import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class DocServiceImpl implements SearchService, DocService {
+public class DocServiceImpl implements SearchService, DocService, DocumentApi {
 
-    private final ElasticsearchOperations es;
-    private final FileApi fileApi;
-    private final DocumentRepository docs;
-    private final ApplicationEventPublisher publisher;
+    final ElasticsearchOperations es;
+    final FileApi fileApi;
+    final DocumentRepository docs;
+    final ApplicationEventPublisher publisher;
+    final ApplicationEventPublisher applicationEventPublisher;
+    final EmbeddingModel embeddingModel;
 
 
     @Override
     public DocPage search(DocFilter filter) {
         String query = filter.query();
         publisher.publishEvent(new UserSearched(filter.query()));
+
+        float[] queryVector = embeddingModel.embed(query);
+        List<Float> vectorList = new ArrayList<>(queryVector.length);
+        for (float v : queryVector) {
+            vectorList.add(v);
+        }
 
         DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
         NativeQueryBuilder buidler = NativeQuery.builder()
@@ -62,6 +76,12 @@ public class DocServiceImpl implements SearchService, DocService {
                             ))
                     )
             ))
+            .withKnnSearches(java.util.List.of(KnnSearch.of(k -> k
+                .field("title_vector")
+                .queryVector(vectorList)
+                .k(10)
+                .numCandidates(100)
+            )))
             .withSort(Sort.by("_score").descending().and(Sort.by("id").ascending()))
             .withPageable(Pageable.ofSize(10));
         if (filter.lastDoc() != null) {
@@ -88,7 +108,7 @@ public class DocServiceImpl implements SearchService, DocService {
     @Override
     public DocumentResponse add(CreateDocumentRequest request) throws FileIntegrityException {
         fileApi.getFile(request.fileKey(), request.eTag());
-        Documentation documentation = new Documentation(UUID.randomUUID().toString(), request.fileKey(), request.filename(), request.title(), request.description(), request.type());
+        Documentation documentation = new Documentation(UUID.randomUUID().toString(), request.fileKey(), request.filename(), request.title(), request.description(), request.type(), embeddingModel.embed(request.title()));
         docs.save(documentation);
 
         return DocumentResponse.builder()
@@ -103,6 +123,13 @@ public class DocServiceImpl implements SearchService, DocService {
     }
 
     @Override
+    public void delete(String id) {
+        Documentation documentation = docs.findById(id).orElseThrow();
+        applicationEventPublisher.publishEvent(new DocDeleted(documentation.getId(), documentation.getFileKey(), documentation.getFilename()));
+        docs.delete(documentation);
+    }
+
+    @Override
     public DocumentResponse find(String id) {
         return docs.findById(id).map(documentation ->
             DocumentResponse.builder()
@@ -114,5 +141,14 @@ public class DocServiceImpl implements SearchService, DocService {
                 .fileType(documentation.getContentType())
                 .createdAt(documentation.getCreatedAt())
                 .build()).orElseThrow();
+    }
+
+    @Override
+    public Map<String, DocInfo> find(Set<String> ids) {
+        return StreamSupport.stream(docs.findAllById(ids).spliterator(), false)
+            .map(documentation -> {
+                return new DocInfo(documentation.getId(), documentation.getTitle(), documentation.getFilename());
+            })
+            .collect(Collectors.toMap(DocInfo::id, docInfo -> docInfo));
     }
 }

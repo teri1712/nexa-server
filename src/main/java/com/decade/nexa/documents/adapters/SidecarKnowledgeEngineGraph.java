@@ -1,7 +1,7 @@
 package com.decade.nexa.documents.adapters;
 
 import com.decade.nexa.documents.application.ports.out.Ingestor;
-import com.decade.nexa.documents.application.ports.out.KnowledgeEngineGraph;
+import com.decade.nexa.documents.application.ports.out.KnowledgeEngine;
 import com.decade.nexa.documents.domain.DocType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,38 +11,21 @@ import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class SidecarKnowledgeEngineGraph implements Ingestor, KnowledgeEngineGraph {
+public class SidecarKnowledgeEngineGraph implements Ingestor, KnowledgeEngine {
 
     final GraphSideCar sideCar;
-
-
-    @Override
-    public void index(Long requestId) {
-        sideCar.index(requestId);
-    }
-
-    @Override
-    public boolean isFinished(Long requestId) {
-        Map<String, String> body = sideCar.progress(requestId);
-        String status = body.get("status");
-        return switch (status) {
-            case "completed" -> {
-                log.debug("Python indexing is completed for {}.", requestId);
-                yield true;
-            }
-            case "error", "failed" -> throw new RuntimeException("Indexing job failed on Python side for %s: %s".formatted(requestId, body.get("message")));
-            default -> false;
-        };
-    }
 
     @Override
     public String ask(String query) {
         return sideCar.query(query);
+    }
+
+    private String makeFilename(String docId, String name) {
+        return docId + "." + name + ".txt";
     }
 
     @Override
@@ -52,9 +35,14 @@ public class SidecarKnowledgeEngineGraph implements Ingestor, KnowledgeEngineGra
         sideCar.upload(new ByteArrayResource(txt.getBytes(StandardCharsets.UTF_8)) {
             @Override
             public String getFilename() {
-                return docId + "." + name + ".txt";
+                return makeFilename(docId, name);
             }
         });
         log.info("Knowledge graph updated.");
+    }
+
+    @Override
+    public void egest(String docId, String name) {
+        sideCar.delete(makeFilename(docId, name));
     }
 }
