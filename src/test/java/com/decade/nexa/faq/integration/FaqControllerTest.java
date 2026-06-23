@@ -5,7 +5,6 @@ import com.decade.nexa.common.OpenAiDataset;
 import com.decade.nexa.documents.domain.events.UserSearched;
 import com.decade.nexa.faq.adapters.ClusterScheduler;
 import com.decade.nexa.faq.application.ports.out.FAQRepository;
-import com.decade.nexa.faq.application.ports.out.QueryRepository;
 import com.decade.nexa.faq.domain.FAQ;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
@@ -27,7 +26,6 @@ public class FaqControllerTest {
     final MockMvc mvc;
     final ClusterScheduler scheduler;
     final FAQRepository faqs;
-    final QueryRepository queries;
     final ApplicationEventPublisher publisher;
 
     @Test

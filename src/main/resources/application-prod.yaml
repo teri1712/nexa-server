@@ -48,7 +48,7 @@ aws:
       id: ${S3_ACCESS_KEY}
       secret: ${S3_SECRET_KEY}
     endpoint: ${S3_ENDPOINT}
-
+    public-endpoint: ${S3_PUBLIC_ENDPOINT}
 
 frontend:
   host:

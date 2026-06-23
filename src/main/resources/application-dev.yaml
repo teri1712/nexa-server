@@ -35,6 +35,7 @@ aws:
       id: decadedecade
       secret: decadedecade
     endpoint: http://localhost:9000
+    public-endpoint: http://localhost:9000
 
 
 frontend:

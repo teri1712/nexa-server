@@ -1,6 +1,8 @@
 package com.decade.nexa.documents.application;
 
 import co.elastic.clients.elasticsearch._types.KnnSearch;
+import com.decade.nexa.documents.api.DocInfo;
+import com.decade.nexa.documents.api.DocumentApi;
 import com.decade.nexa.documents.application.ports.in.SearchService;
 import com.decade.nexa.documents.application.ports.out.DocumentRepository;
 import com.decade.nexa.documents.domain.Documentation;
@@ -22,14 +24,14 @@ import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class DocServiceImpl implements SearchService, DocService {
+public class DocServiceImpl implements SearchService, DocService, DocumentApi {
 
     final ElasticsearchOperations es;
     final FileApi fileApi;
@@ -139,5 +141,14 @@ public class DocServiceImpl implements SearchService, DocService {
                 .fileType(documentation.getContentType())
                 .createdAt(documentation.getCreatedAt())
                 .build()).orElseThrow();
+    }
+
+    @Override
+    public Map<String, DocInfo> find(Set<String> ids) {
+        return StreamSupport.stream(docs.findAllById(ids).spliterator(), false)
+            .map(documentation -> {
+                return new DocInfo(documentation.getId(), documentation.getTitle(), documentation.getFilename());
+            })
+            .collect(Collectors.toMap(DocInfo::id, docInfo -> docInfo));
     }
 }

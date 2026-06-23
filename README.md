@@ -84,6 +84,17 @@ Check out the MVP in action:
    ```
    The API will be available at `http://localhost:8080`, and the Swagger UI at `http://localhost:8080/swagger-ui.html`.
 
+5. **Run FAQ Clustering (Manually)**:
+   Since the FAQ clustering service is configured as a one-shot task, you can execute it manually via Docker Compose to
+   cluster the queries in the database:
+   ```bash
+   docker compose run --rm faq
+   ```
+   You can also pass custom arguments such as target date or cluster count:
+   ```bash
+   docker compose run --rm faq --date 2026-06-18 --num-clusters 3
+   ```
+
 #### 2. Frontend Setup
 
 For instructions on how to set up and run the user interface, please refer to
