@@ -44,11 +44,13 @@ public class ActuatorSecurity {
             .securityMatcher(EndpointRequest.toAnyEndpoint())
             .authorizeHttpRequests(
                 auth -> auth
+                    .requestMatchers(EndpointRequest.to("health", "info")).permitAll()
                     .requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole("OPS")
             )
             .httpBasic(Customizer.withDefaults())
             .csrf(AbstractHttpConfigurer::disable);
         return http.build();
     }
+
 
 }

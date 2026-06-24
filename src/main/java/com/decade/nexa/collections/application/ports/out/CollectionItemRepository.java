@@ -9,5 +9,7 @@ import java.util.List;
 @Repository
 public interface CollectionItemRepository extends CrudRepository<CollectionItem, Long> {
     List<CollectionItem> findByCollectionId(Long collectionId);
+
+    void deleteBydocumentId(String documentId);
 }
 

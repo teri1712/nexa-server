@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "nexa.fullname" . }}-test-connection"
+  labels:
+    {{- include "nexa.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "nexa.fullname" . }}:{{ .Values.service.port }}']
+  restartPolicy: Never

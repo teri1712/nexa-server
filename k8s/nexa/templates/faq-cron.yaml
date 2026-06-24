@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: faq-cron
+spec:
+  schedule: "0 3 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: faq
+              image: "{{.Values.faq.image}}:{{.Values.faq.tag}}"
+              imagePullPolicy: IfNotPresent
+              command:
+                - python3
+                - --num-clusters
+                - "{{ .Values.faq.cluster }}"
+                - --num-representatives
+                - "{{ .Values.faq.representatives }}"
+              env:
+                {{- range $name, $value := .Values.faq.env }}
+                - name: {{ $name }}
+                  {{- if kindIs "map" $value }}
+                  {{- toYaml $value | nindent 18 }}
+                  {{- else }}
+                  value: {{ $value | quote }}
+                  {{- end }}
+                {{- end }}
+          restartPolicy: OnFailure
