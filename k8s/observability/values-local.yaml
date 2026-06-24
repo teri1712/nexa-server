@@ -1,0 +1,27 @@
+# LOCAL Scaling Down for Kind
+prometheus:
+  server:
+    persistentVolume:
+      enabled: false
+
+grafana:
+  initChownData:
+    enabled: false
+  persistence:
+    enabled: false
+
+loki:
+  loki:
+    server:
+      http_server_write_timeout: 1m
+    ingester:
+      lifecycler:
+        final_sleep: 15s
+  singleBinary:
+    persistence:
+      enabled: false
+
+tempo:
+  tempo:
+    persistence:
+      enabled: false

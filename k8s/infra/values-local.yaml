@@ -1,0 +1,32 @@
+postgresql:
+  primary:
+    persistence:
+      enabled: false
+
+minio:
+  persistence:
+    enabled: false
+  ingress:
+    enabled: true
+    ingressClassName: "nginx"
+    path: /minio
+    hosts:
+      - localhost
+
+    environment:
+    MINIO_API_CORS_ALLOW_ORIGIN: http://localhost:4200
+
+elasticsearch:
+  replicas: 1
+  minimumMasterNodes: 1
+  persistence:
+    enabled: false
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "512Mi"
+    limits:
+      cpu: "1000m"
+      memory: "1Gi"
+  esJavaOpts: "-Xms512m -Xmx512m"
+

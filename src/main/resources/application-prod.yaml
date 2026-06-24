@@ -1,8 +1,7 @@
 spring:
   docker:
     compose:
-      enabled: true
-      lifecycle-management: start_only
+      enabled: false
   datasource:
     url: jdbc:postgresql://${DB_HOST}/nexa
     username: ${DB_USER}

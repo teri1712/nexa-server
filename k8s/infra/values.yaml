@@ -1,0 +1,61 @@
+postgresql:
+  auth:
+    username: root
+    database: nexa
+    existingSecret: nexa-secrets
+    secretKeys:
+      adminPasswordKey: "db-password"
+      userPasswordKey: "db-password"
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+
+httpRoute:
+  enabled: false
+
+
+
+minio:
+  mode: standalone
+  replicas: 1
+  existingSecret: "minio-secrets"
+  managedCertificate:
+    enabled: false
+    domains: [ ]
+
+  consoleIngress:
+    enabled: false
+  buckets:
+    - name: nexa-bucket
+      policy: none
+      purge: false
+
+elasticsearch:
+  imageTag: "8.17.0"
+  replicas: 1
+  minimumMasterNodes: 1
+  protocol: http
+  createCert: false
+  secret:
+    enabled: false
+  extraEnvs:
+    - name: ELASTIC_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: nexa-secrets
+          key: elasticsearch-password
+  tests:
+    enabled: false
+  esConfig:
+    elasticsearch.yml: |
+      cluster.routing.allocation.disk.watermark.low: 98%
+      cluster.routing.allocation.disk.watermark.high: 99%
+      cluster.routing.allocation.disk.watermark.flood_stage: 99.5%
+      xpack.security.enabled: false
+
+
+

@@ -1,0 +1,31 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: graphrag-cron
+spec:
+  schedule: "0 3 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: graphrag-index
+              image: "{{.Values.graph.index.image}}:{{.Values.graph.index.tag}}"
+              imagePullPolicy: IfNotPresent
+              env:
+                {{- range $name, $value := .Values.graph.env }}
+                - name: {{ $name }}
+                  {{- if kindIs "map" $value }}
+                  {{- toYaml $value | nindent 18 }}
+                  {{- else }}
+                  value: {{ $value | quote }}
+                  {{- end }}
+                {{- end }}
+              volumeMounts:
+                - mountPath: /app/output
+                  name: sidecar-volume
+          restartPolicy: Never
+          volumes:
+            - name: sidecar-volume
+              persistentVolumeClaim:
+                claimName: sidecar-pvc

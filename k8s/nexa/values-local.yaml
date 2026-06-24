@@ -1,0 +1,27 @@
+image:
+  tag: latest
+faq:
+  tag: latest
+graph:
+  tag: latest
+  index:
+    tag: latest
+ingress:
+  className: nginx
+  hosts:
+    - host: localhost
+      paths:
+        - path: /
+          pathType: Prefix
+
+
+sidecar:
+  persistence:
+    storage: 1Gi
+    accessMode: ReadWriteOnce
+
+  resources: { }
+
+env:
+  S3_PUBLIC_ENDPOINT: "http://localhost:9000/minio"
+  FRONTEND_HOST: "http://localhost:4200"

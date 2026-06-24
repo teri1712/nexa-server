@@ -39,7 +39,7 @@ import java.util.List;
 @Configuration
 public class UserSecurity extends GlobalAuthenticationConfigurerAdapter {
 
-    @Value("${frontend.host.address:http://localhost:3000}")
+    @Value("${frontend.host.address}")
     private String frontEndAddress;
 
 
