@@ -14,8 +14,8 @@ public class CollectionService {
 
     final CollectionRepository collections;
 
-    public Collection create(UUID user, String name) {
-        return collections.save(new Collection(null, user, name));
+    public Collection create(UUID user, String name, Long parentId) {
+        return collections.save(new Collection(null, user, name, parentId));
     }
 
     public List<Collection> list(UUID user) {

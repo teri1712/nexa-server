@@ -10,5 +10,7 @@ import java.util.UUID;
 @Repository
 public interface CollectionRepository extends CrudRepository<Collection, Long> {
     List<Collection> findByUserId(UUID userId);
+
+    List<Collection> findByParentId(Long parentId);
 }
 
