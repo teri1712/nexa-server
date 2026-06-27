@@ -79,6 +79,38 @@ class CollectionControllerTest {
 
     @Test
     @WithJwtUser
+    void givenParentCollectionExists_whenAddingSubCollection_thenSubCollectionIsAdded() throws Exception {
+        // 1. Create parent collection
+        String parentResponse = mvc.perform(post("/collections")
+                .param("name", "Parent Collection"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").isNotEmpty())
+            .andExpect(jsonPath("$.name").value("Parent Collection"))
+            .andReturn().getResponse().getContentAsString();
+
+        Long parentId = objectMapper.readTree(parentResponse).get("id").asLong();
+
+        // 2. Create sub collection under the parent collection
+        String subResponse = mvc.perform(post("/collections")
+                .param("name", "Sub Collection")
+                .param("parentId", String.valueOf(parentId)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").isNotEmpty())
+            .andExpect(jsonPath("$.name").value("Sub Collection"))
+            .andReturn().getResponse().getContentAsString();
+
+        Long subId = objectMapper.readTree(subResponse).get("id").asLong();
+
+        // 3. Call list collections of parent collection to validate
+        mvc.perform(get("/collections/" + parentId + "/collections"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.size()").value(1))
+            .andExpect(jsonPath("$[0].id").value(subId))
+            .andExpect(jsonPath("$[0].name").value("Sub Collection"));
+    }
+
+    @Test
+    @WithJwtUser
         // Defaults to Alice (11111111-1111-1111-1111-111111111111)
     void givenBobHasACollection_whenAliceTriesToAccess_thenForbiddenIsReturned() throws Exception {
         // Retrieve Bob's collection ID
@@ -89,7 +121,7 @@ class CollectionControllerTest {
         Long bobCollectionId = bobCollection.id();
 
         // Alice tries to retrieve Bob's collection items - must be forbidden
-        mvc.perform(get("/collections/" + bobCollectionId))
+        mvc.perform(get("/collections/" + bobCollectionId + "/items"))
             .andExpect(status().isForbidden());
 
         // Alice tries to add an item to Bob's collection - must be forbidden

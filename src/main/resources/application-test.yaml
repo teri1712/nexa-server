@@ -26,3 +26,7 @@ management:
     metrics:
       export:
         enabled: true
+
+frontend:
+  host:
+    address: http://localhost:4200
