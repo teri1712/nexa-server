@@ -20,7 +20,7 @@ public class CollectionDataset implements TestDataset {
     public void setup() {
         try {
             UUID bobId = UUID.fromString("22222222-2222-2222-2222-222222222222");
-            collections.save(new Collection(null, bobId, "Bob's Secrets"));
+            collections.save(new Collection(null, bobId, "Bob's Secrets", null));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -1,6 +1,8 @@
 package com.decade.nexa.collections.application.services;
 
 import com.decade.nexa.collections.application.ports.out.CollectionItemRepository;
+import com.decade.nexa.collections.application.ports.out.CollectionRepository;
+import com.decade.nexa.collections.domain.Collection;
 import com.decade.nexa.collections.domain.CollectionAccessPolicy;
 import com.decade.nexa.collections.domain.CollectionItem;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +17,7 @@ import java.util.UUID;
 public class CollectionItemService {
 
     final CollectionItemRepository items;
+    final CollectionRepository collections;
     final CollectionAccessPolicy policy;
 
     public void create(UUID userId, Long collectionId, String docId) {
@@ -27,4 +30,8 @@ public class CollectionItemService {
         return items.findByCollectionId(collectionIds);
     }
 
+    public List<Collection> listCollections(UUID user, Long parentId) {
+        policy.apply(user, parentId);
+        return collections.findByParentId(parentId);
+    }
 }

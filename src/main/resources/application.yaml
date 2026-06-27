@@ -2,7 +2,7 @@ spring:
   application:
     name: nexa
   profiles:
-    active: dev
+    active: dev, openai
   security:
     oauth2:
       resourceserver:

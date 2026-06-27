@@ -38,8 +38,8 @@ public class CollectionController {
     }
 
     @PostMapping
-    CollectionResponse create(@UserId UUID userId, @RequestParam String name) {
-        return mapper.map(collectionService.create(userId, name));
+    CollectionResponse create(@UserId UUID userId, @RequestParam String name, @RequestParam(required = false) Long parentId) {
+        return mapper.map(collectionService.create(userId, name, parentId));
     }
 
     @GetMapping("/{collectionId}/items")
@@ -62,10 +62,16 @@ public class CollectionController {
             .toList();
     }
 
+    @GetMapping("/{parentId}/collections")
+    List<CollectionResponse> listCollections(@PathVariable Long parentId, @UserId UUID userId) {
+        return mapper.map(collectionItemService.listCollections(userId, parentId));
+    }
+
     @PostMapping("/{collectionId}/items")
     @ResponseStatus(HttpStatus.CREATED)
     void addItem(@PathVariable Long collectionId, @RequestParam String docId, @UserId UUID userId) {
         collectionItemService.create(userId, collectionId, docId);
     }
+
 }
 

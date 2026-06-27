@@ -12,7 +12,10 @@ public record Collection(
     Long id,
     @Column("user_id")
     UUID userId,
-    String name
+    String name,
+
+    @Column("parent_id")
+    Long parentId
 ) {
 }
 
